@@ -1,0 +1,666 @@
+{
+  "transportationMatrix": {
+    "departureCities": {
+      "PARIS": {
+        "name": "Paris, France",
+        "airports": ["CDG", "ORY"]
+      },
+      "LONDON": {
+        "name": "London, UK", 
+        "airports": ["LHR", "STN", "LTN"]
+      },
+      "NEW_YORK": {
+        "name": "New York, USA",
+        "airports": ["JFK", "LGA", "EWR"]
+      },
+      "BERLIN": {
+        "name": "Berlin, Germany",
+        "airports": ["BER"]
+      }
+    },
+    "flights": {
+      "PARIS_to_ATH": [
+        {
+          "id": "AF1532",
+          "airline": "Air France",
+          "flightNumber": "AF1532",
+          "from": "CDG",
+          "to": "ATH",
+          "departure": "08:30",
+          "arrival": "12:45",
+          "duration": "3h 15m",
+          "cost": "€180-220",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.airfrance.com/search?from=CDG&to=ATH&date=2024-06-14&flight=AF1532",
+          "notes": "Direct flight, good availability"
+        },
+        {
+          "id": "AF1534",
+          "airline": "Air France", 
+          "flightNumber": "AF1534",
+          "from": "CDG",
+          "to": "ATH",
+          "departure": "14:20",
+          "arrival": "18:35",
+          "duration": "3h 15m",
+          "cost": "€200-250",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.airfrance.com/search?from=CDG&to=ATH&date=2024-06-14&flight=AF1534",
+          "notes": "Afternoon direct flight"
+        },
+        {
+          "id": "A3614",
+          "airline": "Aegean Airlines",
+          "flightNumber": "A3614",
+          "from": "ORY",
+          "to": "ATH",
+          "departure": "11:50",
+          "arrival": "16:20",
+          "duration": "3h 30m",
+          "cost": "€150-190",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.aegeanair.com/search?from=ORY&to=ATH&date=2024-06-14&flight=A3614",
+          "notes": "Budget option from Orly"
+        }
+      ],
+      "LONDON_to_ATH": [
+        {
+          "id": "BA632",
+          "airline": "British Airways",
+          "flightNumber": "BA632",
+          "from": "LHR",
+          "to": "ATH",
+          "departure": "10:45",
+          "arrival": "16:20",
+          "duration": "3h 35m",
+          "cost": "£250-300",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.britishairways.com/search?from=LHR&to=ATH&date=2024-06-14&flight=BA632",
+          "notes": "Direct flight from Heathrow"
+        },
+        {
+          "id": "FR2456",
+          "airline": "Ryanair",
+          "flightNumber": "FR2456",
+          "from": "STN",
+          "to": "ATH",
+          "departure": "06:30",
+          "arrival": "12:05",
+          "duration": "3h 35m",
+          "cost": "£120-180",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.ryanair.com/search?from=STN&to=ATH&date=2024-06-14&flight=FR2456",
+          "notes": "Budget airline, early departure"
+        },
+        {
+          "id": "A3610",
+          "airline": "Aegean Airlines",
+          "flightNumber": "A3610",
+          "from": "LHR",
+          "to": "ATH",
+          "departure": "15:30",
+          "arrival": "21:05",
+          "duration": "3h 35m",
+          "cost": "£180-240",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.aegeanair.com/search?from=LHR&to=ATH&date=2024-06-14&flight=A3610",
+          "notes": "Afternoon departure"
+        }
+      ],
+      "NEW_YORK_to_ATH": [
+        {
+          "id": "DL8456",
+          "airline": "Delta Airlines",
+          "flightNumber": "DL8456",
+          "from": "JFK",
+          "to": "ATH",
+          "departure": "22:30",
+          "arrival": "17:45+1",
+          "duration": "10h 15m",
+          "cost": "$700-900",
+          "date": "2024-06-13",
+          "bookingUrl": "https://www.delta.com/search?from=JFK&to=ATH&date=2024-06-13&flight=DL8456",
+          "notes": "Direct overnight flight, arrives next day"
+        },
+        {
+          "id": "AA174",
+          "airline": "American Airlines",
+          "flightNumber": "AA174",
+          "from": "JFK",
+          "to": "ATH",
+          "departure": "21:15",
+          "arrival": "16:30+1",
+          "duration": "10h 15m",
+          "cost": "$750-950",
+          "date": "2024-06-13",
+          "bookingUrl": "https://www.aa.com/search?from=JFK&to=ATH&date=2024-06-13&flight=AA174",
+          "notes": "Direct overnight flight"
+        }
+      ],
+      "BERLIN_to_ATH": [
+        {
+          "id": "LH1234",
+          "airline": "Lufthansa",
+          "flightNumber": "LH1234",
+          "from": "BER",
+          "to": "ATH",
+          "departure": "11:20",
+          "arrival": "15:30",
+          "duration": "2h 50m",
+          "cost": "€220-280",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.lufthansa.com/search?from=BER&to=ATH&date=2024-06-14&flight=LH1234",
+          "notes": "Direct flight"
+        },
+        {
+          "id": "A3802",
+          "airline": "Aegean Airlines",
+          "flightNumber": "A3802",
+          "from": "BER",
+          "to": "ATH",
+          "departure": "16:45",
+          "arrival": "20:55",
+          "duration": "2h 50m",
+          "cost": "€180-240",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.aegeanair.com/search?from=BER&to=ATH&date=2024-06-14&flight=A3802",
+          "notes": "Evening departure"
+        }
+      ]
+    },
+    "ferries": {
+      "ATH_to_KEA": [
+        {
+          "id": "seajets_morning",
+          "company": "SeaJets",
+          "from": "Rafina",
+          "to": "Kea (Korissia)",
+          "departure": "08:00",
+          "arrival": "09:15",
+          "duration": "1h 15m",
+          "cost": "€25",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.seajets.gr/search?from=Rafina&to=Kea&date=2024-06-14",
+          "notes": "Morning ferry, daily service"
+        },
+        {
+          "id": "seajets_afternoon",
+          "company": "SeaJets",
+          "from": "Rafina",
+          "to": "Kea (Korissia)",
+          "departure": "15:30",
+          "arrival": "16:45",
+          "duration": "1h 15m",
+          "cost": "€25",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.seajets.gr/search?from=Rafina&to=Kea&date=2024-06-14",
+          "notes": "Afternoon ferry, daily service"
+        },
+        {
+          "id": "seajets_evening",
+          "company": "SeaJets",
+          "from": "Rafina",
+          "to": "Kea (Korissia)",
+          "departure": "19:00",
+          "arrival": "20:15",
+          "duration": "1h 15m",
+          "cost": "€25",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.seajets.gr/search?from=Rafina&to=Kea&date=2024-06-14",
+          "notes": "Evening ferry, daily service"
+        },
+        {
+          "id": "bluestar_morning",
+          "company": "Blue Star Ferries",
+          "from": "Rafina",
+          "to": "Kea (Korissia)",
+          "departure": "09:45",
+          "arrival": "11:15",
+          "duration": "1h 30m",
+          "cost": "€20",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.bluestarferries.com/search?from=Rafina&to=Kea&date=2024-06-14",
+          "notes": "Budget option, slightly slower"
+        },
+        {
+          "id": "bluestar_afternoon",
+          "company": "Blue Star Ferries",
+          "from": "Rafina",
+          "to": "Kea (Korissia)",
+          "departure": "17:30",
+          "arrival": "19:00",
+          "duration": "1h 30m",
+          "cost": "€20",
+          "date": "2024-06-14",
+          "bookingUrl": "https://www.bluestarferries.com/search?from=Rafina&to=Kea&date=2024-06-14",
+          "notes": "Afternoon service"
+        }
+      ]
+    },
+    "transfers": {
+      "ATH_to_Rafina": [
+        {
+          "id": "ktel_bus",
+          "method": "KTEL Bus",
+          "from": "ATH Airport",
+          "to": "Rafina Port",
+          "duration": "45m",
+          "cost": "€3",
+          "frequency": "Every 30 minutes",
+          "bookingUrl": "https://www.ktel-attikis.gr/en/",
+          "notes": "Most economical option"
+        },
+        {
+          "id": "taxi",
+          "method": "Taxi",
+          "from": "ATH Airport",
+          "to": "Rafina Port",
+          "duration": "30m",
+          "cost": "€40-50",
+          "frequency": "On demand",
+          "bookingUrl": "https://www.taxibeat.gr/",
+          "notes": "Fast and convenient"
+        },
+        {
+          "id": "uber",
+          "method": "Uber",
+          "from": "ATH Airport",
+          "to": "Rafina Port",
+          "duration": "35m",
+          "cost": "€35-45",
+          "frequency": "On demand",
+          "bookingUrl": "https://www.uber.com/",
+          "notes": "Modern rideshare option"
+        }
+      ]
+    },
+    "routes": {
+      "PARIS_to_KEA": {
+        "from": "PARIS",
+        "to": "KEA",
+        "dateRanges": {
+          "2024-06-13_to_2024-06-15": {
+            "label": "Wedding Weekend Arrival",
+            "options": [
+              {
+                "id": "paris_option_1",
+                "type": "flight_then_ferry",
+                "totalDuration": "5h 30m",
+                "totalCost": "€280-320",
+                "difficulty": "easy",
+                "recommended": true,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "CDG",
+                    "to": "ATH",
+                    "airline": "Air France",
+                    "flightNumber": "AF1532",
+                    "departure": "08:30",
+                    "arrival": "12:45",
+                    "duration": "3h 15m",
+                    "cost": "€180-220",
+                    "notes": "Direct flight, good availability"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "ATH Airport",
+                    "to": "Rafina Port",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus every 30 minutes"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "15:30",
+                    "arrival": "16:45",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Daily ferry service"
+                  }
+                ]
+              },
+              {
+                "id": "paris_option_2", 
+                "type": "flight_then_ferry",
+                "totalDuration": "6h 45m",
+                "totalCost": "€240-280",
+                "difficulty": "medium",
+                "recommended": false,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "ORY",
+                    "to": "ATH",
+                    "airline": "Aegean Airlines",
+                    "flightNumber": "A3614",
+                    "departure": "14:20",
+                    "arrival": "18:50",
+                    "duration": "3h 30m",
+                    "cost": "€150-190",
+                    "notes": "Budget option, may have layover"
+                  },
+                  {
+                    "type": "overnight",
+                    "location": "Athens",
+                    "notes": "Overnight stay recommended, ferry next morning"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "Athens Hotel",
+                    "to": "Rafina Port",
+                    "method": "taxi",
+                    "duration": "30m",
+                    "cost": "€40",
+                    "notes": "Early morning taxi"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "08:00",
+                    "arrival": "09:15",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Morning ferry"
+                  }
+                ]
+              }
+            ]
+          },
+          "2024-06-16_to_2024-06-18": {
+            "label": "Post-Wedding Departure",
+            "options": [
+              {
+                "id": "paris_return_1",
+                "type": "ferry_then_flight",
+                "totalDuration": "6h 00m",
+                "totalCost": "€260-300",
+                "difficulty": "easy",
+                "recommended": true,
+                "steps": [
+                  {
+                    "type": "ferry",
+                    "from": "Kea (Korissia)",
+                    "to": "Rafina",
+                    "company": "SeaJets",
+                    "departure": "11:30",
+                    "arrival": "12:45",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Return ferry"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "Rafina Port",
+                    "to": "ATH Airport",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus"
+                  },
+                  {
+                    "type": "flight",
+                    "from": "ATH",
+                    "to": "CDG",
+                    "airline": "Air France",
+                    "flightNumber": "AF1533",
+                    "departure": "16:20",
+                    "arrival": "18:45",
+                    "duration": "3h 25m",
+                    "cost": "€180-220",
+                    "notes": "Direct return flight"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "LONDON_to_KEA": {
+        "from": "LONDON",
+        "to": "KEA",
+        "dateRanges": {
+          "2024-06-13_to_2024-06-15": {
+            "label": "Wedding Weekend Arrival",
+            "options": [
+              {
+                "id": "london_option_1",
+                "type": "flight_then_ferry",
+                "totalDuration": "7h 15m",
+                "totalCost": "£320-380",
+                "difficulty": "easy",
+                "recommended": true,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "LHR",
+                    "to": "ATH",
+                    "airline": "British Airways",
+                    "flightNumber": "BA632",
+                    "departure": "10:45",
+                    "arrival": "16:20",
+                    "duration": "3h 35m",
+                    "cost": "£250-300",
+                    "notes": "Direct flight"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "ATH Airport",
+                    "to": "Rafina Port",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "19:00",
+                    "arrival": "20:15",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Evening ferry"
+                  }
+                ]
+              },
+              {
+                "id": "london_option_2",
+                "type": "flight_then_ferry",
+                "totalDuration": "8h 30m",
+                "totalCost": "£280-340",
+                "difficulty": "medium",
+                "recommended": false,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "STN",
+                    "to": "ATH",
+                    "airline": "Ryanair",
+                    "flightNumber": "FR2456",
+                    "departure": "06:30",
+                    "arrival": "12:05",
+                    "duration": "3h 35m",
+                    "cost": "£180-220",
+                    "notes": "Budget airline, early departure"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "ATH Airport",
+                    "to": "Rafina Port",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "15:30",
+                    "arrival": "16:45",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Afternoon ferry"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "NEW_YORK_to_KEA": {
+        "from": "NEW_YORK",
+        "to": "KEA",
+        "dateRanges": {
+          "2024-06-13_to_2024-06-15": {
+            "label": "Wedding Weekend Arrival",
+            "options": [
+              {
+                "id": "ny_option_1",
+                "type": "flight_then_ferry",
+                "totalDuration": "14h 30m",
+                "totalCost": "$850-1200",
+                "difficulty": "medium",
+                "recommended": true,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "JFK",
+                    "to": "ATH",
+                    "airline": "Delta Airlines",
+                    "flightNumber": "DL8456",
+                    "departure": "22:30",
+                    "arrival": "17:45+1",
+                    "duration": "10h 15m",
+                    "cost": "$700-900",
+                    "notes": "Direct overnight flight, arrives next day"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "ATH Airport",
+                    "to": "Rafina Port",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "19:00",
+                    "arrival": "20:15",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Evening ferry"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "BERLIN_to_KEA": {
+        "from": "BERLIN",
+        "to": "KEA",
+        "dateRanges": {
+          "2024-06-13_to_2024-06-15": {
+            "label": "Wedding Weekend Arrival",
+            "options": [
+              {
+                "id": "berlin_option_1",
+                "type": "flight_then_ferry",
+                "totalDuration": "6h 45m",
+                "totalCost": "€320-380",
+                "difficulty": "easy",
+                "recommended": true,
+                "steps": [
+                  {
+                    "type": "flight",
+                    "from": "BER",
+                    "to": "ATH",
+                    "airline": "Lufthansa",
+                    "flightNumber": "LH1234",
+                    "departure": "11:20",
+                    "arrival": "15:30",
+                    "duration": "2h 50m",
+                    "cost": "€220-280",
+                    "notes": "Direct flight"
+                  },
+                  {
+                    "type": "transfer",
+                    "from": "ATH Airport",
+                    "to": "Rafina Port",
+                    "method": "bus",
+                    "duration": "45m",
+                    "cost": "€3",
+                    "notes": "KTEL bus"
+                  },
+                  {
+                    "type": "ferry",
+                    "from": "Rafina",
+                    "to": "Kea (Korissia)",
+                    "company": "SeaJets",
+                    "departure": "17:15",
+                    "arrival": "18:30",
+                    "duration": "1h 15m",
+                    "cost": "€25",
+                    "notes": "Evening ferry"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "generalInfo": {
+      "shuttle": {
+        "available": true,
+        "pickup": "Korissia Port",
+        "dropoff": "Wedding Venue",
+        "cost": "Free for guests",
+        "schedules": [
+          {
+            "date": "2024-06-14",
+            "times": ["18:00", "18:30", "19:00"],
+            "notes": "Friday evening shuttles for welcome dinner"
+          },
+          {
+            "date": "2024-06-15", 
+            "times": ["17:30", "18:00", "18:30"],
+            "notes": "Saturday wedding ceremony shuttles"
+          }
+        ]
+      },
+      "localTransport": {
+        "taxi": {
+          "available": true,
+          "cost": "€15-25 from port to venue",
+          "notes": "Limited availability, book in advance"
+        },
+        "carRental": {
+          "available": true,
+          "cost": "€30-50/day",
+          "notes": "Recommended for flexibility, book early"
+        }
+      },
+      "importantNotes": [
+        "Ferry schedules may change based on weather conditions",
+        "Book accommodations early as Kea has limited hotel capacity",
+        "Shuttle service is provided free for wedding guests",
+        "Contact us for group booking discounts on flights"
+      ]
+    }
+  }
+}
