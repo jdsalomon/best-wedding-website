@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import * as React from 'react'
 import { flushSync } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
@@ -24,6 +24,30 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  
+  // Auto-scroll refs and state
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
+
+  // Check if user is near bottom of chat
+  const isNearBottom = () => {
+    const container = messagesContainerRef.current
+    if (!container) return true
+    
+    const { scrollTop, scrollHeight, clientHeight } = container
+    return scrollHeight - scrollTop - clientHeight < 100 // Within 100px of bottom
+  }
+
+  // Handle user scrolling
+  const handleScroll = () => {
+    setShouldAutoScroll(isNearBottom())
+  }
+
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
@@ -38,6 +62,10 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsThinking(true)
+    
+    // Always scroll when user sends a message
+    setShouldAutoScroll(true)
+    setTimeout(() => scrollToBottom(), 0)
 
     try {
       // Call the real OpenAI API endpoint
@@ -132,6 +160,13 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     }
   }
 
+  // Auto-scroll when messages change (if user is near bottom)
+  useEffect(() => {
+    if (shouldAutoScroll) {
+      scrollToBottom()
+    }
+  }, [messages, shouldAutoScroll])
+
   // Handle first message when chat opens
   React.useEffect(() => {
     if (isOpen && firstMessage && messages.length === 0) {
@@ -144,11 +179,14 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   return (
     <div style={{
       backgroundColor: colors.cream,
-      border: `2px solid ${colors.oliveGreen}`,
-      borderRadius: borderRadius.lg,
-      marginBottom: spacing.xl,
-      overflow: 'hidden',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      margin: 0,
+      border: 'none',
+      borderRadius: 0,
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <div style={{
@@ -157,7 +195,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         padding: spacing.md,
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        flexShrink: 0
       }}>
         <div>
           <h3 style={{
@@ -166,7 +205,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             fontWeight: typography.bold,
             fontFamily: typography.heading
           }}>
-            🤖 {t('chat.title')}
+{t('chat.title')}
           </h3>
           <p style={{
             margin: 0,
@@ -177,34 +216,41 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             {t('chat.subtitle')}
           </p>
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: colors.cream,
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            padding: '0',
-            width: '30px',
-            height: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          title={t('chat.close')}
-        >
-          ×
-        </button>
+        {/* Close button hidden for main interface */}
+        <div style={{ display: 'none' }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: colors.cream,
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '0',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title={t('chat.close')}
+          >
+            ×
+          </button>
+        </div>
       </div>
 
-      {/* Messages Area */}
-      <div style={{
-        maxHeight: '400px',
-        overflowY: 'auto',
-        padding: spacing.md,
-        backgroundColor: colors.cream
-      }}>
+      {/* Messages Area - Takes remaining space */}
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: spacing.md,
+          backgroundColor: colors.cream
+        }}
+      >
         {messages.length === 0 && (
           <div style={{
             textAlign: 'center',
@@ -329,13 +375,17 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             </div>
           </div>
         )}
+        
+        {/* Invisible div for scroll target */}
+        <div ref={messagesEndRef} />
       </div>
       
-      {/* Input Area */}
+      {/* Input Area - Fixed at bottom */}
       <div style={{
         padding: spacing.md,
         borderTop: `1px solid ${colors.oliveGreen}`,
-        backgroundColor: colors.warmBeige
+        backgroundColor: colors.warmBeige,
+        flexShrink: 0
       }}>
         <div style={{
           display: 'flex',

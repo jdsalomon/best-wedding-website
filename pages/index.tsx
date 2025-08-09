@@ -20,16 +20,25 @@ const Home: NextPage = () => {
   
   return (
     <Layout>
-      <div style={{ textAlign: 'center' }}>
-        {/* Hero Section */}
+      {/* Full-Screen Layout */}
+      <div style={{ 
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        
+        {/* Compact Header - Hero Section */}
         <div style={{ 
-          marginBottom: spacing.xxl,
-          padding: `${spacing.xl} 0`,
-          textAlign: 'center'
+          backgroundColor: colors.warmBeige,
+          borderBottom: `2px solid ${colors.oliveGreen}`,
+          padding: spacing.sm,
+          textAlign: 'center',
+          flexShrink: 0
         }}>
           <h1 style={{ 
-            fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-            margin: '0 0 1rem 0',
+            fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+            margin: '0 0 0.25rem 0',
             color: colors.deepOlive,
             fontFamily: typography.heading,
             fontWeight: typography.bold
@@ -37,39 +46,43 @@ const Home: NextPage = () => {
             {t('home.title')}
           </h1>
           <div style={{ 
-            fontSize: 'clamp(1.3rem, 5vw, 2.2rem)',
+            fontSize: 'clamp(0.9rem, 3vw, 1.2rem)',
             color: colors.oliveGreen,
             fontWeight: typography.semibold,
-            marginBottom: spacing.md,
             fontFamily: typography.heading
           }}>
-            {t('home.date')}
-          </div>
-          <div style={{ 
-            fontSize: 'clamp(1rem, 4vw, 1.5rem)',
-            color: colors.charcoal,
-            marginBottom: spacing.lg,
-            fontFamily: typography.body
-          }}>
-            {t('home.location')}
+            {t('home.date')} • {t('home.location')}
           </div>
         </div>
 
-        <OliveBranch variant="natural1" size="large" />
+        {/* Full-Screen Chat Interface */}
+        <div style={{ 
+          flex: 1,
+          width: '100%',
+          overflow: 'hidden'
+        }}>
+          <InlineChatInterface
+            isOpen={true}
+            onClose={() => {}}
+            firstMessage=""
+          />
+        </div>
+      </div>
+      
+      {/* HIDDEN SECTIONS - All original content preserved but not displayed */}
+      <div style={{ display: 'none' }}>
+          {/* Original Chat Components */}
+          {!isInlineChatOpen && (
+            <ChatBar onSendMessage={handleFirstMessage} />
+          )}
+          
+          <InlineChatInterface
+            isOpen={isInlineChatOpen}
+            onClose={() => setIsInlineChatOpen(false)}
+            firstMessage={firstMessage}
+          />
 
-        {/* Chat Bar */}
-        {!isInlineChatOpen && (
-          <ChatBar onSendMessage={handleFirstMessage} />
-        )}
-        
-        {/* Inline Chat Interface */}
-        <InlineChatInterface
-          isOpen={isInlineChatOpen}
-          onClose={() => setIsInlineChatOpen(false)}
-          firstMessage={firstMessage}
-        />
-
-        {/* Program Section */}
+          {/* Program Section */}
         <div id="program" style={{ 
           ...cardStyle,
           padding: spacing.xl,
@@ -768,6 +781,7 @@ const Home: NextPage = () => {
             </div>
           </div>
         </div>
+        {/* End of hidden sections */}
       </div>
     </Layout>
   )
