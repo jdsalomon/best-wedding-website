@@ -54,12 +54,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       maxTokens: 1000
     })
 
-    // Set up streaming response
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
-    res.setHeader('Transfer-Encoding', 'chunked')
+    // Set up Server-Sent Events streaming response
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache, no-transform')
+    res.setHeader('Connection', 'keep-alive')
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
     for await (const chunk of result.textStream) {
       res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`)
+      // Force flush for real-time streaming
+      if (res.flush) res.flush()
     }
     
     res.write('data: [DONE]\n\n')

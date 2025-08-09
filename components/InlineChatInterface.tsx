@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import * as React from 'react'
+import { flushSync } from 'react-dom'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useTranslation } from '../hooks/useTranslation'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
 
@@ -93,12 +96,14 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               const parsed = JSON.parse(data)
               if (parsed.choices?.[0]?.delta?.content) {
                 assistantResponse += parsed.choices[0].delta.content
-                // Update the assistant message in real-time
-                setMessages(prev => prev.map(msg => 
-                  msg.id === assistantMessage.id 
-                    ? { ...msg, content: assistantResponse }
-                    : msg
-                ))
+                // Update the assistant message in real-time with flushSync for immediate UI updates
+                flushSync(() => {
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: assistantResponse }
+                      : msg
+                  ))
+                })
               }
             } catch (e) {
               // Skip invalid JSON
@@ -236,7 +241,70 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 textAlign: 'left'
               }}
             >
-              {message.content}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4}}>{children}</span>,
+                  strong: ({children}) => <strong style={{color: message.role === 'user' ? colors.cream : colors.deepOlive}}>{children}</strong>,
+                  em: ({children}) => <em style={{fontStyle: 'italic'}}>{children}</em>,
+                  ul: ({children}) => <ul style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ul>,
+                  ol: ({children}) => <ol style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ol>,
+                  li: ({children}) => <li style={{marginBottom: '0.25rem'}}>{children}</li>,
+                  a: ({href, children}) => (
+                    <a 
+                      href={href} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        color: message.role === 'user' ? colors.cream : colors.deepOlive,
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      {children}
+                    </a>
+                  ),
+                  table: ({children}) => (
+                    <table style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      margin: '0.5rem 0',
+                      fontSize: '0.9em',
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                    }}>
+                      {children}
+                    </table>
+                  ),
+                  thead: ({children}) => (
+                    <thead style={{
+                      backgroundColor: message.role === 'user' ? colors.deepOlive : colors.sageGreen
+                    }}>
+                      {children}
+                    </thead>
+                  ),
+                  th: ({children}) => (
+                    <th style={{
+                      padding: '0.5rem',
+                      textAlign: 'left',
+                      fontWeight: typography.semibold,
+                      color: message.role === 'user' ? colors.cream : colors.charcoal,
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                    }}>
+                      {children}
+                    </th>
+                  ),
+                  td: ({children}) => (
+                    <td style={{
+                      padding: '0.5rem',
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
+                      color: message.role === 'user' ? colors.cream : colors.charcoal
+                    }}>
+                      {children}
+                    </td>
+                  )
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
