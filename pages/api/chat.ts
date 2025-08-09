@@ -54,7 +54,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       maxTokens: 1000
     })
 
-    return result.toDataStreamResponse()
+    // Set up streaming response
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+    res.setHeader('Transfer-Encoding', 'chunked')
+
+    for await (const chunk of result.textStream) {
+      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`)
+    }
+    
+    res.write('data: [DONE]\n\n')
+    res.end()
   } catch (error) {
     console.error('Chat API error:', error)
     return res.status(500).json({ message: 'Internal server error' })

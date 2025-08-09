@@ -22,14 +22,6 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
 
-  const dummyResponses = [
-    "Thanks for your question! I'm here to help with anything about Estelle & Julien's wedding on Kea Island. Feel free to ask about transportation, hotels, or the program!",
-    "Great question! For transportation to Kea Island, you'll need to fly to Athens (ATH) and then take a ferry from Lavrio Port. The ferry takes about 1.5 hours and costs €15-25 per person.",
-    "Regarding hotels, I recommend checking out the accommodations on Kea Island. There are various options from luxury to budget-friendly. The island has beautiful locations near the wedding venues!",
-    "The wedding program spans 4 amazing days! It includes the civil ceremony, Shabbat dinner, welcome events, the religious ceremony, and celebrations. Each day has special activities planned on this beautiful Greek island.",
-    "For the wedding list, your presence is the most important gift! However, if you'd like to contribute, there are options for traditional registry items, honeymoon fund, or charitable donations."
-  ]
-
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
 
@@ -44,18 +36,88 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     setInput('')
     setIsThinking(true)
 
-    // Simulate AI thinking for 5 seconds
-    setTimeout(() => {
-      const randomResponse = dummyResponses[Math.floor(Math.random() * dummyResponses.length)]
+    try {
+      // Call the real OpenAI API endpoint
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            ...messages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            { role: 'user', content: messageContent }
+          ]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from chat API')
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No reader available')
+      }
+
+      let assistantResponse = ''
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: randomResponse,
+        content: '',
         timestamp: new Date()
       }
+      
+      // Add empty assistant message that we'll update as we stream
       setMessages(prev => [...prev, assistantMessage])
       setIsThinking(false)
-    }, 5000)
+
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = new TextDecoder().decode(value)
+        const lines = chunk.split('\n')
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+            
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.choices?.[0]?.delta?.content) {
+                assistantResponse += parsed.choices[0].delta.content
+                // Update the assistant message in real-time
+                setMessages(prev => prev.map(msg => 
+                  msg.id === assistantMessage.id 
+                    ? { ...msg, content: assistantResponse }
+                    : msg
+                ))
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error calling chat API:', error)
+      // Show error message to user
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again later.',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+      setIsThinking(false)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
