@@ -22,10 +22,13 @@ const Home: NextPage = () => {
     <Layout>
       {/* Full-Screen Layout */}
       <div style={{ 
-        height: '100vh',
+        minHeight: '100dvh',
+        height: '100vh', /* Fallback for browsers that don't support dvh */
         width: '100vw',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        position: 'relative',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
       }}>
         
         {/* Compact Header - Hero Section */}

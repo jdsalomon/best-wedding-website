@@ -180,6 +180,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     <div style={{
       backgroundColor: colors.cream,
       height: '100%',
+      minHeight: '0', /* Allow flex shrinking */
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
@@ -383,6 +384,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       {/* Input Area - Fixed at bottom */}
       <div style={{
         padding: spacing.md,
+        paddingBottom: `calc(${spacing.md} + env(safe-area-inset-bottom, 0px))`,
         borderTop: `1px solid ${colors.oliveGreen}`,
         backgroundColor: colors.warmBeige,
         flexShrink: 0
