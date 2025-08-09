@@ -367,12 +367,36 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               borderRadius: borderRadius.md,
               backgroundColor: colors.warmBeige,
               color: colors.charcoal,
-              fontSize: '0.95rem',
+              fontSize: '1.2rem',
               fontFamily: typography.body,
-              fontStyle: 'italic',
               textAlign: 'left'
             }}>
-              🤔 Thinking...
+              <span style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
+                <span style={{
+                  animation: 'wave 1.4s infinite',
+                  display: 'inline-block',
+                  fontSize: '1.8rem',
+                  animationDelay: '0s'
+                }}>•</span>
+                <span style={{
+                  animation: 'wave 1.4s infinite',
+                  display: 'inline-block',
+                  fontSize: '1.8rem',
+                  animationDelay: '0.2s'
+                }}>•</span>
+                <span style={{
+                  animation: 'wave 1.4s infinite',
+                  display: 'inline-block',
+                  fontSize: '1.8rem',
+                  animationDelay: '0.4s'
+                }}>•</span>
+              </span>
+              <style jsx>{`
+                @keyframes wave {
+                  0%, 60%, 100% { transform: translateY(0); }
+                  30% { transform: translateY(-8px); }
+                }
+              `}</style>
             </div>
           </div>
         )}

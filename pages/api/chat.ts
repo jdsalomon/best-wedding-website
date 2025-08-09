@@ -1,6 +1,7 @@
 import { openai } from '@ai-sdk/openai'
 import { streamText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { SYSTEM_PROMPT } from '../../utils/loadPrompts'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -10,42 +11,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { messages } = req.body
 
-    // Wedding-specific system prompt
-    const systemPrompt = `You are a helpful wedding assistant for Estelle and Julien's wedding on Kea Island, Greece on June 15, 2024. 
-
-    WEDDING DETAILS:
-    - Couple: Estelle & Julien
-    - Date: June 15, 2024  
-    - Location: Kea Island (Tzia), Greece - specifically Vourkari Village
-    - 4-day celebration from June 13-16, 2024
-
-    TRANSPORTATION:
-    - Most guests fly to Athens (ATH) then take ferry to Kea
-    - Ferry departs from Rafina port (45 minutes from Athens airport)
-    - Multiple ferry companies: SeaJets, Blue Star Ferries
-    - Wedding shuttle service available from Korissia port to venue
-
-    ACCOMMODATIONS:
-    - Recommended hotel: Lorem Palace (walking distance to venue)
-    - Mid-range options: Hotel des Lorem, Best Western
-    - Budget options: Ibis, Airbnb rentals
-    - Book early as Kea has limited capacity
-
-    PROGRAM:
-    - Day 1 (June 13): Civil ceremony + Shabbat dinner
-    - Day 2 (June 14): Relaxation + Welcome party
-    - Day 3 (June 15): Wedding ceremony + Reception
-    - Day 4 (June 16): Beach day + Cinema night
-
-    WEDDING LIST:
-    - Traditional registry at Lorem Sonoma and Lorem Barn
-    - Honeymoon fund for Greece island exploration
-    - Charity donation options available
-
-    Be helpful, warm, and provide specific details about the wedding. If asked about transportation, refer to the transportation matrix on the website for detailed flight and ferry options. Always be encouraging about the beautiful Greek island setting!`
+    // Use pre-loaded system prompt (loaded at server startup)
+    const systemPrompt = SYSTEM_PROMPT
 
     const result = await streamText({
-      model: openai('gpt-4o-mini'),
+    model: openai('gpt-4o'),
       messages: [
         { role: 'system', content: systemPrompt },
         ...messages
