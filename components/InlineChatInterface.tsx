@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import * as React from 'react'
+import { flushSync } from 'react-dom'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { useTranslation } from '../hooks/useTranslation'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
 
@@ -21,14 +24,30 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  
+  // Auto-scroll refs and state
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
-  const dummyResponses = [
-    "Thanks for your question! I'm here to help with anything about Estelle & Julien's wedding on Kea Island. Feel free to ask about transportation, hotels, or the program!",
-    "Great question! For transportation to Kea Island, you'll need to fly to Athens (ATH) and then take a ferry from Lavrio Port. The ferry takes about 1.5 hours and costs €15-25 per person.",
-    "Regarding hotels, I recommend checking out the accommodations on Kea Island. There are various options from luxury to budget-friendly. The island has beautiful locations near the wedding venues!",
-    "The wedding program spans 4 amazing days! It includes the civil ceremony, Shabbat dinner, welcome events, the religious ceremony, and celebrations. Each day has special activities planned on this beautiful Greek island.",
-    "For the wedding list, your presence is the most important gift! However, if you'd like to contribute, there are options for traditional registry items, honeymoon fund, or charitable donations."
-  ]
+  // Check if user is near bottom of chat
+  const isNearBottom = () => {
+    const container = messagesContainerRef.current
+    if (!container) return true
+    
+    const { scrollTop, scrollHeight, clientHeight } = container
+    return scrollHeight - scrollTop - clientHeight < 100 // Within 100px of bottom
+  }
+
+  // Handle user scrolling
+  const handleScroll = () => {
+    setShouldAutoScroll(isNearBottom())
+  }
+
+  // Scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
@@ -43,19 +62,95 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsThinking(true)
+    
+    // Always scroll when user sends a message
+    setShouldAutoScroll(true)
+    setTimeout(() => scrollToBottom(), 0)
 
-    // Simulate AI thinking for 5 seconds
-    setTimeout(() => {
-      const randomResponse = dummyResponses[Math.floor(Math.random() * dummyResponses.length)]
+    try {
+      // Call the real OpenAI API endpoint
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            ...messages.map(msg => ({
+              role: msg.role,
+              content: msg.content
+            })),
+            { role: 'user', content: messageContent }
+          ]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get response from chat API')
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      if (!reader) {
+        throw new Error('No reader available')
+      }
+
+      let assistantResponse = ''
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: randomResponse,
+        content: '',
         timestamp: new Date()
       }
+      
+      // Add empty assistant message that we'll update as we stream
       setMessages(prev => [...prev, assistantMessage])
       setIsThinking(false)
-    }, 5000)
+
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = new TextDecoder().decode(value)
+        const lines = chunk.split('\n')
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+            
+            try {
+              const parsed = JSON.parse(data)
+              if (parsed.choices?.[0]?.delta?.content) {
+                assistantResponse += parsed.choices[0].delta.content
+                // Update the assistant message in real-time with flushSync for immediate UI updates
+                flushSync(() => {
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: assistantResponse }
+                      : msg
+                  ))
+                })
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error calling chat API:', error)
+      // Show error message to user
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again later.',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
+      setIsThinking(false)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -64,6 +159,13 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       handleSendMessage(input)
     }
   }
+
+  // Auto-scroll when messages change (if user is near bottom)
+  useEffect(() => {
+    if (shouldAutoScroll) {
+      scrollToBottom()
+    }
+  }, [messages, shouldAutoScroll])
 
   // Handle first message when chat opens
   React.useEffect(() => {
@@ -77,11 +179,14 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   return (
     <div style={{
       backgroundColor: colors.cream,
-      border: `2px solid ${colors.oliveGreen}`,
-      borderRadius: borderRadius.lg,
-      marginBottom: spacing.xl,
-      overflow: 'hidden',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+      height: '100%',
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      margin: 0,
+      border: 'none',
+      borderRadius: 0,
+      overflow: 'hidden'
     }}>
       {/* Header */}
       <div style={{
@@ -90,7 +195,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         padding: spacing.md,
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        flexShrink: 0
       }}>
         <div>
           <h3 style={{
@@ -99,7 +205,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             fontWeight: typography.bold,
             fontFamily: typography.heading
           }}>
-            🤖 {t('chat.title')}
+{t('chat.title')}
           </h3>
           <p style={{
             margin: 0,
@@ -110,34 +216,41 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             {t('chat.subtitle')}
           </p>
         </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: colors.cream,
-            fontSize: '1.5rem',
-            cursor: 'pointer',
-            padding: '0',
-            width: '30px',
-            height: '30px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-          title={t('chat.close')}
-        >
-          ×
-        </button>
+        {/* Close button hidden for main interface */}
+        <div style={{ display: 'none' }}>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: colors.cream,
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '0',
+              width: '30px',
+              height: '30px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title={t('chat.close')}
+          >
+            ×
+          </button>
+        </div>
       </div>
 
-      {/* Messages Area */}
-      <div style={{
-        maxHeight: '400px',
-        overflowY: 'auto',
-        padding: spacing.md,
-        backgroundColor: colors.cream
-      }}>
+      {/* Messages Area - Takes remaining space */}
+      <div 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: spacing.md,
+          backgroundColor: colors.cream
+        }}
+      >
         {messages.length === 0 && (
           <div style={{
             textAlign: 'center',
@@ -174,7 +287,70 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 textAlign: 'left'
               }}
             >
-              {message.content}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4}}>{children}</span>,
+                  strong: ({children}) => <strong style={{color: message.role === 'user' ? colors.cream : colors.deepOlive}}>{children}</strong>,
+                  em: ({children}) => <em style={{fontStyle: 'italic'}}>{children}</em>,
+                  ul: ({children}) => <ul style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ul>,
+                  ol: ({children}) => <ol style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ol>,
+                  li: ({children}) => <li style={{marginBottom: '0.25rem'}}>{children}</li>,
+                  a: ({href, children}) => (
+                    <a 
+                      href={href} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        color: message.role === 'user' ? colors.cream : colors.deepOlive,
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      {children}
+                    </a>
+                  ),
+                  table: ({children}) => (
+                    <table style={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      margin: '0.5rem 0',
+                      fontSize: '0.9em',
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                    }}>
+                      {children}
+                    </table>
+                  ),
+                  thead: ({children}) => (
+                    <thead style={{
+                      backgroundColor: message.role === 'user' ? colors.deepOlive : colors.sageGreen
+                    }}>
+                      {children}
+                    </thead>
+                  ),
+                  th: ({children}) => (
+                    <th style={{
+                      padding: '0.5rem',
+                      textAlign: 'left',
+                      fontWeight: typography.semibold,
+                      color: message.role === 'user' ? colors.cream : colors.charcoal,
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                    }}>
+                      {children}
+                    </th>
+                  ),
+                  td: ({children}) => (
+                    <td style={{
+                      padding: '0.5rem',
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
+                      color: message.role === 'user' ? colors.cream : colors.charcoal
+                    }}>
+                      {children}
+                    </td>
+                  )
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
@@ -199,13 +375,17 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             </div>
           </div>
         )}
+        
+        {/* Invisible div for scroll target */}
+        <div ref={messagesEndRef} />
       </div>
       
-      {/* Input Area */}
+      {/* Input Area - Fixed at bottom */}
       <div style={{
         padding: spacing.md,
         borderTop: `1px solid ${colors.oliveGreen}`,
-        backgroundColor: colors.warmBeige
+        backgroundColor: colors.warmBeige,
+        flexShrink: 0
       }}>
         <div style={{
           display: 'flex',
