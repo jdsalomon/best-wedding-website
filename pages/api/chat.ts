@@ -64,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     for await (const chunk of result.textStream) {
       res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`)
       // Force flush for real-time streaming
-      if (res.flush) res.flush()
+      if ('flush' in res && typeof res.flush === 'function') res.flush()
     }
     
     res.write('data: [DONE]\n\n')
