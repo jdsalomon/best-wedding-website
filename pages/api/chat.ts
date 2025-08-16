@@ -56,6 +56,73 @@ function containsRSVPKeywords(message: string): boolean {
 }
 
 /**
+ * Generate RSVP status summary from existing response data
+ */
+function generateRSVPStatusContext(rsvpData: any): string {
+  if (!rsvpData || !rsvpData.events || !rsvpData.guests) {
+    return ''
+  }
+
+  const statusLines: string[] = []
+  statusLines.push('## Current RSVP Status Context')
+  
+  // Overall statistics
+  const totalResponses = rsvpData.events.length * rsvpData.guests.length
+  const completedResponses = rsvpData.events.reduce((total: number, event: any) => {
+    return total + rsvpData.guests.filter((guest: any) => 
+      rsvpData.responses[event.id]?.[guest.id] && 
+      rsvpData.responses[event.id][guest.id] !== 'no_answer'
+    ).length
+  }, 0)
+  
+  const completionPercentage = Math.round((completedResponses / totalResponses) * 100)
+  statusLines.push(`- **Overall Progress**: ${completedResponses}/${totalResponses} responses completed (${completionPercentage}%)`)
+  
+  // Per-event status
+  statusLines.push('- **Event Status**:')
+  rsvpData.events.forEach((event: any) => {
+    const eventResponses = rsvpData.guests.filter((guest: any) => 
+      rsvpData.responses[event.id]?.[guest.id] && 
+      rsvpData.responses[event.id][guest.id] !== 'no_answer'
+    ).length
+    const going = rsvpData.guests.filter((guest: any) => 
+      rsvpData.responses[event.id]?.[guest.id] === 'yes'
+    ).length
+    const notGoing = rsvpData.guests.filter((guest: any) => 
+      rsvpData.responses[event.id]?.[guest.id] === 'no'
+    ).length
+    const pending = rsvpData.guests.length - eventResponses
+    
+    statusLines.push(`  - ${event.name}: ${eventResponses}/${rsvpData.guests.length} responded (${going} going, ${notGoing} not going, ${pending} pending)`)
+  })
+  
+  // Individual guest status summary
+  statusLines.push('- **Guest Status**:')
+  rsvpData.guests.forEach((guest: any) => {
+    const guestResponses = rsvpData.events.map((event: any) => 
+      rsvpData.responses[event.id]?.[guest.id] || 'no_answer'
+    )
+    const completed = guestResponses.filter((r: string) => r !== 'no_answer').length
+    const going = guestResponses.filter((r: string) => r === 'yes').length
+    const notGoing = guestResponses.filter((r: string) => r === 'no').length
+    const pending = guestResponses.filter((r: string) => r === 'no_answer').length
+    
+    let status = ''
+    if (pending === 0) {
+      status = going === rsvpData.events.length ? 'confirmed all events' : 
+               notGoing === rsvpData.events.length ? 'declined all events' : 
+               'partially confirmed'
+    } else {
+      status = `${pending} event${pending !== 1 ? 's' : ''} pending`
+    }
+    
+    statusLines.push(`  - ${guest.first_name} ${guest.last_name}: ${status}`)
+  })
+  
+  return statusLines.join('\n')
+}
+
+/**
  * Get RSVP data for a group (events and current responses)
  */
 async function getGroupRSVPData(groupId: string) {
@@ -197,6 +264,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     } else {
       console.log(`➡️ No RSVP keywords detected - using streaming mode`)
+    }
+
+    // Add RSVP status context to system prompt if this is an RSVP message with data
+    if (isRSVPMessage && rsvpData) {
+      const rsvpStatusContext = generateRSVPStatusContext(rsvpData)
+      if (rsvpStatusContext) {
+        systemPrompt = `${systemPrompt}\n\n${rsvpStatusContext}`
+        console.log(`✅ RSVP status context added to system prompt`)
+      }
     }
 
     // Debug logging - log the complete system prompt being sent to AI
