@@ -1,3 +1,13 @@
+/**
+ * @deprecated This component is deprecated. Use InlineChatInterface instead.
+ * 
+ * WeddingChatbot was the original chat component but has been replaced by 
+ * InlineChatInterface which is now the active component used in the application.
+ * 
+ * All RSVP functionality has been ported to InlineChatInterface.
+ * This component is kept for reference but should not be used.
+ */
+
 import { useState } from 'react'
 import { flushSync } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
@@ -6,12 +16,30 @@ import { useTranslation } from '../hooks/useTranslation'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
+import RSVPTable from './RSVPTable'
+
+interface RSVPData {
+  events: Array<{
+    id: string
+    event_id: string
+    name: string
+    description?: string
+    date: string
+  }>
+  guests: Array<{
+    id: string
+    first_name: string
+    last_name: string
+  }>
+  responses: Record<string, Record<string, string>>
+}
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  rsvpData?: RSVPData
 }
 
 interface WeddingChatbotProps {
@@ -34,8 +62,54 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
     return t('chat.title')
   }
 
+  const handleRSVPSubmission = async (responses: Array<{guestId: string, eventId: string, response: 'yes' | 'no' | 'no_answer'}>) => {
+    try {
+      const response = await fetch('/api/submit-rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ responses })
+      })
+
+      const result = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to submit RSVP responses')
+      }
+
+      // Add a confirmation message to the chat
+      const confirmationMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `✅ Thank you! Your RSVP responses have been successfully registered. We've updated ${responses.length} response${responses.length !== 1 ? 's' : ''} for your group.`,
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, confirmationMessage])
+      
+      console.log('✅ RSVP responses submitted successfully')
+      
+    } catch (error) {
+      console.error('Error submitting RSVP:', error)
+      
+      // Add an error message to the chat
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: `❌ Sorry, there was an error submitting your RSVP responses. Please try again or contact us directly if the problem persists.`,
+        timestamp: new Date()
+      }
+      
+      setMessages(prev => [...prev, errorMessage])
+    }
+  }
+
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
+
+    // NUCLEAR DEBUG: Simple alert to verify JavaScript is running
+    alert(`FRONTEND DEBUG: handleSendMessage called with: ${messageContent}`)
 
     // Add user message
     const userMessage: Message = {
@@ -49,7 +123,10 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
     setIsThinking(true)
 
     try {
+      console.log(`🚀 FRONTEND: Starting sendMessage with content: "${messageContent}"`)
+      
       // Call the real OpenAI API endpoint
+      console.log(`📡 FRONTEND: Making fetch request to /api/chat`)
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -66,17 +143,86 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
         })
       })
 
+      console.log(`📡 FRONTEND: Response received, status: ${response.status}, ok: ${response.ok}`)
+
       if (!response.ok) {
         throw new Error('Failed to get response from chat API')
       }
 
-      // Handle streaming response
+      // Check response type
+      const contentType = response.headers.get('content-type')
+      console.log(`🔍 FRONTEND: Raw Content-Type header: "${contentType}"`)
+      console.log(`🔍 FRONTEND: Content-Type includes JSON check:`, contentType?.includes('application/json'))
+      console.log(`🔍 FRONTEND: All response headers:`, Array.from(response.headers.entries()))
+
+      // Handle JSON response (RSVP messages)
+      if (contentType?.includes('application/json')) {
+        console.log(`📄 FRONTEND: ENTERING JSON RESPONSE HANDLER`)
+        try {
+          console.log(`🔄 FRONTEND: About to call response.json()`)
+          const jsonResponse = await response.json()
+          console.log(`📋 FRONTEND: JSON parsing successful, response:`, jsonResponse)
+          console.log(`📋 FRONTEND: Content field:`, jsonResponse.content)
+          console.log(`📋 FRONTEND: RSVP data field:`, jsonResponse.rsvpData ? 'PRESENT' : 'MISSING')
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: jsonResponse.content || 'No content received',
+            timestamp: new Date(),
+            rsvpData: jsonResponse.rsvpData
+          }
+          
+          console.log(`📅 FRONTEND: Assistant message created:`, {
+            id: assistantMessage.id,
+            role: assistantMessage.role,
+            contentLength: assistantMessage.content.length,
+            hasRsvpData: !!assistantMessage.rsvpData,
+            eventsCount: assistantMessage.rsvpData?.events?.length || 0
+          })
+          
+          console.log(`🔄 FRONTEND: About to update React state with setMessages`)
+          setMessages(prev => {
+            console.log(`🔄 FRONTEND: Inside setMessages callback, prev length:`, prev.length)
+            const newMessages = [...prev, assistantMessage]
+            console.log(`🔄 FRONTEND: New messages array length:`, newMessages.length)
+            console.log(`🔄 FRONTEND: Last message:`, newMessages[newMessages.length - 1])
+            return newMessages
+          })
+          
+          console.log(`🔄 FRONTEND: Setting isThinking to false`)
+          setIsThinking(false)
+          console.log(`✅ FRONTEND: JSON message processing complete - returning`)
+          return
+        } catch (jsonError) {
+          console.error(`❌ FRONTEND: Error in JSON processing:`, jsonError)
+          console.error(`❌ FRONTEND: Error stack:`, jsonError instanceof Error ? jsonError.stack : 'No stack trace')
+          
+          // Add error message to UI and prevent fallthrough to streaming code
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'Sorry, there was an error processing the RSVP data. Please try again.',
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, errorMessage])
+          setIsThinking(false)
+          return // CRITICAL: Prevent fallthrough to streaming code
+        }
+      } else {
+        console.log(`🌊 FRONTEND: Content-Type is NOT JSON, using streaming path`)
+      }
+
+      // Handle streaming response (regular messages)
+      console.log(`🌊 FRONTEND: Handling streaming response (regular message)`)
       const reader = response.body?.getReader()
       if (!reader) {
         throw new Error('No reader available')
       }
 
       let assistantResponse = ''
+      let rsvpData: RSVPData | undefined = undefined
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -103,13 +249,28 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
             
             try {
               const parsed = JSON.parse(data)
-              if (parsed.choices?.[0]?.delta?.content) {
+              
+              // Handle content streaming (regular messages only)
+              if (parsed.type === 'content' && parsed.choices?.[0]?.delta?.content) {
                 assistantResponse += parsed.choices[0].delta.content
+                
                 // Update the assistant message in real-time with flushSync for immediate UI updates
                 flushSync(() => {
                   setMessages(prev => prev.map(msg => 
                     msg.id === assistantMessage.id 
                       ? { ...msg, content: assistantResponse }
+                      : msg
+                  ))
+                })
+              }
+              
+              // Handle legacy format (for backward compatibility)
+              if (!parsed.type && parsed.choices?.[0]?.delta?.content) {
+                assistantResponse += parsed.choices[0].delta.content
+                flushSync(() => {
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, content: assistantResponse, rsvpData }
                       : msg
                   ))
                 })
@@ -121,7 +282,12 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
         }
       }
     } catch (error) {
-      console.error('Error calling chat API:', error)
+      console.error('❌ FRONTEND: Error calling chat API:', error)
+      console.error('❌ FRONTEND: Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : 'Unknown'
+      })
       // Show error message to user
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -244,12 +410,38 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
                 style={{
                   marginBottom: spacing.md,
                   display: 'flex',
-                  justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start'
+                  flexDirection: 'column',
+                  alignItems: message.role === 'user' ? 'flex-end' : 'flex-start'
                 }}
               >
+                {/* Show RSVP Table above assistant messages that contain RSVP data */}
+                {message.role === 'assistant' && message.rsvpData && (() => {
+                  console.log('🎨 FRONTEND: Rendering RSVPTable component with data:', {
+                    messageId: message.id,
+                    hasRsvpData: !!message.rsvpData,
+                    eventsCount: message.rsvpData.events?.length || 0,
+                    guestsCount: message.rsvpData.guests?.length || 0
+                  })
+                  return (
+                    <div style={{ width: '100%', marginBottom: spacing.sm }}>
+                      <RSVPTable 
+                        rsvpData={message.rsvpData}
+                        onSubmit={handleRSVPSubmission}
+                      />
+                    </div>
+                  )
+                })()}
+                {message.role === 'assistant' && !message.rsvpData && (() => {
+                  console.log('❌ FRONTEND: Assistant message has no RSVP data:', { 
+                    messageId: message.id, 
+                    content: message.content.slice(0, 50) 
+                  })
+                  return null
+                })()}
+
                 <div
                   style={{
-                    maxWidth: '80%',
+                    maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : '80%',
                     padding: spacing.sm,
                     borderRadius: borderRadius.md,
                     backgroundColor: message.role === 'user' ? colors.oliveGreen : colors.warmBeige,

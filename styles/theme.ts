@@ -16,7 +16,14 @@ export const colors = {
   white: '#FFFFFF',
   success: '#7D8471',
   warning: '#B8A082',
-  error: '#A67C52'
+  error: '#A67C52',
+  
+  // RSVP Component Colors
+  primary: '#8B956D', // Using oliveGreen as primary
+  background: '#FBF9F4', // Using cream as background
+  lightGray: '#F0F0F0',
+  textSecondary: '#7A7A7A', // Using softGray for secondary text
+  danger: '#C85450' // Red for 'No' responses
 }
 
 export const typography = {

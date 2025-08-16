@@ -4,6 +4,12 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { SYSTEM_PROMPT, loadHyperpersonalizationTemplate } from '../../utils/loadPrompts'
 import { parseSessionCookie } from '../../lib/authMiddleware'
 import { getGroupContext, processHyperpersonalizationTemplate } from '../../utils/hyperpersonalization'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client for RSVP data
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 interface Message {
   role: 'user' | 'assistant'
@@ -38,6 +44,78 @@ function limitConversationMemory(messages: Message[], maxExchanges: number = 5):
   console.log(`💾 Memory management: Keeping ${recentMessages.length} messages (${exchangeCount} exchanges) from ${messages.length} total`)
   
   return recentMessages
+}
+
+/**
+ * Check if user message contains RSVP-related keywords
+ */
+function containsRSVPKeywords(message: string): boolean {
+  const rsvpKeywords = ['rsvp', 'respond', 'attendance', 'attending', 'confirm attendance']
+  const lowerMessage = message.toLowerCase()
+  return rsvpKeywords.some(keyword => lowerMessage.includes(keyword))
+}
+
+/**
+ * Get RSVP data for a group (events and current responses)
+ */
+async function getGroupRSVPData(groupId: string) {
+  try {
+    // Get all events
+    const { data: events, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: true })
+
+    if (eventsError) throw eventsError
+
+    // Get all guests in the group
+    const { data: guests, error: guestsError } = await supabase
+      .from('guests')
+      .select('id, first_name, last_name')
+      .eq('group_id', groupId)
+      .order('last_name', { ascending: true })
+
+    if (guestsError) throw guestsError
+
+    // Get existing RSVP responses for this group
+    const guestIds = guests.map(g => g.id)
+    let responses: any[] = []
+    
+    if (guestIds.length > 0) {
+      const { data: responseData, error: responsesError } = await supabase
+        .from('event_attendees')
+        .select('event_id, guest_id, response, notes')
+        .in('guest_id', guestIds)
+
+      if (responsesError) throw responsesError
+      responses = responseData || []
+    }
+
+    // Build response matrix
+    const rsvpData = {
+      events: events || [],
+      guests: guests || [],
+      responses: {} as Record<string, Record<string, string>>
+    }
+
+    // Initialize all responses as 'no_answer'
+    rsvpData.events.forEach(event => {
+      rsvpData.responses[event.id] = {}
+      rsvpData.guests.forEach(guest => {
+        rsvpData.responses[event.id][guest.id] = 'no_answer'
+      })
+    })
+
+    // Fill in actual responses
+    responses.forEach(response => {
+      rsvpData.responses[response.event_id][response.guest_id] = response.response
+    })
+
+    return rsvpData
+  } catch (error) {
+    console.error('Error getting group RSVP data:', error)
+    throw error
+  }
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -84,6 +162,43 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Apply conversation memory management to prevent context overflow
     const limitedMessages = limitConversationMemory(messages, 5)
 
+    // Check for RSVP keywords in the latest user message
+    let rsvpData = null
+    let isRSVPMessage = false
+    const latestUserMessage = limitedMessages.filter(m => m.role === 'user').slice(-1)[0]
+    
+    console.log(`🔍 DEBUG: Checking for RSVP keywords in message: "${latestUserMessage?.content || 'NO MESSAGE'}"`)
+    
+    if (latestUserMessage && containsRSVPKeywords(latestUserMessage.content)) {
+      console.log(`🎯 RSVP KEYWORD DETECTED! Using simple JSON response mode`)
+      isRSVPMessage = true
+      
+      try {
+        const session = parseSessionCookie(req.headers.cookie)
+        console.log(`🔐 DEBUG: Session parsed:`, {
+          hasSession: !!session,
+          groupId: session?.groupId || 'NONE',
+          groupName: session?.groupName || 'NONE'
+        })
+        
+        if (session?.groupId) {
+          console.log(`🎯 Fetching RSVP data for group: ${session.groupName} (ID: ${session.groupId})`)
+          rsvpData = await getGroupRSVPData(session.groupId)
+          console.log(`✅ RSVP data loaded:`, {
+            eventsCount: rsvpData.events.length,
+            guestsCount: rsvpData.guests.length
+          })
+        } else {
+          console.log(`❌ RSVP detected but no authenticated group found`)
+        }
+      } catch (rsvpError) {
+        console.error('❌ Error fetching RSVP data:', rsvpError)
+        // Continue without RSVP data if there's an error
+      }
+    } else {
+      console.log(`➡️ No RSVP keywords detected - using streaming mode`)
+    }
+
     // Debug logging - log the complete system prompt being sent to AI
     console.log('\n' + '='.repeat(80))
     console.log('🤖 SYSTEM PROMPT BEING SENT TO AI:')
@@ -104,6 +219,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       maxTokens: 1000
     })
 
+    // Handle RSVP messages with simple JSON response
+    if (isRSVPMessage) {
+      console.log(`📤 RSVP MESSAGE: Generating complete response (no streaming)`)
+      
+      // Generate the complete AI response
+      let fullContent = ''
+      for await (const chunk of result.textStream) {
+        fullContent += chunk
+      }
+      
+      console.log(`✅ Complete AI response generated (${fullContent.length} chars)`)
+      
+      // Return simple JSON response
+      res.setHeader('Content-Type', 'application/json')
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      
+      const response = {
+        content: fullContent,
+        rsvpData: rsvpData
+      }
+      
+      console.log(`📦 Sending JSON response with RSVP data:`, {
+        contentLength: fullContent.length,
+        hasRsvpData: !!rsvpData,
+        eventsCount: rsvpData?.events.length || 0
+      })
+      
+      return res.status(200).json(response)
+    }
+
+    // Handle regular messages with streaming (unchanged)
+    console.log(`📤 REGULAR MESSAGE: Using streaming response`)
+    
     // Set up Server-Sent Events streaming response
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache, no-transform')
@@ -111,8 +260,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
+    // Stream AI response (regular messages)
     for await (const chunk of result.textStream) {
-      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`)
+      const payload = { 
+        choices: [{ delta: { content: chunk } }],
+        type: 'content' 
+      }
+      
+      res.write(`data: ${JSON.stringify(payload)}\n\n`)
       // Force flush for real-time streaming
       if ('flush' in res && typeof res.flush === 'function') res.flush()
     }

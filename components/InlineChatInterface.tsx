@@ -7,12 +7,30 @@ import { useTranslation } from '../hooks/useTranslation'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
+import RSVPTable from './RSVPTable'
+
+interface RSVPData {
+  events: Array<{
+    id: string
+    event_id: string
+    name: string
+    description?: string
+    date: string
+  }>
+  guests: Array<{
+    id: string
+    first_name: string
+    last_name: string
+  }>
+  responses: Record<string, Record<string, string>>
+}
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  rsvpData?: RSVPData
 }
 
 interface InlineChatInterfaceProps {
@@ -100,7 +118,55 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         throw new Error('Failed to get response from chat API')
       }
 
-      // Handle streaming response
+      // Check response type for hybrid handling
+      const contentType = response.headers.get('content-type')
+      console.log(`🔍 FRONTEND: Response Content-Type: ${contentType}`)
+
+      // Handle JSON response (RSVP messages)
+      if (contentType?.includes('application/json')) {
+        console.log(`📄 FRONTEND: Handling JSON response (RSVP message)`)
+        try {
+          const jsonResponse = await response.json()
+          console.log(`📋 FRONTEND: JSON response received:`, {
+            contentLength: jsonResponse.content?.length || 0,
+            hasRsvpData: !!jsonResponse.rsvpData
+          })
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: jsonResponse.content || 'No content received',
+            timestamp: new Date(),
+            rsvpData: jsonResponse.rsvpData
+          }
+          
+          setMessages(prev => [...prev, assistantMessage])
+          setIsThinking(false)
+          
+          // Always scroll when new message is added
+          setShouldAutoScroll(true)
+          setTimeout(() => scrollToBottom(), 0)
+          
+          console.log(`✅ FRONTEND: JSON message processing complete`)
+          return
+        } catch (jsonError) {
+          console.error(`❌ FRONTEND: Error processing JSON response:`, jsonError)
+          
+          // Add error message to UI
+          const errorMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: 'Sorry, there was an error processing the RSVP data. Please try again.',
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, errorMessage])
+          setIsThinking(false)
+          return
+        }
+      }
+
+      // Handle streaming response (regular messages)
+      console.log(`🌊 FRONTEND: Handling streaming response (regular message)`)
       const reader = response.body?.getReader()
       if (!reader) {
         throw new Error('No reader available')
@@ -168,6 +234,53 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage(input)
+    }
+  }
+
+  const handleRSVPSubmission = async (responses: Array<{ guestId: string; eventId: string; response: string }>) => {
+    try {
+      console.log('📝 RSVP submission started:', responses)
+      
+      const response = await fetch('/api/submit-rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ responses })
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        console.log('✅ RSVP responses submitted successfully')
+        
+        // Add success message to chat
+        const successMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: '✅ Thank you! Your RSVP responses have been successfully registered. We look forward to celebrating with you! 🎉',
+          timestamp: new Date()
+        }
+        setMessages(prev => [...prev, successMessage])
+        
+        // Always scroll when new message is added
+        setShouldAutoScroll(true)
+        setTimeout(() => scrollToBottom(), 0)
+      } else {
+        throw new Error(result.message || 'Failed to submit RSVP responses')
+      }
+      
+    } catch (error) {
+      console.error('Error submitting RSVP:', error)
+      
+      // Add an error message to the chat
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: '❌ Sorry, there was an error submitting your RSVP responses. Please try again or contact us directly.',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorMessage])
     }
   }
 
@@ -283,23 +396,31 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             style={{
               marginBottom: spacing.md,
               display: 'flex',
-              justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start'
+              flexDirection: 'column',
+              alignItems: message.role === 'user' ? 'flex-end' : 'flex-start'
             }}
           >
             <div
               style={{
-                maxWidth: '80%',
-                padding: spacing.sm,
+                maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : '80%',
+                padding: message.role === 'assistant' && message.rsvpData ? 0 : spacing.sm, // No padding for RSVP messages
                 borderRadius: borderRadius.md,
                 backgroundColor: message.role === 'user' ? colors.oliveGreen : colors.warmBeige,
                 color: message.role === 'user' ? colors.cream : colors.charcoal,
                 fontSize: '0.95rem',
                 fontFamily: typography.body,
                 lineHeight: 1.4,
-                textAlign: 'left'
+                textAlign: 'left',
+                overflow: 'hidden' // Ensure content stays within bubble
               }}
             >
-              <ReactMarkdown
+              {/* AI Text Response */}
+              {message.content && (
+                <div style={{
+                  padding: message.role === 'assistant' && message.rsvpData ? spacing.sm : 0,
+                  paddingBottom: message.role === 'assistant' && message.rsvpData ? spacing.xs : 0
+                }}>
+                  <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
                   p: ({children}) => <span style={{margin: 0, lineHeight: 1.4}}>{children}</span>,
@@ -363,6 +484,28 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               >
                 {message.content}
               </ReactMarkdown>
+                </div>
+              )}
+
+              {/* RSVP Table - Integrated within the same message bubble */}
+              {message.role === 'assistant' && message.rsvpData && (() => {
+                console.log('🎨 FRONTEND: Rendering RSVPTable component with data:', {
+                  messageId: message.id,
+                  hasRsvpData: !!message.rsvpData,
+                  eventsCount: message.rsvpData.events?.length || 0,
+                  guestsCount: message.rsvpData.guests?.length || 0
+                })
+                return (
+                  <div style={{ 
+                    marginTop: message.content ? spacing.sm : 0 // Add spacing if there's text above
+                  }}>
+                    <RSVPTable 
+                      rsvpData={message.rsvpData}
+                      onSubmit={handleRSVPSubmission}
+                    />
+                  </div>
+                )
+              })()}
             </div>
           </div>
         ))}

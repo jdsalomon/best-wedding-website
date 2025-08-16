@@ -2127,3 +2127,231 @@ async function createEvent() {
 function closeEventModal() {
     document.getElementById('event-modal').style.display = 'none'
 }
+
+async function editEvent(eventId) {
+    try {
+        showToast('🔄 Loading event details...')
+        const result = await apiRequest(`/api/events/${eventId}`)
+        const event = result.data
+        
+        const modalContent = document.getElementById('event-modal-content')
+        modalContent.innerHTML = `
+            <h2>✏️ Edit Event: ${event.name}</h2>
+            <form id="event-form">
+                <div class="form-group">
+                    <label for="event-event-id">Event ID *</label>
+                    <input type="text" id="event-event-id" value="${event.event_id}" required>
+                    <small>Unique identifier (letters, numbers, hyphens, underscores only)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-name">Event Name *</label>
+                    <input type="text" id="event-name" value="${event.name}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea id="event-description" rows="3">${event.description || ''}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="event-date">Date & Time *</label>
+                    <input type="datetime-local" id="event-date" value="${new Date(event.date).toISOString().slice(0, 16)}" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                    <button type="submit" class="btn btn-success">💾 Update Event</button>
+                </div>
+            </form>
+        `
+        
+        // Add form submission handler
+        document.getElementById('event-form').addEventListener('submit', (e) => {
+            e.preventDefault()
+            updateEvent(eventId)
+        })
+        
+        document.getElementById('event-modal').style.display = 'block'
+        
+    } catch (error) {
+        showToast(`❌ Error loading event: ${error.message}`, 'error')
+    }
+}
+
+async function updateEvent(eventId) {
+    try {
+        const eventData = {
+            event_id: document.getElementById('event-event-id').value.trim(),
+            name: document.getElementById('event-name').value.trim(),
+            description: document.getElementById('event-description').value.trim() || null,
+            date: new Date(document.getElementById('event-date').value).toISOString()
+        }
+        
+        if (!eventData.event_id || !eventData.name || !eventData.date) {
+            showToast('❌ Please fill in all required fields', 'error')
+            return
+        }
+        
+        showToast('🔄 Updating event...')
+        
+        const result = await apiRequest(`/api/events/${eventId}`, {
+            method: 'PUT',
+            body: JSON.stringify(eventData)
+        })
+        
+        showToast(`✅ Event "${eventData.name}" updated successfully`)
+        closeEventModal()
+        loadEvents()
+        
+    } catch (error) {
+        showToast(`❌ Error updating event: ${error.message}`, 'error')
+    }
+}
+
+async function confirmDeleteEvent(eventId, eventName) {
+    if (!confirm(`Are you sure you want to delete the event "${eventName}"? This will also delete all RSVP responses for this event.`)) {
+        return
+    }
+    
+    try {
+        showToast('🔄 Deleting event...')
+        
+        await apiRequest(`/api/events/${eventId}`, {
+            method: 'DELETE'
+        })
+        
+        showToast(`✅ Event "${eventName}" deleted successfully`)
+        loadEvents()
+        
+    } catch (error) {
+        showToast(`❌ Error deleting event: ${error.message}`, 'error')
+    }
+}
+
+async function viewEventAttendees(eventId, eventName) {
+    try {
+        showToast('🔄 Loading RSVP data...')
+        
+        // Get event attendees data
+        const result = await apiRequest(`/api/events/${eventId}/attendees`)
+        const attendeesData = result.data
+        
+        const modalContent = document.getElementById('rsvp-modal-content')
+        modalContent.innerHTML = `
+            <h2>👥 RSVP Responses: ${eventName}</h2>
+            
+            <div class="rsvp-summary">
+                <div class="rsvp-stats">
+                    <div class="stat-card going">
+                        <div class="stat-number">${attendeesData.summary.yes}</div>
+                        <div class="stat-label">Going</div>
+                    </div>
+                    <div class="stat-card not-going">
+                        <div class="stat-number">${attendeesData.summary.no}</div>
+                        <div class="stat-label">Not Going</div>
+                    </div>
+                    <div class="stat-card no-answer">
+                        <div class="stat-number">${attendeesData.summary.no_answer}</div>
+                        <div class="stat-label">No Answer</div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-number">${attendeesData.summary.total}</div>
+                        <div class="stat-label">Total Guests</div>
+                    </div>
+                </div>
+            </div>
+            
+            ${attendeesData.attendees.length > 0 ? `
+                <div class="rsvp-responses">
+                    <h3>📋 Individual Responses</h3>
+                    <div class="responses-table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Guest</th>
+                                    <th>Group</th>
+                                    <th>Response</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${attendeesData.attendees.map(attendee => `
+                                    <tr class="response-row ${attendee.response}">
+                                        <td>
+                                            <strong>${attendee.guests.first_name} ${attendee.guests.last_name}</strong>
+                                        </td>
+                                        <td>
+                                            ${attendee.guests.groups?.name || '<em>No group</em>'}
+                                        </td>
+                                        <td>
+                                            <span class="response-badge ${attendee.response}">
+                                                ${attendee.response === 'yes' ? '✅ Going' : 
+                                                  attendee.response === 'no' ? '❌ Not Going' : 
+                                                  '❓ No Answer'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            ${attendee.notes || '<em>No notes</em>'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ` : `
+                <div class="no-responses">
+                    <p>📝 No RSVP responses yet for this event.</p>
+                </div>
+            `}
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRSVPModal()">Close</button>
+                <button class="btn btn-primary" onclick="exportEventRSVPs('${eventId}', '${eventName}')">📄 Export RSVPs</button>
+            </div>
+        `
+        
+        document.getElementById('rsvp-modal').style.display = 'block'
+        
+    } catch (error) {
+        showToast(`❌ Error loading RSVP data: ${error.message}`, 'error')
+    }
+}
+
+function closeRSVPModal() {
+    document.getElementById('rsvp-modal').style.display = 'none'
+}
+
+async function exportEventRSVPs(eventId, eventName) {
+    try {
+        showToast('🔄 Generating RSVP export...')
+        
+        const result = await apiRequest(`/api/events/${eventId}/attendees`)
+        const attendeesData = result.data
+        
+        // Create CSV content
+        const csvHeader = 'Guest Name,Group,Response,Notes\n'
+        const csvRows = attendeesData.attendees.map(attendee => 
+            `"${attendee.guests.first_name} ${attendee.guests.last_name}","${attendee.guests.groups?.name || ''}","${attendee.response}","${attendee.notes || ''}"`
+        ).join('\n')
+        
+        const csvContent = csvHeader + csvRows
+        
+        // Download CSV file
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `rsvp-${eventName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+        
+        showToast(`✅ RSVP export downloaded: ${attendeesData.attendees.length} responses`)
+        
+    } catch (error) {
+        showToast(`❌ Error exporting RSVPs: ${error.message}`, 'error')
+    }
+}
