@@ -19,6 +19,7 @@
             <button class="tab-btn" data-tab="grouping">🎯 Group Management</button>
             <button class="tab-btn" data-tab="guests">👥 Guests</button>
             <button class="tab-btn" data-tab="groups">🏠 Groups</button>
+            <button class="tab-btn" data-tab="events">📅 Events</button>
         </nav>
 
         <!-- Dashboard Tab -->
@@ -180,6 +181,26 @@
             </div>
         </div>
 
+        <!-- Events Tab -->
+        <div id="events" class="tab-content">
+            <div class="section-header">
+                <h2>📅 Wedding Events Management</h2>
+                <p class="info">Manage wedding events and track RSVP responses</p>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openCreateEventModal()">+ Create Event</button>
+                    <button class="btn btn-secondary" onclick="loadEvents()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div id="events-stats" class="stats-mini-grid">
+                <!-- Event statistics will be displayed here -->
+            </div>
+
+            <div id="events-container" class="events-container">
+                <!-- Events will be displayed here -->
+            </div>
+        </div>
+
         <!-- Add Guest to Group Modal -->
         <div id="add-guest-to-group-modal" class="modal">
             <div class="modal-content">
@@ -206,6 +227,16 @@
                 <span class="close" onclick="closeGroupContactModal()">&times;</span>
                 <div id="group-contact-content">
                     <!-- Group contact edit form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Create/Edit Modal -->
+        <div id="event-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEventModal()">&times;</span>
+                <div id="event-modal-content">
+                    <!-- Event form will be inserted here -->
                 </div>
             </div>
         </div>

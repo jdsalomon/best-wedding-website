@@ -716,11 +716,13 @@ async function loadDashboardData() {
         const ungrouped = guestsResult.data.filter(g => !g.group_id)
         document.getElementById('ungrouped-guests').textContent = ungrouped.length
         
-        const groupsWithContact = coverageResult.data.filter(g => g.hasContact)
+        // Safely handle coverage data
+        const coverageData = coverageResult?.data || []
+        const groupsWithContact = Array.isArray(coverageData) ? coverageData.filter(g => g.hasContact) : []
         document.getElementById('groups-with-contact').textContent = groupsWithContact.length
         
         // Update contact coverage
-        displayContactCoverage(coverageResult.data)
+        displayContactCoverage(coverageData)
         
     } catch (error) {
         console.error('Error loading dashboard data:', error)
@@ -897,7 +899,10 @@ function displayContactCoverage(coverage) {
     const container = document.getElementById('coverage-list')
     if (!container) return
     
-    container.innerHTML = coverage.map(group => `
+    // Ensure coverage is an array
+    const coverageArray = Array.isArray(coverage) ? coverage : []
+    
+    container.innerHTML = coverageArray.map(group => `
         <div class="coverage-item ${group.hasContact ? 'has-contact' : 'no-contact'}">
             <div class="coverage-header">
                 <span class="group-name">${group.groupName}</span>
@@ -1944,4 +1949,181 @@ async function updateGroupContactInfo(groupId, groupName, principalName) {
 
 function closeGroupContactModal() {
     document.getElementById('group-contact-modal').style.display = 'none'
+}
+
+// Events Management Functions
+
+let currentEvents = []
+
+async function loadEvents() {
+    try {
+        showToast('🔄 Loading events...')
+        const result = await apiRequest('/api/events')
+        currentEvents = result.data
+        
+        displayEvents(currentEvents)
+        updateEventsStats()
+        
+        showToast(`✅ Loaded ${currentEvents.length} events`)
+    } catch (error) {
+        showToast(`❌ Error loading events: ${error.message}`, 'error')
+    }
+}
+
+function displayEvents(events) {
+    const container = document.getElementById('events-container')
+    if (!container) return
+    
+    if (events.length === 0) {
+        container.innerHTML = `
+            <div class="no-events">
+                <p>📅 No events created yet. Click "Create Event" to add your first wedding event.</p>
+                <button class="btn btn-primary" onclick="openCreateEventModal()">+ Create Event</button>
+            </div>
+        `
+        return
+    }
+    
+    container.innerHTML = events.map(event => {
+        const eventDate = new Date(event.date)
+        const isUpcoming = eventDate > new Date()
+        
+        return `
+            <div class="event-card ${isUpcoming ? 'upcoming' : 'past'}">
+                <div class="event-header">
+                    <div class="event-title">
+                        <h3>${event.name}</h3>
+                        <span class="event-id">${event.event_id}</span>
+                        <span class="event-date">${eventDate.toLocaleDateString()} ${eventDate.toLocaleTimeString()}</span>
+                    </div>
+                    <div class="event-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewEventAttendees('${event.id}', '${event.name}')">
+                            👥 RSVPs
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="editEvent('${event.id}')">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="confirmDeleteEvent('${event.id}', '${event.name}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+                ${event.description ? `
+                    <div class="event-description">
+                        <p>${event.description}</p>
+                    </div>
+                ` : ''}
+                <div class="event-status ${isUpcoming ? 'upcoming-status' : 'past-status'}">
+                    ${isUpcoming ? '🔜 Upcoming Event' : '✅ Past Event'}
+                </div>
+            </div>
+        `
+    }).join('')
+}
+
+function updateEventsStats() {
+    const container = document.getElementById('events-stats')
+    if (!container || !currentEvents.length) {
+        container.innerHTML = ''
+        return
+    }
+    
+    const now = new Date()
+    const upcoming = currentEvents.filter(e => new Date(e.date) > now).length
+    const past = currentEvents.filter(e => new Date(e.date) <= now).length
+    
+    container.innerHTML = `
+        <div class="mini-stat-card">
+            <div class="mini-stat-number">${currentEvents.length}</div>
+            <div class="mini-stat-label">Total Events</div>
+        </div>
+        <div class="mini-stat-card upcoming">
+            <div class="mini-stat-number">${upcoming}</div>
+            <div class="mini-stat-label">Upcoming</div>
+        </div>
+        <div class="mini-stat-card past">
+            <div class="mini-stat-number">${past}</div>
+            <div class="mini-stat-label">Past</div>
+        </div>
+    `
+}
+
+function openCreateEventModal() {
+    const modalContent = document.getElementById('event-modal-content')
+    modalContent.innerHTML = `
+        <h2>📅 Create New Event</h2>
+        <form id="event-form">
+            <div class="form-group">
+                <label for="event-event-id">Event ID *</label>
+                <input type="text" id="event-event-id" placeholder="e.g., ceremony, reception, brunch" required>
+                <small>Unique identifier (letters, numbers, hyphens, underscores only)</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-name">Event Name *</label>
+                <input type="text" id="event-name" placeholder="e.g., Wedding Ceremony" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-description">Description</label>
+                <textarea id="event-description" rows="3" placeholder="Brief description of the event"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-date">Date & Time *</label>
+                <input type="datetime-local" id="event-date" required>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                <button type="submit" class="btn btn-success">✅ Create Event</button>
+            </div>
+        </form>
+    `
+    
+    // Add form submission handler
+    document.getElementById('event-form').addEventListener('submit', (e) => {
+        e.preventDefault()
+        createEvent()
+    })
+    
+    document.getElementById('event-modal').style.display = 'block'
+}
+
+async function createEvent() {
+    try {
+        const eventId = document.getElementById('event-event-id').value.trim()
+        const name = document.getElementById('event-name').value.trim()
+        const description = document.getElementById('event-description').value.trim()
+        const date = document.getElementById('event-date').value
+        
+        if (!eventId || !name || !date) {
+            showToast('❌ Please fill in all required fields', 'error')
+            return
+        }
+        
+        showToast('🔄 Creating event...')
+        
+        const result = await apiRequest('/api/events', {
+            method: 'POST',
+            body: JSON.stringify({
+                event_id: eventId,
+                name: name,
+                description: description || null,
+                date: new Date(date).toISOString()
+            })
+        })
+        
+        showToast(`✅ Event "${name}" created successfully`)
+        closeEventModal()
+        loadEvents()
+        loadDashboardData()
+        
+    } catch (error) {
+        showToast(`❌ Error creating event: ${error.message}`, 'error')
+    }
+}
+
+function closeEventModal() {
+    document.getElementById('event-modal').style.display = 'none'
 }

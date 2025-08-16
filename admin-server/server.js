@@ -7,6 +7,8 @@ const multer = require('multer')
 const guestRoutes = require('./routes/guests')
 const groupRoutes = require('./routes/groups')
 const groupingRoutes = require('./routes/grouping')
+const eventRoutes = require('./routes/events')
+const rsvpRoutes = require('./routes/rsvp')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -36,6 +38,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/api/guests', guestRoutes)
 app.use('/api/groups', groupRoutes)
 app.use('/api/grouping', groupingRoutes)
+app.use('/api/events', eventRoutes)
+app.use('/api/rsvp', rsvpRoutes)
 
 // CSV upload endpoint for direct import
 app.post('/api/upload-csv', upload.single('csvFile'), async (req, res) => {

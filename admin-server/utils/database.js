@@ -456,6 +456,260 @@ async function getGroupContactInfo(groupId) {
   }
 }
 
+// Event Management Functions
+
+/**
+ * Get all events ordered by date
+ */
+async function getAllEvents() {
+  try {
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: true })
+
+    if (error) throw error
+    return events || []
+  } catch (error) {
+    console.error('Error fetching events:', error)
+    throw error
+  }
+}
+
+/**
+ * Get a single event by ID
+ */
+async function getEventById(eventId) {
+  try {
+    const { data: event, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single()
+
+    if (error) throw error
+    return event
+  } catch (error) {
+    console.error('Error fetching event:', error)
+    throw error
+  }
+}
+
+/**
+ * Create a new event
+ */
+async function createEvent(eventData) {
+  try {
+    const { data: event, error } = await supabase
+      .from('events')
+      .insert([{
+        event_id: eventData.event_id,
+        name: eventData.name,
+        description: eventData.description || null,
+        date: eventData.date
+      }])
+      .select()
+      .single()
+
+    if (error) throw error
+    return event
+  } catch (error) {
+    console.error('Error creating event:', error)
+    throw error
+  }
+}
+
+/**
+ * Update an existing event
+ */
+async function updateEvent(eventId, eventData) {
+  try {
+    const { data: event, error } = await supabase
+      .from('events')
+      .update({
+        event_id: eventData.event_id,
+        name: eventData.name,
+        description: eventData.description || null,
+        date: eventData.date
+      })
+      .eq('id', eventId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return event
+  } catch (error) {
+    console.error('Error updating event:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete an event and all its attendee records
+ */
+async function deleteEvent(eventId) {
+  try {
+    // First delete all attendee records for this event
+    const { error: attendeesError } = await supabase
+      .from('event_attendees')
+      .delete()
+      .eq('event_id', eventId)
+
+    if (attendeesError) throw attendeesError
+
+    // Then delete the event itself
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId)
+
+    if (error) throw error
+    return true
+  } catch (error) {
+    console.error('Error deleting event:', error)
+    throw error
+  }
+}
+
+// RSVP Management Functions
+
+/**
+ * Get RSVP status for all guests in a group across all events
+ */
+async function getGroupRSVPStatus(groupId) {
+  try {
+    // Get all events
+    const { data: events, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .order('date', { ascending: true })
+
+    if (eventsError) throw eventsError
+
+    // Get all guests in the group
+    const { data: guests, error: guestsError } = await supabase
+      .from('guests')
+      .select('id, first_name, last_name')
+      .eq('group_id', groupId)
+      .order('last_name', { ascending: true })
+
+    if (guestsError) throw guestsError
+
+    // Get existing RSVP responses for this group
+    const guestIds = guests.map(g => g.id)
+    const { data: responses, error: responsesError } = await supabase
+      .from('event_attendees')
+      .select('event_id, guest_id, response, notes')
+      .in('guest_id', guestIds)
+
+    if (responsesError) throw responsesError
+
+    // Build response matrix
+    const rsvpData = {
+      events: events,
+      guests: guests,
+      responses: {}
+    }
+
+    // Initialize all responses as 'no_answer'
+    events.forEach(event => {
+      rsvpData.responses[event.id] = {}
+      guests.forEach(guest => {
+        rsvpData.responses[event.id][guest.id] = 'no_answer'
+      })
+    })
+
+    // Fill in actual responses
+    responses.forEach(response => {
+      rsvpData.responses[response.event_id][response.guest_id] = response.response
+    })
+
+    return rsvpData
+  } catch (error) {
+    console.error('Error getting group RSVP status:', error)
+    throw error
+  }
+}
+
+/**
+ * Update a single guest's RSVP response for an event
+ */
+async function updateGuestRSVP(guestId, eventId, response, notes = null) {
+  try {
+    const { data, error } = await supabase
+      .from('event_attendees')
+      .upsert({
+        guest_id: guestId,
+        event_id: eventId,
+        response: response,
+        notes: notes
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Error updating guest RSVP:', error)
+    throw error
+  }
+}
+
+/**
+ * Update multiple RSVP responses in bulk
+ */
+async function bulkUpdateRSVPs(responses) {
+  try {
+    const upsertData = responses.map(r => ({
+      guest_id: r.guestId,
+      event_id: r.eventId,
+      response: r.response,
+      notes: r.notes || null
+    }))
+
+    const { data, error } = await supabase
+      .from('event_attendees')
+      .upsert(upsertData)
+      .select()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Error bulk updating RSVPs:', error)
+    throw error
+  }
+}
+
+/**
+ * Get all attendees for a specific event
+ */
+async function getEventAttendees(eventId) {
+  try {
+    const { data, error } = await supabase
+      .from('event_attendees')
+      .select(`
+        *,
+        guests (
+          first_name,
+          last_name,
+          email,
+          phone,
+          groups (
+            name
+          )
+        )
+      `)
+      .eq('event_id', eventId)
+      .order('guests(last_name)', { ascending: true })
+
+    if (error) throw error
+    return data || []
+  } catch (error) {
+    console.error('Error getting event attendees:', error)
+    throw error
+  }
+}
+
 module.exports = {
   // Guest operations
   getAllGuests,
@@ -482,5 +736,18 @@ module.exports = {
   // Group contact management
   getGroupPrincipal,
   updateGroupContact,
-  getGroupContactInfo
+  getGroupContactInfo,
+  
+  // Event management
+  getAllEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  
+  // RSVP management
+  getGroupRSVPStatus,
+  updateGuestRSVP,
+  bulkUpdateRSVPs,
+  getEventAttendees
 }
