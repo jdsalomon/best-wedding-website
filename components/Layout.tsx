@@ -1,7 +1,9 @@
 import { ReactNode, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
+import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, gradients, spacing, borderRadius, shadows } from '../styles/theme'
 import WeddingChatbot, { ChatToggleButton } from './WeddingChatbot'
 
@@ -12,10 +14,17 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { t } = useTranslation()
   const { language, setLanguage } = useLanguageContext()
+  const { isAuthenticated, group, logout } = useAuth()
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const router = useRouter()
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en')
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    router.push('/')
   }
 
   return (
@@ -25,8 +34,8 @@ const Layout = ({ children }: LayoutProps) => {
       background: gradients.warmBackground,
       color: colors.charcoal
     }}>
-      {/* HIDDEN - Navigation Header (preserved for future use) */}
-      <div style={{ display: 'none' }}>
+      {/* Navigation Header with Auth Status */}
+      <div style={{ display: 'block' }}>
         <nav style={{
           backgroundColor: colors.warmBeige,
           position: 'sticky',
@@ -37,16 +46,81 @@ const Layout = ({ children }: LayoutProps) => {
         }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '100%' }}>
             
-            {/* Navigation - Simplified for chat-focused page */}
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'center' }}>
+            {/* Authentication Status and Navigation */}
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
+              {/* Wedding Title */}
               <div style={{
                 color: colors.oliveGreen,
                 fontSize: 'clamp(1rem, 3vw, 1.2rem)',
                 fontFamily: typography.heading,
-                fontWeight: typography.semibold,
-                textAlign: 'center'
+                fontWeight: typography.semibold
               }}>
                 💬 {t('nav.ourWedding')}
+              </div>
+
+              {/* Auth Status */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                {isAuthenticated ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                    <span style={{
+                      fontSize: '0.9rem',
+                      color: colors.oliveGreen,
+                      fontWeight: typography.medium
+                    }}>
+                      👥 {group?.name}
+                    </span>
+                    <button
+                      onClick={handleLogout}
+                      style={{
+                        background: 'none',
+                        border: `1px solid ${colors.deepOlive}`,
+                        borderRadius: borderRadius.sm,
+                        padding: `${spacing.xs} ${spacing.sm}`,
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        color: colors.deepOlive,
+                        fontFamily: typography.body,
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.deepOlive
+                        e.currentTarget.style.color = colors.warmBeige
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.color = colors.deepOlive
+                      }}
+                    >
+                      {t('auth.logout')}
+                    </button>
+                  </div>
+                ) : (
+                  <Link href="/login" style={{ textDecoration: 'none' }}>
+                    <button
+                      style={{
+                        background: 'none',
+                        border: `1px solid ${colors.oliveGreen}`,
+                        borderRadius: borderRadius.sm,
+                        padding: `${spacing.xs} ${spacing.sm}`,
+                        cursor: 'pointer',
+                        fontSize: '0.8rem',
+                        color: colors.oliveGreen,
+                        fontFamily: typography.body,
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = colors.oliveGreen
+                        e.currentTarget.style.color = colors.warmBeige
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.color = colors.oliveGreen
+                      }}
+                    >
+                      {t('auth.login')}
+                    </button>
+                  </Link>
+                )}
               </div>
             </div>
             

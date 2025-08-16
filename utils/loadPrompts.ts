@@ -35,3 +35,18 @@ function loadSystemPromptAtStartup(): string {
 
 // Export the pre-loaded system prompt
 export const SYSTEM_PROMPT = loadSystemPromptAtStartup()
+
+/**
+ * Load the hyperpersonalization template (used only when user is authenticated)
+ */
+export function loadHyperpersonalizationTemplate(): string {
+  const promptsDir = path.join(process.cwd(), 'prompts')
+  const filePath = path.join(promptsDir, '7-hyperpersonalization.md')
+  
+  try {
+    return fs.readFileSync(filePath, 'utf-8')
+  } catch (error) {
+    console.error('Error loading hyperpersonalization template:', error)
+    return ''
+  }
+}

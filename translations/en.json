@@ -261,5 +261,17 @@
       "Where should I stay?",
       "What's on the wedding list?"
     ]
+  },
+  "auth": {
+    "welcomeTitle": "Welcome to Our Wedding",
+    "welcomeSubtitle": "Please enter your family password to access the wedding information",
+    "password": "Family Password",
+    "passwordPlaceholder": "Enter your family password",
+    "login": "Login",
+    "logout": "Logout",
+    "loggingIn": "Logging in...",
+    "helpText": "Contact us if you need help with your family password",
+    "loginError": "Invalid password",
+    "connectionError": "Connection error. Please try again."
   }
 }

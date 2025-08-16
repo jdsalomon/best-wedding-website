@@ -3,6 +3,8 @@ import { flushSync } from 'react-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { useTranslation } from '../hooks/useTranslation'
+import { useAuth } from '../contexts/AuthContext'
+import { useLanguageContext } from '../contexts/LanguageContext'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
 
 interface Message {
@@ -19,9 +21,18 @@ interface WeddingChatbotProps {
 
 const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
   const { t } = useTranslation()
+  const { language } = useLanguageContext()
+  const { isAuthenticated, group } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+
+  const getPersonalizedTitle = () => {
+    if (isAuthenticated && group) {
+      return language === 'fr' ? `Bienvenue ${group.name} !` : `Welcome ${group.name}!`
+    }
+    return t('chat.title')
+  }
 
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
@@ -164,7 +175,7 @@ const WeddingChatbot = ({ isOpen, onClose }: WeddingChatbotProps) => {
             fontWeight: typography.bold,
             fontFamily: typography.heading
           }}>
-            🤖 {t('chat.title')}
+            🤖 {getPersonalizedTitle()}
           </h3>
           <p style={{
             margin: 0,

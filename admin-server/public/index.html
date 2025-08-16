@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Guest Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎊 Wedding Guest Management</h1>
+            <p>Manage guest lists, create groups, and track contact information</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="import">📁 Import CSV</button>
+            <button class="tab-btn" data-tab="grouping">🎯 Group Management</button>
+            <button class="tab-btn" data-tab="guests">👥 Guests</button>
+            <button class="tab-btn" data-tab="groups">🏠 Groups</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-guests">0</div>
+                    <div class="stat-label">Total Guests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-groups">0</div>
+                    <div class="stat-label">Total Groups</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="ungrouped-guests">0</div>
+                    <div class="stat-label">Ungrouped Guests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="groups-with-contact">0</div>
+                    <div class="stat-label">Groups with Contact</div>
+                </div>
+            </div>
+
+            <div class="contact-coverage">
+                <h2>📞 Contact Coverage</h2>
+                <div id="coverage-list" class="coverage-list">
+                    <!-- Contact coverage items will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Import CSV Tab -->
+        <div id="import" class="tab-content">
+            <div class="section-header">
+                <h2>📁 Direct CSV Import</h2>
+                <p>Upload CSV with columns: first_name, last_name, +1 first_name, +1 last_name, source</p>
+                <p class="info">✅ Direct import to database • 🔄 Automatic duplicate handling • 🔗 +1 relationship linking</p>
+            </div>
+
+            <div class="upload-area" id="upload-area">
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <p>Choose your CSV file to import guests directly to database</p>
+                    <input type="file" id="csv-file-input" accept=".csv" hidden>
+                    <button class="btn btn-primary" onclick="document.getElementById('csv-file-input').click()">
+                        Choose CSV File
+                    </button>
+                </div>
+            </div>
+
+            <div id="import-progress" class="import-progress" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="progress-text" class="progress-text">Importing...</div>
+            </div>
+
+            <div id="import-results" class="import-results" style="display: none;">
+                <h3>📊 Import Results</h3>
+                <div id="import-data"></div>
+            </div>
+        </div>
+
+        <!-- Group Management Tab -->
+        <div id="grouping" class="tab-content">
+            <div class="section-header">
+                <h2>🎯 Smart Grouping Wizard</h2>
+                <p class="info">Automatically create groups by processing guests one-by-one with smart suggestions</p>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="loadGroupingWizard()">🚀 Start Grouping Wizard</button>
+                    <button class="btn btn-secondary" onclick="refreshWizard()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <div id="grouping-progress" class="grouping-progress">
+                <!-- Progress information will be displayed here -->
+            </div>
+
+            <div id="grouping-suggestions" class="grouping-suggestions">
+                <div class="loading-state">
+                    <p>🔄 Click "Start Grouping Wizard" to begin creating groups from your imported guests</p>
+                    <p class="info">The wizard will guide you through each guest and suggest family members based on source and last name</p>
+                </div>
+            </div>
+
+            <div id="create-group-section" class="create-group-section" style="display: none;">
+                <h3>✨ Manual Group Creation</h3>
+                <form id="quick-group-form">
+                    <div class="form-row">
+                        <input type="text" id="group-name-quick" placeholder="Group name" required>
+                        <input type="text" id="group-password-quick" placeholder="Password" required>
+                        <button type="submit" class="btn btn-success">Create Group</button>
+                    </div>
+                </form>
+                <div id="selected-guests" class="selected-guests">
+                    <!-- Selected guests will show here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Guests Tab -->
+        <div id="guests" class="tab-content">
+            <div class="section-header">
+                <h2>👥 Guest List</h2>
+                <p class="info">View all imported guests and their assignments. Use <strong>Import CSV</strong> to add new guests.</p>
+                <div class="actions">
+                    <input type="text" id="guest-search" placeholder="Search guests...">
+                    <button class="btn btn-primary" onclick="showCreateGuestModal()">➕ Create Guest</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="guests-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Source</th>
+                            <th>Group</th>
+                            <th>Relationship</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Guest rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Groups Tab -->
+        <div id="groups" class="tab-content">
+            <div class="section-header">
+                <h2>🏠 Groups Overview</h2>
+                <p class="info">View existing groups and their login credentials. Use <strong>Group Management</strong> to create new groups.</p>
+            </div>
+
+            <div id="groups-container" class="groups-container">
+                <!-- Group cards will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Group Edit Modal -->
+        <div id="group-edit-modal" class="modal">
+            <div class="modal-content large">
+                <span class="close" onclick="closeGroupEditModal()">&times;</span>
+                <div id="group-edit-content">
+                    <!-- Group edit form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Assign to Group Modal -->
+        <div id="assign-group-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAssignGroupModal()">&times;</span>
+                <div id="assign-group-content">
+                    <!-- Group assignment form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Guest to Group Modal -->
+        <div id="add-guest-to-group-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddToGroupModal()">&times;</span>
+                <div id="add-to-group-content">
+                    <!-- Add to group form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Guest Edit/Create Modal -->
+        <div id="guest-edit-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeGuestEditModal()">&times;</span>
+                <div id="guest-edit-content">
+                    <!-- Guest edit form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Group Contact Edit Modal -->
+        <div id="group-contact-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeGroupContactModal()">&times;</span>
+                <div id="group-contact-content">
+                    <!-- Group contact edit form will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script src="admin.js"></script>
+</body>
+</html>

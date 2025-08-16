@@ -261,5 +261,17 @@
       "Où dois-je loger ?",
       "Qu'y a-t-il sur la liste de mariage ?"
     ]
+  },
+  "auth": {
+    "welcomeTitle": "Bienvenue à notre mariage",
+    "welcomeSubtitle": "Veuillez entrer le mot de passe de votre famille pour accéder aux informations du mariage",
+    "password": "Mot de passe famille",
+    "passwordPlaceholder": "Entrez le mot de passe de votre famille",
+    "login": "Se connecter",
+    "logout": "Se déconnecter",
+    "loggingIn": "Connexion en cours...",
+    "helpText": "Contactez-nous si vous avez besoin d'aide avec le mot de passe de votre famille",
+    "loginError": "Mot de passe incorrect",
+    "connectionError": "Erreur de connexion. Veuillez réessayer."
   }
 }
