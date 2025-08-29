@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
+import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, gradients, spacing, borderRadius, shadows } from '../styles/theme'
 
 type LoginResponse = {
@@ -23,10 +24,12 @@ type LoginResponse = {
 const LoginPage = () => {
   const { t } = useTranslation()
   const { language, setLanguage } = useLanguageContext()
+  const { login } = useAuth()
   const router = useRouter()
   
   const [formData, setFormData] = useState({
-    password: ''
+    firstName: '',
+    lastName: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -47,21 +50,13 @@ const LoginPage = () => {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
+      const result = await login(formData.firstName, formData.lastName)
 
-      const data: LoginResponse = await response.json()
-
-      if (data.success) {
-        // Redirect to home page or dashboard
+      if (result.success) {
+        // Redirect to home page
         router.push('/')
       } else {
-        setError(data.message || t('auth.loginError'))
+        setError(result.message || t('auth.loginError'))
       }
     } catch (err) {
       setError(t('auth.connectionError'))
@@ -175,7 +170,7 @@ const LoginPage = () => {
               margin: 0,
               opacity: 0.8
             }}>
-              {t('auth.welcomeSubtitle')}
+              {t('auth.loginSubtitle')}
             </p>
           </div>
 
@@ -196,7 +191,7 @@ const LoginPage = () => {
 
           {/* Login form */}
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: spacing.lg }}>
+            <div style={{ marginBottom: spacing.md }}>
               <label style={{
                 display: 'block',
                 marginBottom: spacing.xs,
@@ -204,12 +199,12 @@ const LoginPage = () => {
                 color: colors.charcoal,
                 fontWeight: typography.medium
               }}>
-                {t('auth.password')}
+                Prénom
               </label>
               <input
-                type="password"
-                name="password"
-                value={formData.password}
+                type="text"
+                name="firstName"
+                value={formData.firstName}
                 onChange={handleInputChange}
                 required
                 style={inputStyle}
@@ -219,7 +214,34 @@ const LoginPage = () => {
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = colors.softGray
                 }}
-                placeholder={t('auth.passwordPlaceholder')}
+                placeholder="Entrez votre prénom"
+              />
+            </div>
+
+            <div style={{ marginBottom: spacing.lg }}>
+              <label style={{
+                display: 'block',
+                marginBottom: spacing.xs,
+                fontSize: '0.9rem',
+                color: colors.charcoal,
+                fontWeight: typography.medium
+              }}>
+                Nom
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
+                required
+                style={inputStyle}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = colors.oliveGreen
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = colors.softGray
+                }}
+                placeholder="Entrez votre nom"
               />
             </div>
 

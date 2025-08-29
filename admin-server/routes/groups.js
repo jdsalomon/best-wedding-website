@@ -190,4 +190,33 @@ router.put('/:id/contact', async (req, res) => {
   }
 })
 
+// PUT /api/groups/:id/language - Bulk update language for all guests in group
+router.put('/:id/language', async (req, res) => {
+  try {
+    const { id } = req.params
+    const { language } = req.body
+    
+    if (!language || typeof language !== 'string') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Language is required and must be a string' 
+      })
+    }
+
+    const result = await database.updateGroupLanguage(id, language)
+    
+    res.json({ 
+      success: true, 
+      data: result,
+      message: `Language updated to "${language}" for ${result.count} guest${result.count !== 1 ? 's' : ''}`
+    })
+  } catch (error) {
+    console.error('Error updating group language:', error)
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error updating group language preference' 
+    })
+  }
+})
+
 module.exports = router

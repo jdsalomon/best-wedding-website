@@ -51,6 +51,56 @@ export async function authenticateGroup(password: string): Promise<AuthResult> {
   }
 }
 
+export async function authenticateByName(firstName: string, lastName: string): Promise<AuthResult> {
+  try {
+    // Find guest by first name and last name
+    const { data: guest, error: guestError } = await supabase
+      .from('guests')
+      .select(`
+        *,
+        groups:group_id (*)
+      `)
+      .ilike('first_name', firstName.trim())
+      .ilike('last_name', lastName.trim())
+      .single()
+
+    if (guestError || !guest || !guest.groups) {
+      return {
+        success: false,
+        error: 'Guest not found'
+      }
+    }
+
+    const group = guest.groups as Group
+
+    // Get all guests in this group
+    const { data: guests, error: guestsError } = await supabase
+      .from('guests')
+      .select('*')
+      .eq('group_id', group.id)
+      .order('first_name')
+
+    if (guestsError) {
+      return {
+        success: false,
+        error: 'Error fetching group guests'
+      }
+    }
+
+    return {
+      success: true,
+      group,
+      guests: guests || []
+    }
+  } catch (error) {
+    console.error('Authentication error:', error)
+    return {
+      success: false,
+      error: 'Authentication failed'
+    }
+  }
+}
+
 export async function getGroupGuests(groupId: string): Promise<Guest[]> {
   try {
     const { data: guests, error } = await supabase

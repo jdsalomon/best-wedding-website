@@ -1,15 +1,19 @@
 import { NextPage } from 'next'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import MapWidget from '../components/MapWidget'
 import OliveBranch from '../components/OliveBranch'
 import ChatBar from '../components/ChatBar'
 import InlineChatInterface from '../components/InlineChatInterface'
 import { useTranslation } from '../hooks/useTranslation'
+import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, cardStyle, spacing, borderRadius, shadows } from '../styles/theme'
 
 const Home: NextPage = () => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const { isAuthenticated, loading } = useAuth()
   const [isInlineChatOpen, setIsInlineChatOpen] = useState(false)
   const [firstMessage, setFirstMessage] = useState<string>('')
   
@@ -58,17 +62,99 @@ const Home: NextPage = () => {
           </div>
         </div>
 
-        {/* Full-Screen Chat Interface */}
+        {/* Full-Screen Chat Interface or Login Prompt */}
         <div style={{ 
           flex: 1,
           width: '100%',
           overflow: 'hidden'
         }}>
-          <InlineChatInterface
-            isOpen={true}
-            onClose={() => {}}
-            firstMessage=""
-          />
+          {loading ? (
+            // Loading state
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: colors.oliveGreen,
+              fontSize: '1.1rem',
+              fontFamily: typography.body
+            }}>
+              Chargement...
+            </div>
+          ) : isAuthenticated ? (
+            // Authenticated - show chat interface
+            <InlineChatInterface
+              isOpen={true}
+              onClose={() => {}}
+              firstMessage=""
+            />
+          ) : (
+            // Not authenticated - show login prompt
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              padding: spacing.xl,
+              textAlign: 'center',
+              backgroundColor: colors.cream
+            }}>
+              <div style={{
+                backgroundColor: colors.warmBeige,
+                padding: `${spacing.xl} ${spacing.lg}`,
+                borderRadius: borderRadius.lg,
+                boxShadow: shadows.soft,
+                maxWidth: '400px',
+                width: '100%'
+              }}>
+                <h2 style={{
+                  fontSize: 'clamp(1.3rem, 4vw, 1.8rem)',
+                  color: colors.deepOlive,
+                  marginBottom: spacing.md,
+                  fontFamily: typography.heading,
+                  fontWeight: typography.bold
+                }}>
+                  {t('auth.homeTitle')}
+                </h2>
+                <p style={{
+                  fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                  color: colors.charcoal,
+                  marginBottom: spacing.lg,
+                  fontFamily: typography.body,
+                  lineHeight: 1.6
+                }}>
+                  {t('auth.homeMessage')}
+                </p>
+                <button
+                  onClick={() => router.push('/login')}
+                  style={{
+                    backgroundColor: colors.oliveGreen,
+                    color: colors.cream,
+                    border: 'none',
+                    borderRadius: borderRadius.md,
+                    padding: `${spacing.md} ${spacing.lg}`,
+                    fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                    fontFamily: typography.body,
+                    fontWeight: typography.semibold,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.deepOlive
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.oliveGreen
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  Se Connecter
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       

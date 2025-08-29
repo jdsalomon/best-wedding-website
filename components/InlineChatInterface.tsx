@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { colors, typography, spacing, borderRadius } from '../styles/theme'
 import RSVPTable from './RSVPTable'
+import { getRandomFAQPrompts, FAQPrompt } from '../utils/faqPrompts'
 
 interface RSVPData {
   events: Array<{
@@ -46,6 +47,9 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
+  const [showFAQButtons, setShowFAQButtons] = useState(true)
+  const [faqPrompts, setFaqPrompts] = useState<FAQPrompt[]>([])
+  const [isClient, setIsClient] = useState(false)
 
   const getPersonalizedTitle = () => {
     if (isAuthenticated && group) {
@@ -78,8 +82,19 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const handleFAQClick = (prompt: FAQPrompt) => {
+    const message = t(prompt.messageKey)
+    setShowFAQButtons(false)
+    handleSendMessage(message)
+  }
+
   const handleSendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return
+
+    // Hide FAQ buttons once user starts chatting
+    if (showFAQButtons) {
+      setShowFAQButtons(false)
+    }
 
     // Add user message
     const userMessage: Message = {
@@ -298,7 +313,36 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     }
   }, [isOpen, firstMessage])
 
+  // Initialize FAQ prompts on client side only to avoid hydration errors
+  React.useEffect(() => {
+    setIsClient(true)
+    setFaqPrompts(getRandomFAQPrompts())
+  }, [])
+
   if (!isOpen) return null
+
+  // Additional auth guard - should not happen with home page guard, but safety first
+  if (!isAuthenticated) {
+    return (
+      <div style={{
+        backgroundColor: colors.cream,
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: spacing.xl
+      }}>
+        <div style={{
+          textAlign: 'center',
+          color: colors.charcoal,
+          fontFamily: typography.body
+        }}>
+          <p>Accès non autorisé. Veuillez vous connecter.</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{
@@ -376,18 +420,65 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           backgroundColor: colors.cream
         }}
       >
-        {messages.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            color: colors.charcoal,
-            opacity: 0.7,
-            fontStyle: 'italic',
-            margin: spacing.lg + ' 0',
-            fontSize: '1rem',
-            fontFamily: typography.body
-          }}>
-            {t('chat.subtitle')}
-          </div>
+        {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
+          <>
+            <div style={{
+              textAlign: 'center',
+              color: colors.charcoal,
+              opacity: 0.7,
+              fontStyle: 'italic',
+              margin: spacing.lg + ' 0',
+              fontSize: '1rem',
+              fontFamily: typography.body
+            }}>
+              {t('chat.subtitle')}
+            </div>
+            
+            {/* FAQ Buttons */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.sm,
+              maxWidth: '400px',
+              margin: `${spacing.lg} auto`,
+              padding: '0 ' + spacing.md
+            }}>
+              {faqPrompts.map((prompt) => (
+                <button
+                  key={prompt.id}
+                  onClick={() => handleFAQClick(prompt)}
+                  style={{
+                    backgroundColor: colors.warmBeige,
+                    border: `1px solid ${colors.oliveGreen}`,
+                    borderRadius: borderRadius.md,
+                    padding: spacing.md,
+                    fontSize: '0.95rem',
+                    fontFamily: typography.body,
+                    color: colors.charcoal,
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    lineHeight: 1.4,
+                    transition: 'all 0.2s ease',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.sageGreen
+                    e.currentTarget.style.color = colors.cream
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.1)`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.warmBeige
+                    e.currentTarget.style.color = colors.charcoal
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = 'none'
+                  }}
+                >
+                  {t(prompt.titleKey)}
+                </button>
+              ))}
+            </div>
+          </>
         )}
         
         {messages.map((message) => (

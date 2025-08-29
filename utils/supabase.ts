@@ -15,6 +15,7 @@ export type Guest = {
   address?: string
   misc?: string
   group_id?: string
+  preferred_language?: string
   created_at: string
   updated_at: string
 }
