@@ -1,15 +1,21 @@
 import { NextPage } from 'next'
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import MapWidget from '../components/MapWidget'
 import OliveBranch from '../components/OliveBranch'
 import ChatBar from '../components/ChatBar'
 import InlineChatInterface from '../components/InlineChatInterface'
 import { useTranslation } from '../hooks/useTranslation'
-import { colors, typography, cardStyle, spacing, borderRadius, shadows } from '../styles/theme'
+import { useAuth } from '../contexts/AuthContext'
+import { useLanguageContext } from '../contexts/LanguageContext'
+import { colors, typography, cardStyle, spacing, borderRadius, shadows, transitions, modernSpacing, gradients } from '../styles/theme'
 
 const Home: NextPage = () => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const { isAuthenticated, loading } = useAuth()
+  const { language } = useLanguageContext()
   const [isInlineChatOpen, setIsInlineChatOpen] = useState(false)
   const [firstMessage, setFirstMessage] = useState<string>('')
   
@@ -20,55 +26,137 @@ const Home: NextPage = () => {
   
   return (
     <Layout>
-      {/* Full-Screen Layout */}
+      {/* Modern Full-Screen Chat Layout */}
       <div style={{ 
-        minHeight: '100dvh',
-        height: '100vh', /* Fallback for browsers that don't support dvh */
-        width: '100vw',
+        height: '100%',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)'
+        overflow: 'hidden'
       }}>
-        
-        {/* Compact Header - Hero Section */}
-        <div style={{ 
-          backgroundColor: colors.warmBeige,
-          borderBottom: `2px solid ${colors.oliveGreen}`,
-          padding: spacing.sm,
-          textAlign: 'center',
-          flexShrink: 0
-        }}>
-          <h1 style={{ 
-            fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-            margin: '0 0 0.25rem 0',
-            color: colors.deepOlive,
-            fontFamily: typography.heading,
-            fontWeight: typography.bold
-          }}>
-            {t('home.title')}
-          </h1>
-          <div style={{ 
-            fontSize: 'clamp(0.9rem, 3vw, 1.2rem)',
-            color: colors.oliveGreen,
-            fontWeight: typography.semibold,
-            fontFamily: typography.heading
-          }}>
-            {t('home.date')} • {t('home.location')}
-          </div>
-        </div>
-
-        {/* Full-Screen Chat Interface */}
+        {/* Full-Screen Chat Interface or Login Prompt */}
         <div style={{ 
           flex: 1,
           width: '100%',
-          overflow: 'hidden'
+          height: '100%',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <InlineChatInterface
-            isOpen={true}
-            onClose={() => {}}
-            firstMessage=""
-          />
+          {loading ? (
+            // Modern Loading state
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              background: gradients.romanticOverlay,
+              flexDirection: 'column',
+              gap: modernSpacing.base
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                border: `3px solid ${colors.sageGreen}`,
+                borderTop: `3px solid ${colors.oliveGreen}`,
+                borderRadius: '50%'
+              }} />
+              <div style={{
+                color: colors.deepOlive,
+                fontSize: '1.1rem',
+                fontFamily: typography.body,
+                fontWeight: typography.medium
+              }}>
+                {language === 'fr' ? 'Chargement...' : 'Loading...'}
+              </div>
+            </div>
+          ) : isAuthenticated ? (
+            // Authenticated - show chat interface
+            <InlineChatInterface
+              isOpen={true}
+              onClose={() => {}}
+              firstMessage=""
+            />
+          ) : (
+            // Clean login prompt
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              padding: modernSpacing.spacious,
+              textAlign: 'center',
+              background: gradients.subtleWarmth
+            }}>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.4)',
+                backdropFilter: 'blur(20px)',
+                padding: `${modernSpacing.generous} ${modernSpacing.spacious}`,
+                borderRadius: '24px',
+                border: `1px solid rgba(139, 149, 109, 0.2)`,
+                boxShadow: shadows.floating,
+                maxWidth: '480px',
+                width: '100%',
+                position: 'relative'
+              }}>
+                <h2 style={{
+                  fontSize: 'clamp(1.5rem, 5vw, 2.2rem)',
+                  color: colors.deepOlive,
+                  marginBottom: modernSpacing.comfortable,
+                  fontFamily: typography.heading,
+                  fontWeight: typography.bold,
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.2
+                }}>
+                  {t('auth.homeTitle')}
+                </h2>
+                <p style={{
+                  fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+                  color: colors.charcoal,
+                  marginBottom: modernSpacing.generous,
+                  fontFamily: typography.body,
+                  lineHeight: 1.6,
+                  opacity: 0.9
+                }}>
+                  {t('auth.homeMessage')}
+                </p>
+                <button
+                  onClick={() => router.push('/login')}
+                  style={{
+                    background: gradients.oliveSubtle,
+                    color: colors.cream,
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: `${modernSpacing.comfortable} ${modernSpacing.spacious}`,
+                    fontSize: 'clamp(1rem, 3vw, 1.1rem)',
+                    fontFamily: typography.body,
+                    fontWeight: typography.semibold,
+                    cursor: 'pointer',
+                    transition: transitions.spring,
+                    width: '100%',
+                    boxShadow: shadows.medium,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'
+                    e.currentTarget.style.boxShadow = shadows.elevated
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                    e.currentTarget.style.boxShadow = shadows.medium
+                  }}
+                >
+                  <span style={{ position: 'relative', zIndex: 1 }}>
+                    {language === 'fr' ? 'Se Connecter' : 'Sign In'}
+                  </span>
+                </button>
+              </div>
+
+            </div>
+          )}
         </div>
       </div>
       

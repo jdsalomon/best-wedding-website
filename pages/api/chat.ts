@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { SYSTEM_PROMPT, loadHyperpersonalizationTemplate } from '../../utils/loadPrompts'
 import { parseSessionCookie } from '../../lib/authMiddleware'
 import { getGroupContext, processHyperpersonalizationTemplate } from '../../utils/hyperpersonalization'
+import { getClientId, checkRateLimit } from '../../lib/rateLimit'
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client for RSVP data
@@ -193,17 +194,55 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { messages } = req.body
 
+    // Validate request
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({ message: 'Invalid request: messages array required' })
+    }
+
+    // Validate message limits
+    if (messages.length > 20) {
+      return res.status(400).json({ message: 'Too many messages in conversation history' })
+    }
+
+    // Validate message content length
+    const totalLength = messages.reduce((sum: number, msg: Message) => sum + (msg.content?.length || 0), 0)
+    if (totalLength > 10000) {
+      return res.status(400).json({ message: 'Message content too long' })
+    }
+
+    // Check for individual message length
+    const longMessage = messages.find((msg: Message) => msg.content && msg.content.length > 2000)
+    if (longMessage) {
+      return res.status(400).json({ message: 'Individual message too long (max 2000 characters)' })
+    }
+
+    // Rate limiting
+    const session = parseSessionCookie(req.headers.cookie)
+    const client = getClientId(req, session)
+    const { success, limit, remaining, reset } = await checkRateLimit(client.id, client.type)
+    
+    if (!success) {
+      const resetTime = new Date(reset).toISOString()
+      return res.status(429).json({
+        message: `Rate limit exceeded. Try again after ${resetTime}`,
+        limit,
+        remaining,
+        reset: resetTime
+      })
+    }
+
+    console.log(`🚦 Rate limit check passed: ${remaining}/${limit} remaining for ${client.type}:${client.id}`)
+
     // Get base system prompt
     let systemPrompt = SYSTEM_PROMPT
 
     // Try to add hyperpersonalization if user is authenticated
     try {
-      const session = parseSessionCookie(req.headers.cookie)
       
       if (session?.groupId) {
         console.log(`🎯 Generating hyperpersonalized prompt for group: ${session.groupName}`)
         
-        const groupContext = await getGroupContext(session.groupId)
+        const groupContext = await getGroupContext(session.groupId, session.currentUserId, session.groupLanguage)
         
         if (groupContext) {
           const hyperpersonalizationTemplate = loadHyperpersonalizationTemplate()

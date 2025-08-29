@@ -15,6 +15,13 @@ type StatusResponse = {
       email?: string
     }>
   }
+  session?: {
+    groupId: string
+    groupName: string
+    groupLanguage?: string
+    currentUserId?: string
+    currentUserName?: string
+  }
 }
 
 export default async function handler(
@@ -49,6 +56,13 @@ export default async function handler(
         id: session.groupId,
         name: session.groupName,
         guests: sanitizedGuests
+      },
+      session: {
+        groupId: session.groupId,
+        groupName: session.groupName,
+        groupLanguage: session.groupLanguage,
+        currentUserId: session.currentUserId,
+        currentUserName: session.currentUserName
       }
     })
 

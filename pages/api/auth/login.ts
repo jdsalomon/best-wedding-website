@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { authenticateGroup } from '../../../lib/auth'
+import { authenticateByName } from '../../../lib/auth'
 import { serialize } from 'cookie'
 
 type LoginRequest = {
-  password: string
+  firstName: string
+  lastName: string
 }
 
 type LoginResponse = {
@@ -34,16 +35,16 @@ export default async function handler(
   }
 
   try {
-    const { password }: LoginRequest = req.body
+    const { firstName, lastName }: LoginRequest = req.body
 
-    if (!password) {
+    if (!firstName || !lastName) {
       return res.status(400).json({
         success: false,
-        message: 'Password is required'
+        message: 'First name and last name are required'
       })
     }
 
-    const authResult = await authenticateGroup(password.trim())
+    const authResult = await authenticateByName(firstName.trim(), lastName.trim())
 
     if (!authResult.success || !authResult.group) {
       return res.status(401).json({
@@ -52,10 +53,19 @@ export default async function handler(
       })
     }
 
-    // Create session cookie
+    // Find the current user (the guest who logged in)
+    const currentUser = authResult.guests?.find(guest => 
+      guest.first_name.toLowerCase() === firstName.trim().toLowerCase() &&
+      guest.last_name.toLowerCase() === lastName.trim().toLowerCase()
+    )
+
+    // Create session cookie with current user information
     const sessionData = {
       groupId: authResult.group.id,
       groupName: authResult.group.name,
+      groupLanguage: currentUser?.preferred_language || 'French', // Use current user's language, not group
+      currentUserId: currentUser?.id,
+      currentUserName: currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : undefined,
       loginTime: Date.now()
     }
 

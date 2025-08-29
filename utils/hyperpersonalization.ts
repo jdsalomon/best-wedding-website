@@ -17,12 +17,14 @@ export interface GroupContext {
   guestCount: number
   members: Guest[]
   groupNotes?: string
+  groupLanguage?: string
+  currentUser?: Guest
 }
 
 /**
  * Fetch comprehensive group data for hyperpersonalization
  */
-export async function getGroupContext(groupId: string): Promise<GroupContext | null> {
+export async function getGroupContext(groupId: string, currentUserId?: string, groupLanguage?: string): Promise<GroupContext | null> {
   try {
     // Fetch group details with all guests
     const { data: groupData, error: groupError } = await supabase
@@ -40,7 +42,8 @@ export async function getGroupContext(groupId: string): Promise<GroupContext | n
           address,
           misc,
           source,
-          plus_one_of
+          plus_one_of,
+          preferred_language
         )
       `)
       .eq('id', groupId)
@@ -54,11 +57,16 @@ export async function getGroupContext(groupId: string): Promise<GroupContext | n
     // Get all members (unified list)
     const allMembers = groupData.guests
 
+    // Find current user if provided
+    const currentUser = currentUserId ? allMembers.find(guest => guest.id === currentUserId) : undefined
+
     return {
       groupName: groupData.name,
       guestCount: groupData.guests.length,
       members: allMembers,
-      groupNotes: groupData.misc || undefined
+      groupNotes: groupData.misc || undefined,
+      groupLanguage: groupLanguage || currentUser?.preferred_language || 'French', // Use current user's language
+      currentUser
     }
 
   } catch (error) {
@@ -75,6 +83,9 @@ export function processHyperpersonalizationTemplate(template: string, context: G
   const groupNotesSection = context.groupNotes 
     ? `- **Special Notes**: "${context.groupNotes}"`
     : ''
+  const currentUserName = context.currentUser 
+    ? `${context.currentUser.first_name} ${context.currentUser.last_name}`
+    : context.groupName
   
   return template
     .replace(/\{\{GROUP_NAME\}\}/g, context.groupName)
@@ -82,6 +93,8 @@ export function processHyperpersonalizationTemplate(template: string, context: G
     .replace(/\{\{GUEST_COUNT_PLURAL\}\}/g, context.guestCount !== 1 ? 's' : '')
     .replace(/\{\{MEMBERS\}\}/g, memberNames)
     .replace(/\{\{GROUP_NOTES\}\}/g, groupNotesSection)
+    .replace(/\{\{CURRENT_USER_NAME\}\}/g, currentUserName)
+    .replace(/\{\{GROUP_LANGUAGE\}\}/g, context.groupLanguage || 'French')
 }
 
 /**

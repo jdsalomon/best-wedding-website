@@ -54,7 +54,10 @@ async function createGuest(guestData) {
         email: guestData.email || null,
         address: guestData.address || null,
         misc: guestData.misc || null,
-        group_id: guestData.group_id || null
+        group_id: guestData.group_id || null,
+        source: guestData.source || 'manual',
+        plus_one_of: guestData.plus_one_of || null,
+        preferred_language: guestData.preferred_language || 'French'
       }])
       .select()
       .single()
@@ -78,7 +81,10 @@ async function updateGuest(id, guestData) {
         email: guestData.email || null,
         address: guestData.address || null,
         misc: guestData.misc || null,
-        group_id: guestData.group_id || null
+        group_id: guestData.group_id || null,
+        source: guestData.source || 'manual',
+        plus_one_of: guestData.plus_one_of || null,
+        preferred_language: guestData.preferred_language || 'French'
       })
       .eq('id', id)
       .select()
@@ -401,6 +407,30 @@ async function updateGroupContact(groupId, contactData) {
     return { principal, updatedGuest: data }
   } catch (error) {
     console.error('Error updating group contact:', error)
+    throw error
+  }
+}
+
+/**
+ * Bulk update language preference for all guests in a group
+ */
+async function updateGroupLanguage(groupId, language) {
+  try {
+    const { data: updatedGuests, error } = await supabase
+      .from('guests')
+      .update({ preferred_language: language || 'French' })
+      .eq('group_id', groupId)
+      .select('id, first_name, last_name, preferred_language')
+
+    if (error) throw error
+
+    return {
+      success: true,
+      count: updatedGuests?.length || 0,
+      guests: updatedGuests || []
+    }
+  } catch (error) {
+    console.error('Error updating group language:', error)
     throw error
   }
 }
@@ -737,6 +767,7 @@ module.exports = {
   getGroupPrincipal,
   updateGroupContact,
   getGroupContactInfo,
+  updateGroupLanguage,
   
   // Event management
   getAllEvents,

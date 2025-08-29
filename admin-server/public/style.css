@@ -724,6 +724,76 @@ tr:hover {
     color: #2d5016;
 }
 
+/* Language badges */
+.language-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.language-badge.lang-french {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.language-badge.lang-english {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.language-badge.lang-spanish {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.language-badge.lang-italian {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.language-badge.lang-german {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.language-badge.lang-other {
+    background: #f5f5f5;
+    color: #616161;
+}
+
+/* Language management sections */
+.bulk-language-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.bulk-language-section h4 {
+    margin: 0 0 10px 0;
+    color: #495057;
+}
+
+.language-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.language-row select {
+    flex: 1;
+    max-width: 200px;
+}
+
+.language-row button {
+    white-space: nowrap;
+}
+
 .info {
     background: #e3f2fd;
     color: #1976d2;

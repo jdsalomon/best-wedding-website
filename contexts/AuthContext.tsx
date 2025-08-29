@@ -17,7 +17,7 @@ type Group = {
 type AuthContextType = {
   isAuthenticated: boolean
   group: Group | null
-  login: (groupName: string, password: string) => Promise<{ success: boolean; message: string }>
+  login: (firstName: string, lastName: string) => Promise<{ success: boolean; message: string }>
   logout: () => Promise<void>
   loading: boolean
 }
@@ -51,14 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const login = async (groupName: string, password: string): Promise<{ success: boolean; message: string }> => {
+  const login = async (firstName: string, lastName: string): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ groupName, password }),
+        body: JSON.stringify({ firstName, lastName }),
       })
 
       const data = await response.json()

@@ -775,6 +775,11 @@ function displayGuests(guests) {
                 ` : ''}
             </td>
             <td>
+                <span class="language-badge ${getLanguageBadgeClass(guest.preferred_language)}" title="${guest.preferred_language || 'French'}">
+                    ${getLanguageFlag(guest.preferred_language)} ${guest.preferred_language || 'French'}
+                </span>
+            </td>
+            <td>
                 ${guest.plus_one_of 
                     ? '<span class="relationship-tag">+1 Guest</span>' 
                     : '<span class="relationship-tag primary">Main Guest</span>'
@@ -1010,6 +1015,17 @@ async function editGroup(groupId) {
                                 </button>
                             </div>
                         `).join('')}
+                    </div>
+                    
+                    <div class="bulk-language-section">
+                        <h4>🌍 Set Group Language</h4>
+                        <p class="info">Set the preferred language for all members of this group at once.</p>
+                        <div class="language-row">
+                            <input type="text" id="bulk-language-input" placeholder="Enter language (e.g., French, English, Spanish)" value="French">
+                            <button type="button" class="btn btn-primary" onclick="setBulkGroupLanguage('${groupId}')">
+                                Set Language for All ${group.guests.length} Members
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="add-members-section">
@@ -1597,14 +1613,19 @@ async function showCreateGuestModal() {
                         <input type="text" id="guest-source" placeholder="e.g., Wedding List, Friend">
                     </div>
                     <div class="form-group">
-                        <label for="guest-group">Group (optional)</label>
-                        <select id="guest-group">
-                            <option value="">No group</option>
-                            ${groups.map(group => `
-                                <option value="${group.id}">${group.name} (${group.guests.length} members)</option>
-                            `).join('')}
-                        </select>
+                        <label for="guest-language">Preferred Language</label>
+                        <input type="text" id="guest-language" value="French" placeholder="e.g., French, English, Spanish">
                     </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="guest-group">Group (optional)</label>
+                    <select id="guest-group">
+                        <option value="">No group</option>
+                        ${groups.map(group => `
+                            <option value="${group.id}">${group.name} (${group.guests.length} members)</option>
+                        `).join('')}
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -1682,16 +1703,21 @@ async function editGuest(guestId) {
                         <input type="text" id="guest-source" value="${guest.source || ''}" placeholder="e.g., Wedding List, Friend">
                     </div>
                     <div class="form-group">
-                        <label for="guest-group">Group</label>
-                        <select id="guest-group">
-                            <option value="">No group</option>
-                            ${groups.map(group => `
-                                <option value="${group.id}" ${guest.group_id === group.id ? 'selected' : ''}>
-                                    ${group.name} (${group.guests.length} members)
-                                </option>
-                            `).join('')}
-                        </select>
+                        <label for="guest-language">Preferred Language</label>
+                        <input type="text" id="guest-language" value="${guest.preferred_language || 'French'}" placeholder="e.g., French, English, Spanish">
                     </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="guest-group">Group</label>
+                    <select id="guest-group">
+                        <option value="">No group</option>
+                        ${groups.map(group => `
+                            <option value="${group.id}" ${guest.group_id === group.id ? 'selected' : ''}>
+                                ${group.name} (${group.guests.length} members)
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -1735,7 +1761,8 @@ async function createGuest() {
             email: document.getElementById('guest-email').value.trim() || null,
             address: document.getElementById('guest-address').value.trim() || null,
             misc: document.getElementById('guest-misc').value.trim() || null,
-            group_id: document.getElementById('guest-group').value || null
+            group_id: document.getElementById('guest-group').value || null,
+            preferred_language: document.getElementById('guest-language').value || 'French'
         }
         
         if (!guestData.first_name || !guestData.last_name) {
@@ -1772,7 +1799,8 @@ async function updateGuest(guestId) {
             email: document.getElementById('guest-email').value.trim() || null,
             address: document.getElementById('guest-address').value.trim() || null,
             misc: document.getElementById('guest-misc').value.trim() || null,
-            group_id: document.getElementById('guest-group').value || null
+            group_id: document.getElementById('guest-group').value || null,
+            preferred_language: document.getElementById('guest-language').value || 'French'
         }
         
         if (!guestData.first_name || !guestData.last_name) {
@@ -2355,3 +2383,111 @@ async function exportEventRSVPs(eventId, eventName) {
         showToast(`❌ Error exporting RSVPs: ${error.message}`, 'error')
     }
 }
+
+// Bulk language setting function
+async function setBulkGroupLanguage(groupId) {
+    const languageInput = document.getElementById('bulk-language-input')
+    const selectedLanguage = languageInput.value.trim()
+    
+    if (!selectedLanguage) {
+        showToast('⚠️ Please enter a language first', 'warning')
+        return
+    }
+    
+    // Get group data to show member count in confirmation
+    try {
+        const groupResult = await apiRequest(`/api/groups/${groupId}`)
+        const group = groupResult.data
+        const memberCount = group.guests.length
+        
+        const confirmed = confirm(`Set language to "${selectedLanguage}" for all ${memberCount} member${memberCount !== 1 ? 's' : ''} of "${group.name}"?`)
+        
+        if (!confirmed) return
+        
+        showToast('🔄 Updating group language...')
+        
+        const result = await apiRequest(`/api/groups/${groupId}/language`, {
+            method: 'PUT',
+            body: JSON.stringify({ language: selectedLanguage })
+        })
+        
+        if (result.success) {
+            showToast(`✅ ${result.message}`)
+            
+            // Refresh the group edit modal to show updated data
+            editGroup(groupId)
+            
+            // Refresh guests list if it's visible
+            if (document.getElementById('guests').classList.contains('active')) {
+                loadGuests()
+            }
+        } else {
+            showToast(`❌ Error: ${result.message}`, 'error')
+        }
+        
+    } catch (error) {
+        showToast(`❌ Error updating group language: ${error.message}`, 'error')
+        console.error('Error setting bulk group language:', error)
+    }
+}
+
+// Language utility functions
+function getLanguageFlag(language) {
+    if (!language) return '🌍'
+    
+    const langLower = language.toLowerCase()
+    const flags = {
+        'french': '🇫🇷',
+        'français': '🇫🇷',
+        'english': '🇺🇸',
+        'anglais': '🇺🇸', 
+        'spanish': '🇪🇸',
+        'español': '🇪🇸',
+        'espagnol': '🇪🇸',
+        'italian': '🇮🇹',
+        'italiano': '🇮🇹',
+        'italien': '🇮🇹',
+        'german': '🇩🇪',
+        'deutsch': '🇩🇪',
+        'allemand': '🇩🇪',
+        'portuguese': '🇵🇹',
+        'português': '🇵🇹',
+        'portugais': '🇵🇹',
+        'dutch': '🇳🇱',
+        'nederlands': '🇳🇱',
+        'néerlandais': '🇳🇱',
+        'chinese': '🇨🇳',
+        'mandarin': '🇨🇳',
+        'chinois': '🇨🇳',
+        'japanese': '🇯🇵',
+        'japonais': '🇯🇵',
+        'arabic': '🇸🇦',
+        'arabe': '🇸🇦',
+        'russian': '🇷🇺',
+        'russe': '🇷🇺'
+    }
+    return flags[langLower] || '🌍'
+}
+
+function getLanguageBadgeClass(language) {
+    if (!language) return 'lang-other'
+    
+    const langLower = language.toLowerCase()
+    const classes = {
+        'french': 'lang-french',
+        'français': 'lang-french',
+        'english': 'lang-english',
+        'anglais': 'lang-english',
+        'spanish': 'lang-spanish',
+        'español': 'lang-spanish', 
+        'espagnol': 'lang-spanish',
+        'italian': 'lang-italian',
+        'italiano': 'lang-italian',
+        'italien': 'lang-italian',
+        'german': 'lang-german',
+        'deutsch': 'lang-german',
+        'allemand': 'lang-german'
+    }
+    return classes[langLower] || 'lang-other'
+}
+

@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const path = require('path')
 const multer = require('multer')
+const { detect } = require('detect-port')
 
 const guestRoutes = require('./routes/guests')
 const groupRoutes = require('./routes/groups')
@@ -11,7 +12,7 @@ const eventRoutes = require('./routes/events')
 const rsvpRoutes = require('./routes/rsvp')
 
 const app = express()
-const PORT = process.env.PORT || 3001
+const PREFERRED_PORT = process.env.PORT || 3001
 
 // Middleware
 app.use(cors())
@@ -105,7 +106,21 @@ app.use((error, req, res, next) => {
   })
 })
 
-app.listen(PORT, () => {
-  console.log(`🔧 Wedding Admin Server running on http://localhost:${PORT}`)
-  console.log('📊 Access the admin interface at http://localhost:3001')
-})
+// Start server with dynamic port detection
+async function startServer() {
+  try {
+    const port = await detect(PREFERRED_PORT)
+    app.listen(port, () => {
+      console.log(`🔧 Wedding Admin Server running on http://localhost:${port}`)
+      if (port !== PREFERRED_PORT) {
+        console.log(`⚠️  Port ${PREFERRED_PORT} was taken, using port ${port} instead`)
+      }
+      console.log(`📊 Access the admin interface at http://localhost:${port}`)
+    })
+  } catch (error) {
+    console.error('❌ Failed to start server:', error)
+    process.exit(1)
+  }
+}
+
+startServer()
