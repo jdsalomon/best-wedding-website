@@ -134,7 +134,7 @@ const LoginPage = () => {
             e.currentTarget.style.color = colors.oliveGreen
           }}
         >
-          {language === 'en' ? '🇫🇷 FR' : '🇺🇸 EN'}
+          {language === 'en' ? 'FR' : 'EN'}
         </button>
       </div>
 

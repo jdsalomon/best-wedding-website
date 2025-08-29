@@ -32,7 +32,7 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
     setIsClient(true)
   }, [])
   
-  // Check for group language preference when on client side
+  // Check for group language preference when on client side (one-time only)
   useEffect(() => {
     if (!isClient) return
     
@@ -55,11 +55,8 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
       }
     }
     
+    // Only check once when component mounts - no polling
     checkGroupLanguage()
-    
-    // Poll for authentication changes
-    const interval = setInterval(checkGroupLanguage, 2000)
-    return () => clearInterval(interval)
   }, [isClient])
 
   return (

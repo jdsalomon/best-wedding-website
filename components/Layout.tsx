@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { useAuth } from '../contexts/AuthContext'
-import { colors, typography, gradients, spacing, borderRadius, shadows } from '../styles/theme'
+import { colors, typography, gradients, spacing, borderRadius, shadows, transitions, glassMorphism, modernSpacing } from '../styles/theme'
 import WeddingChatbot, { ChatToggleButton } from './WeddingChatbot'
 
 interface LayoutProps {
@@ -29,138 +29,207 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
       fontFamily: typography.body,
-      background: gradients.warmBackground,
+      background: gradients.subtleWarmth,
       color: colors.charcoal
     }}>
-      {/* Navigation Header with Auth Status */}
-      <div style={{ display: 'block' }}>
-        <nav style={{
-          backgroundColor: colors.warmBeige,
-          position: 'sticky',
-          top: 0,
-          zIndex: 1000,
-          boxShadow: 'none',
-          height: '60px'
+      {/* Modern Glass Navigation - Fixed Header */}
+      <header style={{
+        flexShrink: 0,
+        zIndex: 1000,
+        backdropFilter: glassMorphism.backdrop,
+        background: glassMorphism.background,
+        border: glassMorphism.border,
+        borderTop: 'none',
+        borderLeft: 'none',
+        borderRight: 'none'
+      }}>
+        <div style={{ 
+          maxWidth: '1400px', 
+          margin: '0 auto', 
+          padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: modernSpacing.base,
+          minHeight: '60px'
         }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', height: '100%' }}>
-            
-            {/* Authentication Status and Navigation */}
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', height: '100%', justifyContent: 'space-between' }}>
-              {/* Wedding Title */}
+          
+          {/* Wedding Title & Date */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: modernSpacing.xs
+          }}>
+            <h1 style={{
+              margin: 0,
+              fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
+              fontFamily: typography.heading,
+              fontWeight: typography.bold,
+              color: colors.deepOlive,
+              letterSpacing: '-0.02em'
+            }}>
+              {t('home.title')}
+            </h1>
+            <div style={{
+              fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+              fontFamily: typography.body,
+              fontWeight: typography.medium,
+              color: colors.oliveGreen,
+              display: 'flex',
+              alignItems: 'center',
+              gap: modernSpacing.xs,
+              position: 'relative',
+              paddingLeft: '12px'
+            }}>
               <div style={{
-                color: colors.oliveGreen,
-                fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-                fontFamily: typography.heading,
-                fontWeight: typography.semibold
-              }}>
-                💬 {t('nav.ourWedding')}
-              </div>
-
-              {/* Auth Status */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                {isAuthenticated ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                    <span style={{
-                      fontSize: '0.9rem',
-                      color: colors.oliveGreen,
-                      fontWeight: typography.medium
-                    }}>
-                      👥 {group?.name}
-                    </span>
-                    <button
-                      onClick={handleLogout}
-                      style={{
-                        background: 'none',
-                        border: `1px solid ${colors.deepOlive}`,
-                        borderRadius: borderRadius.sm,
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        cursor: 'pointer',
-                        fontSize: '0.8rem',
-                        color: colors.deepOlive,
-                        fontFamily: typography.body,
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = colors.deepOlive
-                        e.currentTarget.style.color = colors.warmBeige
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.color = colors.deepOlive
-                      }}
-                    >
-                      {t('auth.logout')}
-                    </button>
-                  </div>
-                ) : (
-                  <Link href="/login" style={{ textDecoration: 'none' }}>
-                    <button
-                      style={{
-                        background: 'none',
-                        border: `1px solid ${colors.oliveGreen}`,
-                        borderRadius: borderRadius.sm,
-                        padding: `${spacing.xs} ${spacing.sm}`,
-                        cursor: 'pointer',
-                        fontSize: '0.8rem',
-                        color: colors.oliveGreen,
-                        fontFamily: typography.body,
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = colors.oliveGreen
-                        e.currentTarget.style.color = colors.warmBeige
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                        e.currentTarget.style.color = colors.oliveGreen
-                      }}
-                    >
-                      {t('auth.login')}
-                    </button>
-                  </Link>
-                )}
-              </div>
-            </div>
-            
-            {/* Language switcher - fixed width */}
-            <div style={{ flexShrink: 0, marginLeft: spacing.md, marginRight: spacing.md }}>
-              <button
-                onClick={toggleLanguage}
-                style={{
-                  background: 'none',
-                  border: `1px solid ${colors.oliveGreen}`,
-                  borderRadius: borderRadius.md,
-                  padding: `${spacing.xs} ${spacing.sm}`,
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  color: colors.oliveGreen,
-                  fontFamily: typography.body,
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.oliveGreen
-                  e.currentTarget.style.color = colors.warmBeige
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = colors.oliveGreen
-                }}
-              >
-                {language === 'en' ? '🇫🇷 FR' : '🇺🇸 EN'}
-              </button>
+                position: 'absolute',
+                left: 0,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '4px',
+                height: '4px',
+                borderRadius: '50%',
+                background: colors.sageGreen
+              }} />
+              {t('home.date')} • {t('home.location')}
             </div>
           </div>
-        </nav>
-      </div>
+
+          {/* Auth & Language Controls */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 'clamp(0.5rem, 2vw, 1rem)',
+            flexShrink: 0,
+            flexWrap: 'wrap'
+          }}>
+            {/* Auth Status */}
+            {isAuthenticated ? (
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: modernSpacing.tiny,
+                padding: `${modernSpacing.xs} ${modernSpacing.base}`,
+                backgroundColor: 'rgba(139, 149, 109, 0.1)',
+                borderRadius: borderRadius.lg,
+                border: `1px solid rgba(139, 149, 109, 0.2)`
+              }}>
+                <span style={{
+                  fontSize: '0.9rem',
+                  color: colors.deepOlive,
+                  fontWeight: typography.medium,
+                  fontFamily: typography.body
+                }}>
+                  Welcome, {group?.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    background: 'none',
+                    border: `1px solid ${colors.deepOlive}`,
+                    borderRadius: borderRadius.sm,
+                    padding: `${modernSpacing.xs} ${modernSpacing.tiny}`,
+                    cursor: 'pointer',
+                    fontSize: '0.75rem',
+                    color: colors.deepOlive,
+                    fontFamily: typography.body,
+                    fontWeight: typography.medium,
+                    transition: transitions.normal,
+                    marginLeft: modernSpacing.xs
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.deepOlive
+                    e.currentTarget.style.color = colors.cream
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                    e.currentTarget.style.color = colors.deepOlive
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  {t('auth.logout')}
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" style={{ textDecoration: 'none' }}>
+                <button
+                  style={{
+                    background: colors.oliveGreen,
+                    border: 'none',
+                    borderRadius: borderRadius.lg,
+                    padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: colors.cream,
+                    fontFamily: typography.body,
+                    fontWeight: typography.semibold,
+                    transition: transitions.spring,
+                    boxShadow: shadows.soft
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.deepOlive
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = shadows.medium
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.oliveGreen
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = shadows.soft
+                  }}
+                >
+                  {t('auth.login')}
+                </button>
+              </Link>
+            )}
+            
+            {/* Language switcher */}
+            <button
+              onClick={toggleLanguage}
+              style={{
+                background: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(10px)',
+                border: `1px solid rgba(139, 149, 109, 0.3)`,
+                borderRadius: borderRadius.lg,
+                padding: `${modernSpacing.tiny} ${modernSpacing.base}`,
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                color: colors.deepOlive,
+                fontFamily: typography.body,
+                fontWeight: typography.medium,
+                transition: transitions.spring,
+                display: 'flex',
+                alignItems: 'center',
+                gap: modernSpacing.xs
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+                e.currentTarget.style.borderColor = colors.oliveGreen
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
+              }}
+            >
+              {language === 'en' ? 'FR' : 'EN'}
+            </button>
+          </div>
+        </div>
+      </header>
       
-      {/* Full-screen content area - no constraints */}
+      {/* Content Area - Takes remaining space */}
       <main style={{ 
-        height: '100vh',
-        width: '100vw',
-        padding: 0,
-        margin: 0
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 0
       }}>
         {children}
       </main>

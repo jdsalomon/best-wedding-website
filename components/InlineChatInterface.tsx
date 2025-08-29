@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { useTranslation } from '../hooks/useTranslation'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
-import { colors, typography, spacing, borderRadius } from '../styles/theme'
+import { colors, typography, spacing, borderRadius, transitions, modernSpacing, gradients, shadows } from '../styles/theme'
 import RSVPTable from './RSVPTable'
 import { getRandomFAQPrompts, FAQPrompt } from '../utils/faqPrompts'
 
@@ -50,6 +50,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [showFAQButtons, setShowFAQButtons] = useState(true)
   const [faqPrompts, setFaqPrompts] = useState<FAQPrompt[]>([])
   const [isClient, setIsClient] = useState(false)
+  const [isWideScreen, setIsWideScreen] = useState(false)
 
   const getPersonalizedTitle = () => {
     if (isAuthenticated && group) {
@@ -317,6 +318,18 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   React.useEffect(() => {
     setIsClient(true)
     setFaqPrompts(getRandomFAQPrompts())
+    
+    // Check screen size for responsive layout
+    const checkScreenSize = () => {
+      if (typeof window !== 'undefined') {
+        const isWide = window.innerWidth >= 768 && window.innerWidth / window.innerHeight >= 1.5
+        setIsWideScreen(isWide)
+      }
+    }
+    
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
   if (!isOpen) return null
@@ -346,163 +359,235 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
 
   return (
     <div style={{
-      backgroundColor: colors.cream,
+      background: gradients.subtleWarmth,
       height: '100%',
-      minHeight: '0', /* Allow flex shrinking */
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
       margin: 0,
       border: 'none',
-      borderRadius: 0,
-      overflow: 'hidden'
+      borderRadius: 0
     }}>
-      {/* Header */}
+      {/* Chat Header - Fixed, never scrolls */}
       <div style={{
-        backgroundColor: colors.oliveGreen,
+        background: 'rgba(139, 149, 109, 0.95)',
+        backdropFilter: 'blur(20px)',
         color: colors.cream,
-        padding: spacing.md,
+        padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        flexShrink: 0
+        flexShrink: 0,
+        borderBottom: `1px solid rgba(255, 255, 255, 0.1)`
       }}>
+        {/* Subtle decorative gradient */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+        }} />
+        
         <div>
           <h3 style={{
             margin: 0,
-            fontSize: '1.1rem',
+            fontSize: 'clamp(1.1rem, 3vw, 1.3rem)',
             fontWeight: typography.bold,
-            fontFamily: typography.heading
+            fontFamily: typography.heading,
+            letterSpacing: '-0.01em'
           }}>
-{getPersonalizedTitle()}
+            {getPersonalizedTitle()}
           </h3>
           <p style={{
-            margin: 0,
-            fontSize: '0.9rem',
-            opacity: 0.9,
-            fontFamily: typography.body
+            margin: `${modernSpacing.xs} 0 0 0`,
+            fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
+            opacity: 0.85,
+            fontFamily: typography.body,
+            fontWeight: typography.medium
           }}>
             {t('chat.subtitle')}
           </p>
         </div>
-        {/* Close button hidden for main interface */}
-        <div style={{ display: 'none' }}>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: colors.cream,
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0',
-              width: '30px',
-              height: '30px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title={t('chat.close')}
-          >
-            ×
-          </button>
+        
+        {/* Elegant status indicator */}
+        <div style={{
+          display: 'flex',
+          gap: '3px',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: colors.sageGreen,
+            opacity: 0.8
+          }} />
+          <div style={{
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            background: colors.sageGreen,
+            opacity: 0.6
+          }} />
+          <div style={{
+            width: '3px',
+            height: '3px',
+            borderRadius: '50%',
+            background: colors.sageGreen,
+            opacity: 0.4
+          }} />
         </div>
+        
       </div>
 
-      {/* Messages Area - Takes remaining space */}
+      {/* Messages Area - Only this scrolls */}
       <div 
         ref={messagesContainerRef}
         onScroll={handleScroll}
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: spacing.md,
-          backgroundColor: colors.cream
+          overflowX: 'hidden',
+          padding: `${modernSpacing.base} clamp(1rem, 4vw, 1.5rem)`,
+          background: 'transparent',
+          minHeight: 0
         }}
       >
-        {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
-          <>
-            <div style={{
-              textAlign: 'center',
-              color: colors.charcoal,
-              opacity: 0.7,
-              fontStyle: 'italic',
-              margin: spacing.lg + ' 0',
-              fontSize: '1rem',
-              fontFamily: typography.body
-            }}>
-              {t('chat.subtitle')}
-            </div>
-            
-            {/* FAQ Buttons */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: spacing.sm,
-              maxWidth: '400px',
-              margin: `${spacing.lg} auto`,
-              padding: '0 ' + spacing.md
-            }}>
-              {faqPrompts.map((prompt) => (
+        {/* Centered FAQ Section */}
+        <div style={{
+          display: messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 ? 'flex' : 'none',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100%',
+          height: '100%'
+        }}>
+          {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
+            <>
+              {/* Welcome Message */}
+              <div style={{
+                textAlign: 'center',
+                marginBottom: isWideScreen ? modernSpacing.spacious : modernSpacing.comfortable,
+                position: 'relative'
+              }}>
+                <h3 style={{
+                  fontSize: 'clamp(1.3rem, 4vw, 1.6rem)',
+                  marginBottom: modernSpacing.base,
+                  color: colors.deepOlive,
+                  fontFamily: typography.heading,
+                  fontWeight: typography.bold,
+                  margin: `0 0 ${modernSpacing.base} 0`
+                }}>
+                  {t('chat.welcome')}
+                </h3>
+                <p style={{
+                  color: colors.deepOlive,
+                  fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+                  fontFamily: typography.body,
+                  fontWeight: typography.medium,
+                  margin: 0,
+                  opacity: 0.8,
+                  lineHeight: 1.6
+                }}>
+                  {t('chat.subtitle')}
+                </p>
+              </div>
+              
+              {/* Responsive FAQ Buttons */}
+              <div style={{
+                display: 'flex',
+                flexDirection: isWideScreen ? 'row' : 'column',
+                justifyContent: 'center',
+                alignItems: isWideScreen ? 'center' : 'stretch',
+                gap: isWideScreen ? modernSpacing.comfortable : modernSpacing.base,
+                width: '100%',
+                maxWidth: isWideScreen ? '850px' : '500px',
+                margin: '0 auto',
+                padding: `0 ${modernSpacing.base}`,
+                boxSizing: 'border-box'
+              }}>
+              {faqPrompts.map((prompt, index) => (
                 <button
                   key={prompt.id}
                   onClick={() => handleFAQClick(prompt)}
                   style={{
-                    backgroundColor: colors.warmBeige,
-                    border: `1px solid ${colors.oliveGreen}`,
-                    borderRadius: borderRadius.md,
-                    padding: spacing.md,
-                    fontSize: '0.95rem',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    border: `1px solid rgba(139, 149, 109, 0.3)`,
+                    borderRadius: '16px',
+                    padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
+                    fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
                     fontFamily: typography.body,
-                    color: colors.charcoal,
+                    fontWeight: typography.medium,
+                    color: colors.deepOlive,
                     cursor: 'pointer',
-                    textAlign: 'left',
-                    lineHeight: 1.4,
-                    transition: 'all 0.2s ease',
-                    width: '100%'
+                    textAlign: 'center',
+                    lineHeight: 1.5,
+                    transition: transitions.spring,
+                    boxShadow: shadows.soft,
+                    position: 'relative',
+                    opacity: 1,
+                    flex: isWideScreen ? '1' : 'none',
+                    width: isWideScreen ? 'auto' : '100%',
+                    minWidth: isWideScreen ? '220px' : 'auto',
+                    maxWidth: isWideScreen ? '260px' : 'none',
+                    height: isWideScreen ? 'auto' : 'auto'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.sageGreen
+                    e.currentTarget.style.background = 'rgba(164, 180, 148, 0.8)'
                     e.currentTarget.style.color = colors.cream
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.boxShadow = `0 2px 8px rgba(0,0,0,0.1)`
+                    e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'
+                    e.currentTarget.style.boxShadow = shadows.floating
+                    e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.6)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.warmBeige
-                    e.currentTarget.style.color = colors.charcoal
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'none'
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+                    e.currentTarget.style.color = colors.deepOlive
+                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                    e.currentTarget.style.boxShadow = shadows.soft
+                    e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
                   }}
                 >
                   {t(prompt.titleKey)}
                 </button>
               ))}
-            </div>
-          </>
-        )}
+              </div>
+            </>
+          )}
+        </div>
+
         
-        {messages.map((message) => (
+        {messages.map((message, index) => (
           <div
             key={message.id}
             style={{
-              marginBottom: spacing.md,
+              marginBottom: modernSpacing.comfortable,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: message.role === 'user' ? 'flex-end' : 'flex-start'
+              alignItems: message.role === 'user' ? 'flex-end' : 'flex-start',
+              opacity: 1
             }}
           >
             <div
               style={{
-                maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : '80%',
-                padding: message.role === 'assistant' && message.rsvpData ? 0 : spacing.sm, // No padding for RSVP messages
-                borderRadius: borderRadius.md,
-                backgroundColor: message.role === 'user' ? colors.oliveGreen : colors.warmBeige,
+                maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : '85%',
+                padding: message.role === 'assistant' && message.rsvpData ? 0 : `${modernSpacing.base} ${modernSpacing.comfortable}`,
+                borderRadius: message.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                background: message.role === 'user' 
+                  ? gradients.oliveSubtle
+                  : 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: message.role === 'user' ? 'none' : 'blur(10px)',
+                border: message.role === 'user' ? 'none' : `1px solid rgba(139, 149, 109, 0.2)`,
                 color: message.role === 'user' ? colors.cream : colors.charcoal,
-                fontSize: '0.95rem',
+                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
                 fontFamily: typography.body,
-                lineHeight: 1.4,
+                lineHeight: 1.5,
                 textAlign: 'left',
-                overflow: 'hidden' // Ensure content stays within bubble
+                overflow: 'hidden',
+                boxShadow: message.role === 'user' ? shadows.medium : shadows.soft,
+                position: 'relative'
               }}
             >
               {/* AI Text Response */}
@@ -652,21 +737,39 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       
       {/* Input Area - Fixed at bottom */}
       <div style={{
-        padding: spacing.md,
-        paddingBottom: `calc(${spacing.md} + env(safe-area-inset-bottom, 0px))`,
-        borderTop: `1px solid ${colors.oliveGreen}`,
-        backgroundColor: colors.warmBeige,
+        padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
+        paddingBottom: `calc(${modernSpacing.base} + env(safe-area-inset-bottom, 0px))`,
+        background: 'rgba(255, 255, 255, 0.3)',
+        backdropFilter: 'blur(20px)',
+        borderTop: `1px solid rgba(139, 149, 109, 0.2)`,
         flexShrink: 0
       }}>
+        {/* Subtle top gradient */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)'
+        }} />
+        
         <div style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: spacing.sm,
-          border: `1px solid ${colors.oliveGreen}`,
-          borderRadius: borderRadius.md,
-          backgroundColor: colors.cream,
-          padding: spacing.sm
-        }}>
+          alignItems: 'flex-end',
+          gap: modernSpacing.base,
+          background: 'rgba(255, 255, 255, 0.8)',
+          border: `1px solid rgba(139, 149, 109, 0.3)`,
+          borderRadius: '20px',
+          padding: `${modernSpacing.tiny} ${modernSpacing.base}`,
+          backdropFilter: 'blur(10px)',
+          boxShadow: shadows.soft,
+          transition: transitions.normal
+        }}
+        onFocus={() => {
+          // Add focus styles via parent container
+        }}
+        >
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -675,39 +778,80 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               flex: 1,
               border: 'none',
               background: 'transparent',
-              fontSize: '1rem',
+              fontSize: 'clamp(0.95rem, 2.5vw, 1rem)',
               fontFamily: typography.body,
               color: colors.charcoal,
               resize: 'none' as const,
-              minHeight: '24px',
-              maxHeight: '120px',
+              minHeight: '20px',
+              maxHeight: '100px',
               outline: 'none',
-              padding: 0
+              padding: `${modernSpacing.base} 0`,
+              lineHeight: 1.4
             }}
             placeholder={t('chat.placeholder')}
             disabled={isThinking}
+            onFocus={(e) => {
+              e.currentTarget.parentElement!.style.borderColor = colors.oliveGreen
+              e.currentTarget.parentElement!.style.background = 'rgba(255, 255, 255, 0.95)'
+            }}
+            onBlur={(e) => {
+              e.currentTarget.parentElement!.style.borderColor = 'rgba(139, 149, 109, 0.3)'
+              e.currentTarget.parentElement!.style.background = 'rgba(255, 255, 255, 0.8)'
+            }}
           />
           <button
             onClick={() => handleSendMessage(input)}
             disabled={isThinking || !input.trim()}
             style={{
-              backgroundColor: colors.oliveGreen,
+              background: isThinking || !input.trim() 
+                ? 'rgba(139, 149, 109, 0.3)' 
+                : gradients.oliveSubtle,
               color: colors.cream,
               border: 'none',
-              borderRadius: borderRadius.sm,
-              padding: `${spacing.xs} ${spacing.sm}`,
+              borderRadius: '16px',
+              padding: `${modernSpacing.tiny} ${modernSpacing.comfortable}`,
               cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
               fontSize: '0.9rem',
               fontFamily: typography.body,
-              opacity: isThinking || !input.trim() ? 0.5 : 1,
+              fontWeight: typography.semibold,
+              transition: transitions.spring,
               whiteSpace: 'nowrap' as const,
-              flexShrink: 0
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: modernSpacing.xs,
+              boxShadow: isThinking || !input.trim() ? 'none' : shadows.soft
+            }}
+            onMouseEnter={(e) => {
+              if (!isThinking && input.trim()) {
+                e.currentTarget.style.transform = 'translateY(-1px) scale(1.05)'
+                e.currentTarget.style.boxShadow = shadows.medium
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isThinking && input.trim()) {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                e.currentTarget.style.boxShadow = shadows.soft
+              }
             }}
           >
-            Send
+            {isThinking ? (
+              <>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  border: '2px solid rgba(255,255,255,0.3)',
+                  borderTop: '2px solid rgba(255,255,255,0.8)',
+                  borderRadius: '50%'
+                }} />
+              </>
+            ) : (
+              <span>Send</span>
+            )}
           </button>
         </div>
       </div>
+
     </div>
   )
 }

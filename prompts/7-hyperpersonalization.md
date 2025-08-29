@@ -4,6 +4,7 @@
 - **Speaking with**: {{CURRENT_USER_NAME}}
 - **Preferred Language**: {{GROUP_LANGUAGE}}
 
+
 ## Group Information
 - **Group**: {{GROUP_NAME}} ({{GUEST_COUNT}} member{{GUEST_COUNT_PLURAL}})
 - **Members**: {{MEMBERS}}

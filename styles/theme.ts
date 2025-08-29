@@ -58,7 +58,10 @@ export const borderRadius = {
 export const shadows = {
   soft: '0 2px 8px rgba(139, 149, 109, 0.1)',
   medium: '0 4px 16px rgba(139, 149, 109, 0.15)',
-  strong: '0 8px 32px rgba(139, 149, 109, 0.2)'
+  strong: '0 8px 32px rgba(139, 149, 109, 0.2)',
+  glass: '0 8px 32px rgba(139, 149, 109, 0.12)',
+  floating: '0 10px 40px rgba(139, 149, 109, 0.15)',
+  elevated: '0 20px 60px rgba(139, 149, 109, 0.18)'
 }
 
 // Component style helpers
@@ -89,5 +92,33 @@ export const buttonStyle = {
 
 export const gradients = {
   warmBackground: `linear-gradient(135deg, ${colors.warmBeige} 0%, ${colors.cream} 100%)`,
-  oliveSubtle: `linear-gradient(135deg, ${colors.sageGreen} 0%, ${colors.oliveGreen} 100%)`
+  oliveSubtle: `linear-gradient(135deg, ${colors.sageGreen} 0%, ${colors.oliveGreen} 100%)`,
+  glass: `linear-gradient(135deg, rgba(251, 249, 244, 0.25) 0%, rgba(245, 241, 232, 0.05) 100%)`,
+  subtleWarmth: `linear-gradient(135deg, ${colors.cream} 0%, ${colors.warmBeige} 50%, ${colors.stone} 100%)`,
+  romanticOverlay: `linear-gradient(135deg, rgba(139, 149, 109, 0.03) 0%, rgba(164, 180, 148, 0.08) 100%)`
+}
+
+// Modern design tokens
+export const transitions = {
+  fast: '0.15s ease-out',
+  normal: '0.25s ease-out',
+  slow: '0.35s ease-out',
+  spring: '0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+}
+
+export const glassMorphism = {
+  backdrop: 'blur(20px)',
+  border: `1px solid rgba(139, 149, 109, 0.2)`,
+  background: gradients.glass
+}
+
+// Enhanced spacing for modern layouts
+export const modernSpacing = {
+  ...spacing,
+  xs: '0.25rem',
+  tiny: '0.5rem',
+  base: '1rem',
+  comfortable: '1.5rem',
+  spacious: '2.5rem',
+  generous: '4rem'
 }

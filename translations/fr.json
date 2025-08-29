@@ -249,6 +249,7 @@
   },
   "chat": {
     "title": "Assistant Mariage",
+    "welcome": "Comment puis-je vous aider ?",
     "subtitle": "Posez-moi vos questions sur le mariage !",
     "openChat": "Ouvrir l'assistant de mariage",
     "placeholder": "Demandez-moi sur le transport, les hôtels, le programme...",
@@ -331,12 +332,12 @@
     },
     "rsvp": {
       "howTo": {
-        "title": "Comment confirmer",
-        "message": "Je suis prêt à confirmer ma présence ! C'est quoi la procédure pour vous dire que je viens au mariage ?"
+        "title": "Comment faire le RSVP",
+        "message": "Je suis prêt à confirmer ma présence ! C'est quoi la procédure RSVP pour vous dire que je viens au mariage ?"
       },
       "change": {
-        "title": "Changer ma réponse",
-        "message": "Si mes plans changent et je dois mettre à jour ma réponse, c'est possible ? C'est quoi la procédure pour faire des changements ?"
+        "title": "Changer mon RSVP",
+        "message": "Si mes plans changent et je dois mettre à jour mon RSVP, c'est possible ? C'est quoi la procédure RSVP pour faire des changements ?"
       }
     },
     "weddingList": {
