@@ -9,6 +9,8 @@
   },
   "home": {
     "title": "Estelle & Julien",
+    "weddingLine": "Mariage Estelle & Julien",
+    "weddingLineMobile": "Estelle & Julien • 5-8 juin 2026",
     "date": "5-8 juin 2026",
     "location": "Île de Kea, Grèce",
     "locationSection": {
@@ -332,11 +334,11 @@
     },
     "rsvp": {
       "howTo": {
-        "title": "Comment faire le RSVP",
+        "title": "RSVP",
         "message": "Je suis prêt à confirmer ma présence ! C'est quoi la procédure RSVP pour vous dire que je viens au mariage ?"
       },
       "change": {
-        "title": "Changer mon RSVP",
+        "title": "RSVP",
         "message": "Si mes plans changent et je dois mettre à jour mon RSVP, c'est possible ? C'est quoi la procédure RSVP pour faire des changements ?"
       }
     },

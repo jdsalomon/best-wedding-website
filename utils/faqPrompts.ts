@@ -140,11 +140,21 @@ export const faqPrompts: FAQPrompt[] = [
 ]
 
 /**
- * Get 3 random FAQ prompts for display
+ * Get 3 FAQ prompts for display: 1 RSVP + 2 random others
  */
 export function getRandomFAQPrompts(): FAQPrompt[] {
-  const shuffled = [...faqPrompts].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 3)
+  // Always include 1 RSVP prompt
+  const rsvpPrompts = faqPrompts.filter(prompt => prompt.category === 'rsvp')
+  const randomRSVP = rsvpPrompts[Math.floor(Math.random() * rsvpPrompts.length)]
+  
+  // Get 2 random prompts from other categories
+  const nonRSVPPrompts = faqPrompts.filter(prompt => prompt.category !== 'rsvp')
+  const shuffledOthers = [...nonRSVPPrompts].sort(() => Math.random() - 0.5)
+  const randomOthers = shuffledOthers.slice(0, 2)
+  
+  // Combine: 1 RSVP + 2 others, then shuffle the final order
+  const result = [randomRSVP, ...randomOthers].sort(() => Math.random() - 0.5)
+  return result
 }
 
 /**
