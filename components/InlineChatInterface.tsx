@@ -52,12 +52,6 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [isClient, setIsClient] = useState(false)
   const [isWideScreen, setIsWideScreen] = useState(false)
 
-  const getPersonalizedTitle = () => {
-    if (isAuthenticated && group) {
-      return language === 'fr' ? `Bienvenue ${group.name} !` : `Welcome ${group.name}!`
-    }
-    return t('chat.title')
-  }
   
   // Auto-scroll refs and state
   const messagesContainerRef = useRef<HTMLDivElement>(null)
@@ -368,79 +362,6 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       border: 'none',
       borderRadius: 0
     }}>
-      {/* Chat Header - Fixed, never scrolls */}
-      <div style={{
-        background: 'rgba(139, 149, 109, 0.95)',
-        backdropFilter: 'blur(20px)',
-        color: colors.cream,
-        padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0,
-        borderBottom: `1px solid rgba(255, 255, 255, 0.1)`
-      }}>
-        {/* Subtle decorative gradient */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '2px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
-        }} />
-        
-        <div>
-          <h3 style={{
-            margin: 0,
-            fontSize: 'clamp(1.1rem, 3vw, 1.3rem)',
-            fontWeight: typography.bold,
-            fontFamily: typography.heading,
-            letterSpacing: '-0.01em'
-          }}>
-            {getPersonalizedTitle()}
-          </h3>
-          <p style={{
-            margin: `${modernSpacing.xs} 0 0 0`,
-            fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
-            opacity: 0.85,
-            fontFamily: typography.body,
-            fontWeight: typography.medium
-          }}>
-            {t('chat.subtitle')}
-          </p>
-        </div>
-        
-        {/* Elegant status indicator */}
-        <div style={{
-          display: 'flex',
-          gap: '3px',
-          alignItems: 'center'
-        }}>
-          <div style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            background: colors.sageGreen,
-            opacity: 0.8
-          }} />
-          <div style={{
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            background: colors.sageGreen,
-            opacity: 0.6
-          }} />
-          <div style={{
-            width: '3px',
-            height: '3px',
-            borderRadius: '50%',
-            background: colors.sageGreen,
-            opacity: 0.4
-          }} />
-        </div>
-        
-      </div>
 
       {/* Messages Area - Only this scrolls */}
       <div 
@@ -480,7 +401,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   fontWeight: typography.bold,
                   margin: `0 0 ${modernSpacing.base} 0`
                 }}>
-                  {t('chat.welcome')}
+                  {group ? (language === 'fr' ? `Bienvenue ${group.name} !` : `Welcome ${group.name}!`) : t('chat.welcome')}
                 </h3>
                 <p style={{
                   color: colors.deepOlive,
@@ -513,15 +434,19 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   key={prompt.id}
                   onClick={() => handleFAQClick(prompt)}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.6)',
+                    background: prompt.category === 'rsvp' 
+                      ? 'linear-gradient(135deg, #E8B86D 0%, #D4A747 100%)'
+                      : 'rgba(255, 255, 255, 0.6)',
                     backdropFilter: 'blur(10px)',
-                    border: `1px solid rgba(139, 149, 109, 0.3)`,
+                    border: prompt.category === 'rsvp'
+                      ? `2px solid #C89935`
+                      : `1px solid rgba(139, 149, 109, 0.3)`,
                     borderRadius: '16px',
                     padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
                     fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
                     fontFamily: typography.body,
                     fontWeight: typography.medium,
-                    color: colors.deepOlive,
+                    color: prompt.category === 'rsvp' ? '#FFFFFF' : colors.deepOlive,
                     cursor: 'pointer',
                     textAlign: 'center',
                     lineHeight: 1.5,
@@ -536,18 +461,30 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                     height: isWideScreen ? 'auto' : 'auto'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(164, 180, 148, 0.8)'
-                    e.currentTarget.style.color = colors.cream
+                    if (prompt.category === 'rsvp') {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #D4A747 0%, #C89935 100%)'
+                      e.currentTarget.style.color = '#FFFFFF'
+                      e.currentTarget.style.borderColor = '#B88A2E'
+                    } else {
+                      e.currentTarget.style.background = 'rgba(164, 180, 148, 0.8)'
+                      e.currentTarget.style.color = colors.cream
+                      e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.6)'
+                    }
                     e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'
                     e.currentTarget.style.boxShadow = shadows.floating
-                    e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.6)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
-                    e.currentTarget.style.color = colors.deepOlive
+                    if (prompt.category === 'rsvp') {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #E8B86D 0%, #D4A747 100%)'
+                      e.currentTarget.style.color = '#FFFFFF'
+                      e.currentTarget.style.borderColor = '#C89935'
+                    } else {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+                      e.currentTarget.style.color = colors.deepOlive
+                      e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
+                    }
                     e.currentTarget.style.transform = 'translateY(0) scale(1)'
                     e.currentTarget.style.boxShadow = shadows.soft
-                    e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
                   }}
                 >
                   {t(prompt.titleKey)}
@@ -673,7 +610,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 })
                 return (
                   <div style={{ 
-                    marginTop: message.content ? spacing.sm : 0 // Add spacing if there's text above
+                    marginTop: message.content ? spacing.sm : 0, // Add spacing if there's text above
+                    padding: modernSpacing.base // Add padding around the RSVP table for breathing room
                   }}>
                     <RSVPTable 
                       rsvpData={message.rsvpData}

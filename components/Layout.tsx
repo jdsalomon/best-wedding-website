@@ -1,4 +1,5 @@
 import { ReactNode, useState } from 'react'
+import * as React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
@@ -16,7 +17,18 @@ const Layout = ({ children }: LayoutProps) => {
   const { language, setLanguage } = useLanguageContext()
   const { isAuthenticated, group, logout } = useAuth()
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
+
+  // Check if mobile screen
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en')
@@ -36,13 +48,13 @@ const Layout = ({ children }: LayoutProps) => {
       background: gradients.subtleWarmth,
       color: colors.charcoal
     }}>
-      {/* Modern Glass Navigation - Fixed Header */}
+      {/* Clean Single-Line Wedding Header */}
       <header style={{
         flexShrink: 0,
         zIndex: 1000,
-        backdropFilter: glassMorphism.backdrop,
-        background: glassMorphism.background,
-        border: glassMorphism.border,
+        background: 'rgba(139, 149, 109, 0.95)',
+        backdropFilter: 'blur(20px)',
+        border: `1px solid rgba(255, 255, 255, 0.1)`,
         borderTop: 'none',
         borderLeft: 'none',
         borderRight: 'none'
@@ -50,140 +62,100 @@ const Layout = ({ children }: LayoutProps) => {
         <div style={{ 
           maxWidth: '1400px', 
           margin: '0 auto', 
-          padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
+          padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.base} ${modernSpacing.base}`,
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: modernSpacing.base,
-          minHeight: '60px'
+          gap: isMobile ? modernSpacing.xs : modernSpacing.base,
+          minHeight: isMobile ? '40px' : '50px',
+          overflow: 'hidden'
         }}>
           
-          {/* Wedding Title & Date */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: modernSpacing.xs
+          {/* Always Show Wedding Info - Responsive */}
+          <div style={{ 
+            flex: 1,
+            minWidth: 0,
+            overflow: 'hidden'
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: 'clamp(1.4rem, 4vw, 1.8rem)',
+              fontSize: isMobile ? 'clamp(0.85rem, 4vw, 1.1rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)',
               fontFamily: typography.heading,
               fontWeight: typography.bold,
-              color: colors.deepOlive,
-              letterSpacing: '-0.02em'
+              color: colors.cream,
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
             }}>
-              {t('home.title')}
+              {isMobile 
+                ? t('home.weddingLineMobile')
+                : `${t('home.weddingLine')} • ${t('home.date')} • ${t('home.location')}`
+              }
             </h1>
-            <div style={{
-              fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
-              fontFamily: typography.body,
-              fontWeight: typography.medium,
-              color: colors.oliveGreen,
-              display: 'flex',
-              alignItems: 'center',
-              gap: modernSpacing.xs,
-              position: 'relative',
-              paddingLeft: '12px'
-            }}>
-              <div style={{
-                position: 'absolute',
-                left: 0,
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '4px',
-                height: '4px',
-                borderRadius: '50%',
-                background: colors.sageGreen
-              }} />
-              {t('home.date')} • {t('home.location')}
-            </div>
           </div>
 
-          {/* Auth & Language Controls */}
+          {/* Compact Controls */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 'clamp(0.5rem, 2vw, 1rem)',
-            flexShrink: 0,
-            flexWrap: 'wrap'
+            gap: isMobile ? modernSpacing.xs : modernSpacing.base,
+            flexShrink: 0
           }}>
             {/* Auth Status */}
             {isAuthenticated ? (
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: modernSpacing.tiny,
-                padding: `${modernSpacing.xs} ${modernSpacing.base}`,
-                backgroundColor: 'rgba(139, 149, 109, 0.1)',
-                borderRadius: borderRadius.lg,
-                border: `1px solid rgba(139, 149, 109, 0.2)`
-              }}>
-                <span style={{
-                  fontSize: '0.9rem',
-                  color: colors.deepOlive,
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: 'none',
+                  border: `1px solid rgba(255, 255, 255, 0.4)`,
+                  borderRadius: borderRadius.sm,
+                  padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
+                  cursor: 'pointer',
+                  fontSize: isMobile ? '0.75rem' : '0.85rem',
+                  color: colors.cream,
+                  fontFamily: typography.body,
                   fontWeight: typography.medium,
-                  fontFamily: typography.body
-                }}>
-                  Welcome, {group?.name}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    background: 'none',
-                    border: `1px solid ${colors.deepOlive}`,
-                    borderRadius: borderRadius.sm,
-                    padding: `${modernSpacing.xs} ${modernSpacing.tiny}`,
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    color: colors.deepOlive,
-                    fontFamily: typography.body,
-                    fontWeight: typography.medium,
-                    transition: transitions.normal,
-                    marginLeft: modernSpacing.xs
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.deepOlive
-                    e.currentTarget.style.color = colors.cream
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent'
-                    e.currentTarget.style.color = colors.deepOlive
-                    e.currentTarget.style.transform = 'translateY(0)'
-                  }}
-                >
-                  {t('auth.logout')}
-                </button>
-              </div>
+                  transition: transitions.normal,
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
+                }}
+              >
+                {isMobile ? 'Exit' : t('auth.logout')}
+              </button>
             ) : (
               <Link href="/login" style={{ textDecoration: 'none' }}>
                 <button
                   style={{
-                    background: colors.oliveGreen,
-                    border: 'none',
-                    borderRadius: borderRadius.lg,
-                    padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: `1px solid rgba(255, 255, 255, 0.4)`,
+                    borderRadius: borderRadius.sm,
+                    padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
                     cursor: 'pointer',
-                    fontSize: '0.9rem',
+                    fontSize: isMobile ? '0.75rem' : '0.85rem',
                     color: colors.cream,
                     fontFamily: typography.body,
-                    fontWeight: typography.semibold,
-                    transition: transitions.spring,
-                    boxShadow: shadows.soft
+                    fontWeight: typography.medium,
+                    transition: transitions.normal,
+                    whiteSpace: 'nowrap'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.deepOlive
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = shadows.medium
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.oliveGreen
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = shadows.soft
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
                   }}
                 >
-                  {t('auth.login')}
+                  {isMobile ? 'Login' : t('auth.login')}
                 </button>
               </Link>
             )}
@@ -192,30 +164,26 @@ const Layout = ({ children }: LayoutProps) => {
             <button
               onClick={toggleLanguage}
               style={{
-                background: 'rgba(255, 255, 255, 0.3)',
-                backdropFilter: 'blur(10px)',
-                border: `1px solid rgba(139, 149, 109, 0.3)`,
-                borderRadius: borderRadius.lg,
-                padding: `${modernSpacing.tiny} ${modernSpacing.base}`,
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: `1px solid rgba(255, 255, 255, 0.4)`,
+                borderRadius: borderRadius.sm,
+                padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
                 cursor: 'pointer',
-                fontSize: '0.9rem',
-                color: colors.deepOlive,
+                fontSize: isMobile ? '0.75rem' : '0.85rem',
+                color: colors.cream,
                 fontFamily: typography.body,
                 fontWeight: typography.medium,
-                transition: transitions.spring,
-                display: 'flex',
-                alignItems: 'center',
-                gap: modernSpacing.xs
+                transition: transitions.normal,
+                whiteSpace: 'nowrap',
+                minWidth: isMobile ? '32px' : 'auto'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)'
-                e.currentTarget.style.transform = 'translateY(-1px)'
-                e.currentTarget.style.borderColor = colors.oliveGreen
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
-                e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
               }}
             >
               {language === 'en' ? 'FR' : 'EN'}

@@ -34,6 +34,22 @@ interface RSVPResponse {
 }
 
 const RSVPTable: React.FC<RSVPTableProps> = ({ rsvpData, onSubmit }) => {
+  // Add keyframes for loading spinner
+  React.useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `
+    document.head.appendChild(style)
+    return () => {
+      if (document.head.contains(style)) {
+        document.head.removeChild(style)
+      }
+    }
+  }, [])
   const { t } = useTranslation()
   const [responses, setResponses] = useState<Record<string, Record<string, string>>>(
     rsvpData.responses
@@ -332,19 +348,19 @@ const RSVPTable: React.FC<RSVPTableProps> = ({ rsvpData, onSubmit }) => {
       <div 
         onClick={hasChanges && !isSubmitting ? handleSubmit : undefined}
         style={{
-          padding: `${spacing.xs}`, // Much smaller padding
+          padding: `${spacing.xs}`,
           textAlign: 'center',
           borderTop: `1px solid ${colors.oliveGreen}`,
           backgroundColor: hasChanges && !isSubmitting ? colors.oliveGreen : colors.sageGreen,
           color: hasChanges && !isSubmitting ? colors.cream : colors.charcoal,
-          borderBottomLeftRadius: borderRadius.sm, // Round bottom corners
+          borderBottomLeftRadius: borderRadius.sm,
           borderBottomRightRadius: borderRadius.sm,
           cursor: hasChanges && !isSubmitting ? 'pointer' : 'default',
           transition: 'all 0.2s ease',
-          fontSize: '12px', // Smaller font
+          fontSize: '12px',
           fontWeight: '500',
           userSelect: 'none',
-          minHeight: '32px', // Smaller height
+          minHeight: '32px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
