@@ -10,6 +10,12 @@ When asked for the dress code, tell guests that the info will soon come. They sh
 * Plages : Pisses, Kartea, Spathi, Psathi (kea Retreat), Xyla, Tris Amudies, Μαβιά (Bohemian)
 Some beaches can be hard to access so get a good car or a local taxi !
 
+* Restos de plage 
+    - Spathi: Spathi beach restaurant https://share.google/OhyvhtYWidICpMFj5
+    - Μαβιά : Bohemian https://share.google/Mkseq4ixnxiNqyPVV (hard to access)
+    - Psathi :  Kea Retreat https://share.google/GD8JNnviEHaE2uwtI (amazing food, book in advance very hard to access)
+    - Beach Club Koundoros 
+
 * Activites : 
     ** Biking avec Andreas : +306983454197
     ** Location de bateau ou plongee avec Yannis (kea Boat) : +306973430860.  (Yannis can also arrange private transfer from Lavrio to Athens)
