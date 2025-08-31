@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "dev-next": "next dev",
-    "dev-all": "node start-all.js",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "NODE_OPTIONS='--no-deprecation' node server.js",
+    "dev-next": "NODE_OPTIONS='--no-deprecation' next dev",
+    "dev-all": "NODE_OPTIONS='--no-deprecation' node start-all.js",
+    "build": "NODE_OPTIONS='--no-deprecation' next build",
+    "start": "NODE_OPTIONS='--no-deprecation' next start",
+    "lint": "NODE_OPTIONS='--no-deprecation' next lint"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.23",
