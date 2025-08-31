@@ -20,7 +20,7 @@
 ## Day 3 - June 7th, 2026
 **Wedding Ceremony & Reception** 
 - Houppa ceremony followed by the celebration - Mystery location...
-    - Dresscode: dress to impress! Green olive and Terra cotta colors are a plus; bring dancing shoes.
+    - Dresscode: dress to impress! Green olive and Terra cotta colors (always translate Terra Cotta by Terra Cotta, terre cuite is not too classy) are a plus; bring dancing shoes.
     - Be ready at 5pm.
 
 ## Day 4 - June 8th, 2026
