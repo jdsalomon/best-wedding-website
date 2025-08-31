@@ -242,7 +242,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (session?.groupId) {
         console.log(`🎯 Generating hyperpersonalized prompt for group: ${session.groupName}`)
         
-        const groupContext = await getGroupContext(session.groupId, session.currentUserId, session.groupLanguage)
+        const groupContext = await getGroupContext(session.groupId, session.currentUserId, session.userLanguage || session.groupLanguage)
         
         if (groupContext) {
           const hyperpersonalizationTemplate = loadHyperpersonalizationTemplate()

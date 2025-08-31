@@ -43,7 +43,7 @@ interface InlineChatInterfaceProps {
 const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterfaceProps) => {
   const { t } = useTranslation()
   const { language } = useLanguageContext()
-  const { isAuthenticated, group } = useAuth()
+  const { isAuthenticated, currentUser } = useAuth()
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
@@ -402,7 +402,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   fontWeight: typography.bold,
                   margin: `0 0 ${modernSpacing.base} 0`
                 }}>
-                  {group ? (language === 'fr' ? `Bienvenue ${group.name} !` : `Welcome ${group.name}!`) : t('chat.welcome')}
+                  {currentUser ? `${t('chat.welcomePersonal')} ${currentUser.first_name}!` : t('chat.welcome')}
                 </h3>
                 <p style={{
                   color: colors.deepOlive,

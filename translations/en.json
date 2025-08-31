@@ -4,7 +4,6 @@
     "program": "Program",
     "transportation": "Transportation",
     "hotels": "Hotels",
-    "weddingList": "Wedding List",
     "ourWedding": "Our Wedding"
   },
   "home": {
@@ -90,6 +89,7 @@
   "chat": {
     "title": "Wedding Assistant",
     "welcome": "How can I help you?",
+    "welcomePersonal": "Welcome",
     "subtitle": "Ask me anything about the wedding!",
     "openChat": "Open wedding chat assistant",
     "placeholder": "Ask about transportation, hotels, program...",
@@ -178,16 +178,6 @@
       "change": {
         "title": "RSVP",
         "message": "If my plans change and I need to update my RSVP, is that possible? What's the RSVP process for making changes?"
-      }
-    },
-    "weddingList": {
-      "registry": {
-        "title": "Wedding registry",
-        "message": "I'd love to get you something special for your wedding - do you have a gift registry or wish list I can look at?"
-      },
-      "honeymoon": {
-        "title": "Honeymoon fund",
-        "message": "I'd like to contribute to your honeymoon instead of a traditional gift. How can I help with your post-wedding travel plans?"
       }
     },
     "general": {

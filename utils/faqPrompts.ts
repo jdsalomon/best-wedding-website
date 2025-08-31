@@ -2,7 +2,7 @@ export interface FAQPrompt {
   id: string
   titleKey: string
   messageKey: string
-  category: 'program' | 'travel' | 'hotels' | 'rsvp' | 'weddingList' | 'general'
+  category: 'program' | 'travel' | 'hotels' | 'rsvp' | 'general'
 }
 
 export const faqPrompts: FAQPrompt[] = [
@@ -96,20 +96,6 @@ export const faqPrompts: FAQPrompt[] = [
     titleKey: 'faq.rsvp.change.title',
     messageKey: 'faq.rsvp.change.message',
     category: 'rsvp'
-  },
-
-  // Wedding List Questions
-  {
-    id: 'weddingList_registry',
-    titleKey: 'faq.weddingList.registry.title',
-    messageKey: 'faq.weddingList.registry.message',
-    category: 'weddingList'
-  },
-  {
-    id: 'weddingList_honeymoon',
-    titleKey: 'faq.weddingList.honeymoon.title',
-    messageKey: 'faq.weddingList.honeymoon.message',
-    category: 'weddingList'
   },
 
   // General Questions

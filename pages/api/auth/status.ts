@@ -18,7 +18,8 @@ type StatusResponse = {
   session?: {
     groupId: string
     groupName: string
-    groupLanguage?: string
+    userLanguage?: string
+    groupLanguage?: string // Deprecated: kept for backward compatibility
     currentUserId?: string
     currentUserName?: string
   }
@@ -60,7 +61,8 @@ export default async function handler(
       session: {
         groupId: session.groupId,
         groupName: session.groupName,
-        groupLanguage: session.groupLanguage,
+        userLanguage: session.userLanguage || session.groupLanguage, // New field with fallback
+        groupLanguage: session.groupLanguage || session.userLanguage, // Deprecated: backward compatibility
         currentUserId: session.currentUserId,
         currentUserName: session.currentUserName
       }

@@ -63,7 +63,7 @@ export default async function handler(
     const sessionData = {
       groupId: authResult.group.id,
       groupName: authResult.group.name,
-      groupLanguage: currentUser?.preferred_language || 'French', // Use current user's language, not group
+      userLanguage: currentUser?.preferred_language || 'French', // Individual user's preferred language
       currentUserId: currentUser?.id,
       currentUserName: currentUser ? `${currentUser.first_name} ${currentUser.last_name}` : undefined,
       loginTime: Date.now()

@@ -1,15 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { parseSessionCookie } from '../../../lib/authMiddleware'
-import { getGroupContext, generatePersonalizedPrompt } from '../../../utils/hyperpersonalization'
+import { getGroupContext, processHyperpersonalizationTemplate } from '../../../utils/hyperpersonalization'
+import { loadHyperpersonalizationTemplate } from '../../../utils/loadPrompts'
 
 type DebugResponse = {
   success: boolean
   session?: {
     groupId: string
     groupName: string
+    currentUserId?: string
+    currentUserName?: string
   }
   groupContext?: any
   personalizedPrompt?: string
+  templateContent?: string
   error?: string
 }
 
@@ -37,30 +41,36 @@ export default async function handler(
       })
     }
 
-    // Get group context
-    const groupContext = await getGroupContext(session.groupId)
+    // Get group context with current user info
+    const groupContext = await getGroupContext(session.groupId, session.currentUserId, session.userLanguage || session.groupLanguage)
     
     if (!groupContext) {
       return res.status(200).json({
         success: false,
         session: {
           groupId: session.groupId,
-          groupName: session.groupName
+          groupName: session.groupName,
+          currentUserId: session.currentUserId,
+          currentUserName: session.currentUserName
         },
         error: 'Could not fetch group context'
       })
     }
 
-    // Generate personalized prompt
-    const personalizedPrompt = generatePersonalizedPrompt(groupContext)
+    // Load and process hyperpersonalization template
+    const template = loadHyperpersonalizationTemplate()
+    const personalizedPrompt = template ? processHyperpersonalizationTemplate(template, groupContext) : 'Template not found'
 
     return res.status(200).json({
       success: true,
       session: {
         groupId: session.groupId,
-        groupName: session.groupName
+        groupName: session.groupName,
+        currentUserId: session.currentUserId,
+        currentUserName: session.currentUserName
       },
       groupContext,
+      templateContent: template || 'Template not loaded',
       personalizedPrompt
     })
 

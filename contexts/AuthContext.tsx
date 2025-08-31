@@ -17,6 +17,7 @@ type Group = {
 type AuthContextType = {
   isAuthenticated: boolean
   group: Group | null
+  currentUser: Guest | null
   login: (firstName: string, lastName: string) => Promise<{ success: boolean; message: string }>
   logout: () => Promise<void>
   loading: boolean
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [group, setGroup] = useState<Group | null>(null)
+  const [currentUser, setCurrentUser] = useState<Guest | null>(null)
   const [loading, setLoading] = useState(true)
 
   // Check authentication status on mount
@@ -42,6 +44,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.isAuthenticated) {
           setIsAuthenticated(true)
           setGroup(data.group)
+          
+          // Find the current user from the group guests using session info
+          if (data.session?.currentUserId && data.group?.guests) {
+            const foundUser = data.group.guests.find((guest: Guest) => guest.id === data.session.currentUserId)
+            setCurrentUser(foundUser || null)
+          }
         }
       }
     } catch (error) {
@@ -66,6 +74,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.success) {
         setIsAuthenticated(true)
         setGroup(data.group)
+        
+        // Find the current user (the one who just logged in)
+        if (data.group?.guests) {
+          const foundUser = data.group.guests.find((guest: Guest) => 
+            guest.first_name.toLowerCase() === firstName.trim().toLowerCase() &&
+            guest.last_name.toLowerCase() === lastName.trim().toLowerCase()
+          )
+          setCurrentUser(foundUser || null)
+        }
       }
 
       return {
@@ -88,12 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsAuthenticated(false)
       setGroup(null)
+      setCurrentUser(null)
     }
   }
 
   const value = {
     isAuthenticated,
     group,
+    currentUser,
     login,
     logout,
     loading

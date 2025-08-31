@@ -4,7 +4,6 @@
     "program": "Programme",
     "transportation": "Transport",
     "hotels": "Hôtels",
-    "weddingList": "Liste de Mariage",
     "ourWedding": "Notre Mariage"
   },
   "home": {
@@ -90,6 +89,7 @@
   "chat": {
     "title": "Assistant Mariage",
     "welcome": "Comment puis-je vous aider ?",
+    "welcomePersonal": "Bienvenue",
     "subtitle": "Posez-moi vos questions sur le mariage !",
     "openChat": "Ouvrir l'assistant de mariage",
     "placeholder": "Demandez-moi sur le transport, les hôtels, le programme...",
@@ -178,16 +178,6 @@
       "change": {
         "title": "RSVP",
         "message": "Si mes plans changent et je dois mettre à jour mon RSVP, c'est possible ? C'est quoi la procédure RSVP pour faire des changements ?"
-      }
-    },
-    "weddingList": {
-      "registry": {
-        "title": "Liste de mariage",
-        "message": "J'aimerais vous offrir quelque chose de spécial pour votre mariage - vous avez une liste de cadeaux ou une liste de souhaits que je peux consulter ?"
-      },
-      "honeymoon": {
-        "title": "Fonds lune de miel",
-        "message": "J'aimerais contribuer à votre lune de miel plutôt qu'à un cadeau traditionnel. Comment je peux aider avec vos projets de voyage post-mariage ?"
       }
     },
     "general": {

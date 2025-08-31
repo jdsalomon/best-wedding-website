@@ -39,7 +39,6 @@ const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div style={{ 
-      height: '100vh',
       height: '100dvh',
       display: 'flex',
       flexDirection: 'column',

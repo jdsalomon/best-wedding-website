@@ -10,6 +10,7 @@ export interface Guest {
   misc?: string
   source?: string
   plus_one_of?: string
+  preferred_language?: string
 }
 
 export interface GroupContext {
@@ -87,6 +88,12 @@ export function processHyperpersonalizationTemplate(template: string, context: G
     ? `${context.currentUser.first_name} ${context.currentUser.last_name}`
     : context.groupName
   
+  // Individual user personalization
+  const userLanguage = context.currentUser?.preferred_language || context.groupLanguage || 'French'
+  const userNotesSection = context.currentUser?.misc 
+    ? `"${context.currentUser.misc}"`
+    : ''
+  
   return template
     .replace(/\{\{GROUP_NAME\}\}/g, context.groupName)
     .replace(/\{\{GUEST_COUNT\}\}/g, context.guestCount.toString())
@@ -95,6 +102,8 @@ export function processHyperpersonalizationTemplate(template: string, context: G
     .replace(/\{\{GROUP_NOTES\}\}/g, groupNotesSection)
     .replace(/\{\{CURRENT_USER_NAME\}\}/g, currentUserName)
     .replace(/\{\{GROUP_LANGUAGE\}\}/g, context.groupLanguage || 'French')
+    .replace(/\{\{USER_LANGUAGE\}\}/g, userLanguage)
+    .replace(/\{\{USER_NOTES\}\}/g, userNotesSection)
 }
 
 /**

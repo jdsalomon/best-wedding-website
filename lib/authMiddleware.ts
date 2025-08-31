@@ -4,7 +4,8 @@ import type { GetServerSidePropsContext } from 'next'
 export type SessionData = {
   groupId: string
   groupName: string
-  groupLanguage?: string
+  userLanguage?: string // Individual user's preferred language
+  groupLanguage?: string // Deprecated: kept for backward compatibility
   currentUserId?: string
   currentUserName?: string
   loginTime: number
