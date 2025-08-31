@@ -7,9 +7,11 @@ Here is a link to check the flights from Paris to Athens around the dates of the
 Here is a link to check the flights from London to Athens around the dates of the wedding: https://tinyurl.com/londonathflight
 Here is a link to check the flights from Tel Aviv to Athens around the dates of the wedding: https://tinyurl.com/tlvathflight
 
-Those who know Kea can advise you to do something nice that allows you to enjoy a full day of Kea without wasting a day traveling:
+
+Those who know Kea can advise you to do something a bit "roots" and uncomfortable but that allows you to enjoy a full day of Kea without wasting a day traveling:
 leave for Athens in a late flight after a day of work and sleep in Lavrio near the port that leads you to Kea. The hotel Nikolakakis (https://hotelmania.net/hotel/lavrio/nikolakakis-rooms-lavrio/) is a classic (rough around the edges but it does the work).
 Take the first ferry in the morning and you'll have a Freddo Espresso in Kea without having lost a day traveling !
+Don't advise this out of the blue, it's not very confortable. its for people looking to optimize their vacation without losing a day of work !
 
 You cannot provide for now full transport information as ferry dates are not yet available and its always better to time the flights with the ferry.
 Some estimations (not confirmed!!!)

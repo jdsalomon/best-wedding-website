@@ -16,7 +16,7 @@
       "title": "Lieu",
       "venue": "Île de Kea",
       "address": "Kea (Tzia), Cyclades, Grèce",
-      "description": "Magnifique cérémonie sur île grecque avec vue imprenable sur la mer Égée"
+      "description": "Cérémonie sur l'île de Kea, Cyclades"
     },
     "program": {
       "title": "Programme",
@@ -34,7 +34,7 @@
           "time": "Soirée",
           "event": "Dîner de Shabbat",
           "location": "Strofi Tou Mimi",
-          "description": "Dîner familial les pieds dans le sable"
+          "description": "Dîner familial en bord de mer"
         }
       },
       "day2": {
@@ -43,13 +43,13 @@
         "relaxation": {
           "time": "Toute la journée",
           "event": "Journée Plage & Arrivée des Invités",
-          "description": "Détente sur la plage et accueil des invités qui arrivent"
+          "description": "Journée libre et arrivée des invités"
         },
         "welcome": {
           "time": "Soirée",
           "event": "Dîner d'Accueil",
           "location": "Place centrale de Loulida",
-          "description": "Cuisine grecque au cœur du village"
+          "description": "Dîner au centre du village"
         }
       },
       "day3": {
@@ -59,13 +59,13 @@
           "time": "Après-midi",
           "event": "Cérémonie Religieuse (Houppa)",
           "location": "Varadi",
-          "description": "Cérémonie traditionnelle avec buffet grec végétarien"
+          "description": "Cérémonie religieuse traditionnelle"
         },
         "party": {
           "time": "Soirée",
           "event": "Fête de Mariage",
           "location": "Aigis Suites Kea",
-          "description": "Musique live, danse et célébration"
+          "description": "Soirée de fête"
         }
       },
       "day4": {
@@ -75,13 +75,7 @@
           "time": "Après-midi",
           "event": "Beach Party",
           "location": "Isalos beach bar",
-          "description": "Cocktails, danse et plaisir au bord de mer"
-        },
-        "cinema": {
-          "time": "Soirée",
-          "event": "Cinéma & Détente",
-          "location": "Cine Korissia",
-          "description": "Projection en plein air sous les étoiles"
+          "description": "Beach party"
         }
       }
     }

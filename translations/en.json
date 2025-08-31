@@ -16,7 +16,7 @@
       "title": "Location",
       "venue": "Kea Island",
       "address": "Kea (Tzia), Cyclades, Greece",
-      "description": "Beautiful Greek island ceremony with stunning Aegean views"
+      "description": "Ceremony on Kea Island, Cyclades"
     },
     "program": {
       "title": "Program",
@@ -34,7 +34,7 @@
           "time": "Evening",
           "event": "Shabbat Dinner",
           "location": "Strofi Tou Mimi",
-          "description": "Beachside family dinner with feet in the sand"
+          "description": "Beachside family dinner"
         }
       },
       "day2": {
@@ -43,13 +43,13 @@
         "relaxation": {
           "time": "All day",
           "event": "Beach Day & Guest Arrivals",
-          "description": "Relax on the beach and welcome arriving guests"
+          "description": "Free day and guest arrivals"
         },
         "welcome": {
           "time": "Evening",
           "event": "Welcome Dinner",
           "location": "Loulida central square",
-          "description": "Greek cuisine in the heart of the village"
+          "description": "Dinner in the village center"
         }
       },
       "day3": {
@@ -59,13 +59,13 @@
           "time": "Afternoon",
           "event": "Religious Ceremony (Houppa)",
           "location": "Varadi",
-          "description": "Traditional ceremony with Greek vegetarian buffet"
+          "description": "Traditional religious ceremony"
         },
         "party": {
           "time": "Evening",
           "event": "Wedding Party",
           "location": "Aigis Suites Kea",
-          "description": "Live music, dancing, and celebration"
+          "description": "Evening celebration"
         }
       },
       "day4": {
@@ -75,13 +75,7 @@
           "time": "Afternoon",
           "event": "Beach Party",
           "location": "Isalos beach bar",
-          "description": "Cocktails, dancing, and seaside fun"
-        },
-        "cinema": {
-          "time": "Evening",
-          "event": "Cinema & Relaxation",
-          "location": "Cine Korissia",
-          "description": "Outdoor movie screening under the stars"
+          "description": "Beach party"
         }
       }
     }
