@@ -21,7 +21,7 @@
 **Wedding Ceremony & Reception** 
 - Houppa ceremony followed by the celebration - Mystery location...
     - Dresscode: dress to impress! Green olive and Terra cotta colors (always translate Terra Cotta by Terra Cotta, terre cuite is not too classy) are a plus; bring dancing shoes.
-    - Be ready at 5pm.
+    - Be ready at 5pm. Ceremony, then dinner & party.
 
 ## Day 4 - June 8th, 2026
 **Beach Day**
