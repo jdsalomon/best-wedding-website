@@ -6,7 +6,6 @@ import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, gradients, spacing, borderRadius, shadows, transitions, glassMorphism, modernSpacing } from '../styles/theme'
-import WeddingChatbot, { ChatToggleButton } from './WeddingChatbot'
 
 interface LayoutProps {
   children: ReactNode
@@ -16,7 +15,6 @@ const Layout = ({ children }: LayoutProps) => {
   const { t } = useTranslation()
   const { language, setLanguage } = useLanguageContext()
   const { isAuthenticated, group, logout } = useAuth()
-  const [isChatOpen, setIsChatOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
 
@@ -42,6 +40,7 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <div style={{ 
       height: '100vh',
+      height: '100dvh',
       display: 'flex',
       flexDirection: 'column',
       fontFamily: typography.body,
@@ -202,16 +201,6 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
       
-      {/* Chat Components - HIDDEN (main page now has prominent chat) */}
-      <div style={{ display: 'none' }}>
-        {!isChatOpen && (
-          <ChatToggleButton onClick={() => setIsChatOpen(true)} />
-        )}
-        <WeddingChatbot 
-          isOpen={isChatOpen} 
-          onClose={() => setIsChatOpen(false)} 
-        />
-      </div>
     </div>
   )
 }

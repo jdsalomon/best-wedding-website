@@ -354,7 +354,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   return (
     <div style={{
       background: gradients.subtleWarmth,
-      height: '100%',
+      flex: 1,
+      minHeight: 0,
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
@@ -694,7 +695,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         
         <div style={{
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'center',
           gap: modernSpacing.base,
           background: 'rgba(255, 255, 255, 0.8)',
           border: `1px solid rgba(139, 149, 109, 0.3)`,
@@ -716,14 +717,14 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               flex: 1,
               border: 'none',
               background: 'transparent',
-              fontSize: 'clamp(0.95rem, 2.5vw, 1rem)',
+              fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
               fontFamily: typography.body,
               color: colors.charcoal,
               resize: 'none' as const,
               minHeight: '20px',
               maxHeight: '100px',
               outline: 'none',
-              padding: `${modernSpacing.base} 0`,
+              padding: `${modernSpacing.tiny} 0`,
               lineHeight: 1.4
             }}
             placeholder={t('chat.placeholder')}
@@ -747,7 +748,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               color: colors.cream,
               border: 'none',
               borderRadius: '16px',
-              padding: `${modernSpacing.tiny} ${modernSpacing.comfortable}`,
+              padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
               cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
               fontSize: '0.9rem',
               fontFamily: typography.body,
