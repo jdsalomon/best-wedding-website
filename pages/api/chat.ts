@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai'
+import { openrouter } from '@openrouter/ai-sdk-provider'
 import { streamText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { SYSTEM_PROMPT, loadHyperpersonalizationTemplate } from '../../utils/loadPrompts'
@@ -6,6 +6,11 @@ import { parseSessionCookie } from '../../lib/authMiddleware'
 import { getGroupContext, processHyperpersonalizationTemplate } from '../../utils/hyperpersonalization'
 import { getClientId, checkRateLimit } from '../../lib/rateLimit'
 import { createClient } from '@supabase/supabase-js'
+
+// OpenRouter Configuration
+const primaryModel = process.env.AI_MODEL_PRIMARY || 'openai/gpt-4o'
+const fallbackModels = process.env.AI_MODEL_FALLBACKS || 'anthropic/claude-3.5-sonnet,google/gemini-1.5-flash'
+const routingPreference = process.env.AI_ROUTING_PREFERENCE || 'quality'
 
 // Initialize Supabase client for RSVP data
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -314,24 +319,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Debug logging - log the complete system prompt being sent to AI
-    console.log('\n' + '='.repeat(80))
-    console.log('🤖 SYSTEM PROMPT BEING SENT TO AI:')
-    console.log('='.repeat(80))
-    console.log(systemPrompt)
-    console.log('='.repeat(80))
-    console.log(`💬 CONVERSATION MESSAGES (${limitedMessages.length} messages):`)
-    console.log(limitedMessages.map((msg, i) => `${i+1}. ${msg.role}: ${msg.content.slice(0, 50)}...`).join('\n'))
-    console.log('='.repeat(80) + '\n')
+    // Debug logging - API and request status
+    console.log(`🔑 OpenRouter API Key: ${process.env.OPENROUTER_API_KEY ? 'Present' : 'Missing'}`)
+    console.log(`📝 System prompt length: ${systemPrompt.length} chars`)
+    console.log(`💬 Messages: ${limitedMessages.length} messages`)
+    console.log(`🤖 Primary Model: ${primaryModel}`)
+    console.log(`🔄 Fallback Models: ${fallbackModels}`)
+    console.log(`⚙️ Routing Preference: ${routingPreference}`)
 
+    console.log(`🤖 Calling streamText with OpenRouter model: ${primaryModel}`)
+    
     const result = await streamText({
-    model: openai('gpt-4o'),
+      model: openrouter(primaryModel),
       messages: [
         { role: 'system', content: systemPrompt },
         ...limitedMessages
       ],
       temperature: 0.7,
-      maxTokens: 1000
+      headers: {
+        'X-OpenRouter-Fallback-Models': fallbackModels,
+        'X-OpenRouter-Prefer': routingPreference
+      }
     })
 
     // Handle RSVP messages with simple JSON response
