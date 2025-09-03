@@ -132,14 +132,15 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       const contentType = response.headers.get('content-type')
       console.log(`🔍 FRONTEND: Response Content-Type: ${contentType}`)
 
-      // Handle JSON response (RSVP messages)
+      // Handle JSON response (RSVP messages or non-streaming mode)
       if (contentType?.includes('application/json')) {
-        console.log(`📄 FRONTEND: Handling JSON response (RSVP message)`)
+        console.log(`📄 FRONTEND: Handling JSON response`)
         try {
           const jsonResponse = await response.json()
           console.log(`📋 FRONTEND: JSON response received:`, {
             contentLength: jsonResponse.content?.length || 0,
-            hasRsvpData: !!jsonResponse.rsvpData
+            hasRsvpData: !!jsonResponse.rsvpData,
+            isRSVP: !!jsonResponse.rsvpData
           })
           
           const assistantMessage: Message = {

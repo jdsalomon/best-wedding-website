@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai'
+import { google } from '@ai-sdk/google'
 import { streamText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { SYSTEM_PROMPT, loadHyperpersonalizationTemplate } from '../../utils/loadPrompts'
@@ -6,6 +6,9 @@ import { parseSessionCookie } from '../../lib/authMiddleware'
 import { getGroupContext, processHyperpersonalizationTemplate } from '../../utils/hyperpersonalization'
 import { getClientId, checkRateLimit } from '../../lib/rateLimit'
 import { createClient } from '@supabase/supabase-js'
+
+// DEBUG: Toggle streaming on/off to isolate issues
+const USE_STREAMING = false // Set to true to enable streaming, false for single response
 
 // Initialize Supabase client for RSVP data
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -314,25 +317,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Debug logging - log the complete system prompt being sent to AI
-    console.log('\n' + '='.repeat(80))
-    console.log('🤖 SYSTEM PROMPT BEING SENT TO AI:')
-    console.log('='.repeat(80))
-    console.log(systemPrompt)
-    console.log('='.repeat(80))
-    console.log(`💬 CONVERSATION MESSAGES (${limitedMessages.length} messages):`)
-    console.log(limitedMessages.map((msg, i) => `${i+1}. ${msg.role}: ${msg.content.slice(0, 50)}...`).join('\n'))
-    console.log('='.repeat(80) + '\n')
+    // Debug logging - API and request status
+    console.log(`🔑 Gemini API Key: ${process.env.GEMINI_API_KEY ? 'Present' : 'Missing'}`)
+    console.log(`📝 System prompt length: ${systemPrompt.length} chars`)
+    console.log(`💬 Messages: ${limitedMessages.length} messages`)
+    console.log(`🌊 Streaming mode: ${USE_STREAMING ? 'Enabled' : 'Disabled'}`)
 
+    console.log(`🤖 Calling streamText with model: gemini-1.5-flash`)
+    
     const result = await streamText({
-    model: openai('gpt-4o'),
+      model: google('gemini-1.5-flash'),
       messages: [
         { role: 'system', content: systemPrompt },
         ...limitedMessages
       ],
-      temperature: 0.7,
-      maxTokens: 1000
+      temperature: 0.7
     })
+    
+    console.log(`✅ streamText call completed, has textStream: ${!!result.textStream}`)
 
     // Handle RSVP messages with simple JSON response
     if (isRSVPMessage) {
@@ -340,11 +342,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // Generate the complete AI response
       let fullContent = ''
+      let chunkCount = 0
       for await (const chunk of result.textStream) {
+        chunkCount++
         fullContent += chunk
+        if (chunkCount === 1) console.log(`📦 First chunk: "${chunk.slice(0, 50)}..."`)
       }
       
-      console.log(`✅ Complete AI response generated (${fullContent.length} chars)`)
+      console.log(`✅ RSVP response: ${chunkCount} chunks, ${fullContent.length} chars total`)
       
       // Return simple JSON response
       res.setHeader('Content-Type', 'application/json')
@@ -356,39 +361,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         rsvpData: rsvpData
       }
       
-      console.log(`📦 Sending JSON response with RSVP data:`, {
-        contentLength: fullContent.length,
-        hasRsvpData: !!rsvpData,
-        eventsCount: rsvpData?.events.length || 0
-      })
-      
       return res.status(200).json(response)
     }
 
-    // Handle regular messages with streaming (unchanged)
-    console.log(`📤 REGULAR MESSAGE: Using streaming response`)
-    
-    // Set up Server-Sent Events streaming response
-    res.setHeader('Content-Type', 'text/event-stream')
-    res.setHeader('Cache-Control', 'no-cache, no-transform')
-    res.setHeader('Connection', 'keep-alive')
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    // Handle regular messages - with streaming toggle
+    if (USE_STREAMING) {
+      console.log(`📤 REGULAR MESSAGE: Using streaming response`)
+      
+      // Set up Server-Sent Events streaming response
+      res.setHeader('Content-Type', 'text/event-stream')
+      res.setHeader('Cache-Control', 'no-cache, no-transform')
+      res.setHeader('Connection', 'keep-alive')
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
-    // Stream AI response (regular messages)
-    for await (const chunk of result.textStream) {
-      const payload = { 
-        choices: [{ delta: { content: chunk } }],
-        type: 'content' 
+      // Stream AI response with debug logging
+      let chunkCount = 0
+      for await (const chunk of result.textStream) {
+        chunkCount++
+        if (chunkCount === 1) console.log(`📦 First streaming chunk: "${chunk.slice(0, 50)}..."`)
+        
+        const payload = { 
+          choices: [{ delta: { content: chunk } }],
+          type: 'content' 
+        }
+        
+        res.write(`data: ${JSON.stringify(payload)}\n\n`)
+        // Force flush for real-time streaming
+        if ('flush' in res && typeof res.flush === 'function') res.flush()
       }
       
-      res.write(`data: ${JSON.stringify(payload)}\n\n`)
-      // Force flush for real-time streaming
-      if ('flush' in res && typeof res.flush === 'function') res.flush()
+      console.log(`🌊 Streaming complete: ${chunkCount} chunks sent`)
+      res.write('data: [DONE]\n\n')
+      res.end()
+    } else {
+      console.log(`📤 REGULAR MESSAGE: Using non-streaming response (debug mode)`)
+      
+      // Generate complete response first
+      let fullContent = ''
+      let chunkCount = 0
+      for await (const chunk of result.textStream) {
+        chunkCount++
+        fullContent += chunk
+        if (chunkCount === 1) console.log(`📦 First chunk: "${chunk.slice(0, 50)}..."`)
+      }
+      
+      console.log(`✅ Non-streaming response: ${chunkCount} chunks, ${fullContent.length} chars total`)
+      
+      // Return as simple JSON response
+      res.setHeader('Content-Type', 'application/json')
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      
+      return res.status(200).json({ content: fullContent })
     }
-    
-    res.write('data: [DONE]\n\n')
-    res.end()
   } catch (error) {
     console.error('Chat API error:', error)
     return res.status(500).json({ message: 'Internal server error' })
