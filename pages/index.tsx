@@ -340,19 +340,6 @@ const Home: NextPage = () => {
                     {t('home.program.day4.beach.description')}
                   </div>
                 </div>
-                <div style={{ marginBottom: spacing.md }}>
-                  <strong style={{ color: colors.deepOlive }}>
-                    {t('home.program.day4.cinema.time')}
-                  </strong> - {t('home.program.day4.cinema.event')} @ {t('home.program.day4.cinema.location')}
-                  <div style={{ 
-                    fontSize: '0.9em', 
-                    color: colors.softGray, 
-                    marginTop: spacing.xs,
-                    fontStyle: 'italic'
-                  }}>
-                    {t('home.program.day4.cinema.description')}
-                  </div>
-                </div>
               </div>
             </div>
           ) : (
