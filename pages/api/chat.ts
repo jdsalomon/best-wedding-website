@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai'
+import { openrouter } from '@openrouter/ai-sdk-provider'
 import { streamText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { SYSTEM_PROMPT, loadHyperpersonalizationTemplate } from '../../utils/loadPrompts'
@@ -6,6 +6,17 @@ import { parseSessionCookie } from '../../lib/authMiddleware'
 import { getGroupContext, processHyperpersonalizationTemplate } from '../../utils/hyperpersonalization'
 import { getClientId, checkRateLimit } from '../../lib/rateLimit'
 import { createClient } from '@supabase/supabase-js'
+
+// Model Priority Configuration (hardcoded for easier management)
+const MODEL_PRIORITY = [
+  'google/gemini-2.5-flash',   // Fallback 2: Fast and cost-effective
+  'anthropic/claude-3.5-sonnet',    // Primary: Best reasoning and coding
+  'openai/gpt-4o',                 // Fallback 1: Reliable conversational AI
+  'openai/gpt-4o-mini'             // Fallback 3: Ultra-cheap emergency fallback
+]
+
+// Routing preference for OpenRouter
+const ROUTING_PREFERENCE = 'quality'
 
 // Initialize Supabase client for RSVP data
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -15,6 +26,61 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 interface Message {
   role: 'user' | 'assistant'
   content: string
+}
+
+/**
+ * Attempt to get AI response with model fallback
+ * Tries models in priority order until one succeeds
+ */
+async function getAIResponseWithFallback(
+  systemPrompt: string,
+  limitedMessages: Message[],
+  temperature: number = 0.7
+) {
+  const errors: string[] = []
+  
+  for (let i = 0; i < MODEL_PRIORITY.length; i++) {
+    const modelId = MODEL_PRIORITY[i]
+    const remainingModels = MODEL_PRIORITY.slice(i + 1)
+    
+    try {
+      console.log(`🤖 Attempting model ${i + 1}/${MODEL_PRIORITY.length}: ${modelId}`)
+      if (remainingModels.length > 0) {
+        console.log(`🔄 Remaining fallbacks: ${remainingModels.join(', ')}`)
+      }
+      
+      const result = await streamText({
+        model: openrouter(modelId),
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...limitedMessages
+        ],
+        temperature,
+        headers: {
+          'X-OpenRouter-Fallback-Models': remainingModels.join(','),
+          'X-OpenRouter-Prefer': ROUTING_PREFERENCE
+        }
+      })
+      
+      console.log(`✅ Success with model: ${modelId}`)
+      return { result, modelUsed: modelId }
+      
+    } catch (error) {
+      const errorMsg = `❌ Model ${modelId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      console.log(errorMsg)
+      errors.push(errorMsg)
+      
+      // If this is the last model, throw the accumulated errors
+      if (i === MODEL_PRIORITY.length - 1) {
+        throw new Error(`All models failed:\n${errors.join('\n')}`)
+      }
+      
+      // Continue to next model
+      console.log(`⏭️ Trying next model...`)
+    }
+  }
+  
+  throw new Error('Unexpected error: no models to try')
 }
 
 /**
@@ -314,25 +380,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Debug logging - log the complete system prompt being sent to AI
-    console.log('\n' + '='.repeat(80))
-    console.log('🤖 SYSTEM PROMPT BEING SENT TO AI:')
-    console.log('='.repeat(80))
-    console.log(systemPrompt)
-    console.log('='.repeat(80))
-    console.log(`💬 CONVERSATION MESSAGES (${limitedMessages.length} messages):`)
-    console.log(limitedMessages.map((msg, i) => `${i+1}. ${msg.role}: ${msg.content.slice(0, 50)}...`).join('\n'))
-    console.log('='.repeat(80) + '\n')
+    // Debug logging - API and request status
+    console.log(`🔑 OpenRouter API Key: ${process.env.OPENROUTER_API_KEY ? 'Present' : 'Missing'}`)
+    console.log(`📝 System prompt length: ${systemPrompt.length} chars`)
+    console.log(`💬 Messages: ${limitedMessages.length} messages`)
+    console.log(`🎯 Model Priority: ${MODEL_PRIORITY.join(' → ')}`)
+    console.log(`⚙️ Routing Preference: ${ROUTING_PREFERENCE}`)
 
-    const result = await streamText({
-    model: openai('gpt-4o'),
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...limitedMessages
-      ],
-      temperature: 0.7,
-      maxTokens: 1000
-    })
+    // Get AI response with automatic model fallback
+    const { result, modelUsed } = await getAIResponseWithFallback(
+      systemPrompt,
+      limitedMessages,
+      0.7
+    )
+    
+    console.log(`✅ Using model: ${modelUsed}`)
 
     // Handle RSVP messages with simple JSON response
     if (isRSVPMessage) {
@@ -391,6 +453,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.end()
   } catch (error) {
     console.error('Chat API error:', error)
+    
+    // Provide more specific error messages
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+    
+    if (errorMessage.includes('All models failed')) {
+      return res.status(503).json({ 
+        message: 'All AI models are currently unavailable. Please try again later.',
+        details: errorMessage
+      })
+    }
+    
     return res.status(500).json({ message: 'Internal server error' })
   }
 }
