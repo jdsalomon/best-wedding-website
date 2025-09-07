@@ -557,15 +557,42 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                     </a>
                   ),
                   table: ({children}) => (
-                    <table style={{
-                      width: '100%',
-                      borderCollapse: 'collapse',
+                    <div style={{
+                      overflow: 'auto',
                       margin: '0.5rem 0',
-                      fontSize: '0.9em',
-                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                      borderRadius: borderRadius.sm,
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
+                      background: message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.05)',
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: `${message.role === 'user' ? colors.cream : colors.oliveGreen} transparent`,
+                      position: 'relative'
                     }}>
-                      {children}
-                    </table>
+                      <table style={{
+                        width: '100%',
+                        minWidth: 'max-content',
+                        borderCollapse: 'collapse',
+                        fontSize: '0.9em',
+                        border: 'none'
+                      }}>
+                        {children}
+                      </table>
+                      <style jsx>{`
+                        div::-webkit-scrollbar {
+                          height: 6px;
+                        }
+                        div::-webkit-scrollbar-track {
+                          background: transparent;
+                        }
+                        div::-webkit-scrollbar-thumb {
+                          background: ${message.role === 'user' ? colors.cream : colors.oliveGreen};
+                          border-radius: 3px;
+                          opacity: 0.6;
+                        }
+                        div::-webkit-scrollbar-thumb:hover {
+                          opacity: 1;
+                        }
+                      `}</style>
+                    </div>
                   ),
                   thead: ({children}) => (
                     <thead style={{
@@ -580,7 +607,9 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       textAlign: 'left',
                       fontWeight: typography.semibold,
                       color: message.role === 'user' ? colors.cream : colors.charcoal,
-                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`
+                      borderBottom: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.2)' : 'rgba(139, 149, 109, 0.3)'}`,
+                      borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.2)'}`,
+                      whiteSpace: 'nowrap'
                     }}>
                       {children}
                     </th>
@@ -588,12 +617,57 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   td: ({children}) => (
                     <td style={{
                       padding: '0.5rem',
-                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
-                      color: message.role === 'user' ? colors.cream : colors.charcoal
+                      borderBottom: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.2)'}`,
+                      borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.05)' : 'rgba(139, 149, 109, 0.1)'}`,
+                      color: message.role === 'user' ? colors.cream : colors.charcoal,
+                      whiteSpace: 'nowrap'
                     }}>
                       {children}
                     </td>
-                  )
+                  ),
+                  pre: ({children}) => (
+                    <div style={{
+                      overflow: 'auto',
+                      margin: '0.5rem 0',
+                      borderRadius: borderRadius.sm,
+                      border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
+                      background: message.role === 'user' ? 'rgba(0,0,0,0.2)' : 'rgba(139, 149, 109, 0.1)',
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: `${message.role === 'user' ? colors.cream : colors.oliveGreen} transparent`
+                    }}>
+                      <pre style={{
+                        margin: 0,
+                        padding: '0.75rem',
+                        fontFamily: 'Monaco, "Courier New", monospace',
+                        fontSize: '0.85em',
+                        lineHeight: 1.4,
+                        color: message.role === 'user' ? colors.cream : colors.charcoal,
+                        whiteSpace: 'pre',
+                        overflowWrap: 'normal'
+                      }}>
+                        {children}
+                      </pre>
+                    </div>
+                  ),
+                  code: ({children, className}) => {
+                    // Inline code (no className means it's inline)
+                    if (!className) {
+                      return (
+                        <code style={{
+                          backgroundColor: message.role === 'user' ? 'rgba(0,0,0,0.2)' : 'rgba(139, 149, 109, 0.15)',
+                          color: message.role === 'user' ? colors.cream : colors.charcoal,
+                          padding: '0.2rem 0.4rem',
+                          borderRadius: borderRadius.sm,
+                          fontFamily: 'Monaco, "Courier New", monospace',
+                          fontSize: '0.9em'
+                        }}>
+                          {children}
+                        </code>
+                      )
+                    }
+                    // Block code (has className, will be wrapped by pre element above)
+                    return <code className={className}>{children}</code>
+                  }
                 }}
               >
                 {message.content}
