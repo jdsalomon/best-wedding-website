@@ -19,3 +19,9 @@ Some beaches can be hard to access so get a good car or a local taxi !
 * Activites : 
     ** Biking avec Andreas : +306983454197
     ** Location de bateau ou plongee avec Yannis (kea Boat) : +306973430860.  (Yannis can also arrange private transfer from Lavrio to Athens)
+
+## Food
+
+The catering will be "Kosher-style", with no meat, but not official Bet-Din.
+We will have proper Kosher options for those who desire it.
+And if you want Hallal, then what is Kosher is also Hallal so, good news here.
