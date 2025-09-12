@@ -1,4 +1,5 @@
 import { supabase, type Group, type Guest } from '../utils/supabase'
+import { normalizeNameForMatching } from '../utils/nameNormalization'
 
 export type AuthResult = {
   success: boolean
@@ -53,18 +54,32 @@ export async function authenticateGroup(password: string): Promise<AuthResult> {
 
 export async function authenticateByName(firstName: string, lastName: string): Promise<AuthResult> {
   try {
-    // Find guest by first name and last name
-    const { data: guest, error: guestError } = await supabase
+    // Get all guests first since we need to do flexible name matching
+    // We can't use ilike for accent/space normalization, so we filter in memory
+    const { data: allGuests, error: allGuestsError } = await supabase
       .from('guests')
       .select(`
         *,
         groups:group_id (*)
       `)
-      .ilike('first_name', firstName.trim())
-      .ilike('last_name', lastName.trim())
-      .single()
 
-    if (guestError || !guest || !guest.groups) {
+    if (allGuestsError || !allGuests) {
+      return {
+        success: false,
+        error: 'Error fetching guests'
+      }
+    }
+
+    // Find guest using flexible name matching
+    const normalizedFirstName = normalizeNameForMatching(firstName)
+    const normalizedLastName = normalizeNameForMatching(lastName)
+    
+    const guest = allGuests.find(g => 
+      normalizeNameForMatching(g.first_name) === normalizedFirstName &&
+      normalizeNameForMatching(g.last_name) === normalizedLastName
+    )
+
+    if (!guest || !guest.groups) {
       return {
         success: false,
         error: 'Guest not found'

@@ -9,10 +9,10 @@ import { createClient } from '@supabase/supabase-js'
 
 // Model Priority Configuration (hardcoded for easier management)
 const MODEL_PRIORITY = [
-  'google/gemini-2.5-flash',   // Fallback 2: Fast and cost-effective
-  'anthropic/claude-3.5-sonnet',    // Primary: Best reasoning and coding
-  'openai/gpt-4o',                 // Fallback 1: Reliable conversational AI
-  'openai/gpt-4o-mini'             // Fallback 3: Ultra-cheap emergency fallback
+  'google/gemini-2.5-flash',
+  'openai/gpt-4o',  
+  'anthropic/claude-3.5-sonnet',
+  'openai/gpt-4o-mini'
 ]
 
 // Routing preference for OpenRouter
@@ -30,7 +30,7 @@ interface Message {
 
 /**
  * Attempt to get AI response with model fallback
- * Tries models in priority order until one succeeds
+ * Tries models in priority order with single retry per model
  */
 async function getAIResponseWithFallback(
   systemPrompt: string,
@@ -43,40 +43,50 @@ async function getAIResponseWithFallback(
     const modelId = MODEL_PRIORITY[i]
     const remainingModels = MODEL_PRIORITY.slice(i + 1)
     
-    try {
-      console.log(`🤖 Attempting model ${i + 1}/${MODEL_PRIORITY.length}: ${modelId}`)
-      if (remainingModels.length > 0) {
-        console.log(`🔄 Remaining fallbacks: ${remainingModels.join(', ')}`)
-      }
-      
-      const result = await streamText({
-        model: openrouter(modelId),
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...limitedMessages
-        ],
-        temperature,
-        headers: {
-          'X-OpenRouter-Fallback-Models': remainingModels.join(','),
-          'X-OpenRouter-Prefer': ROUTING_PREFERENCE
+    // Try each model up to 2 times (initial attempt + 1 retry)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const attemptText = attempt === 1 ? '' : ' (retry)'
+        console.log(`🤖 Attempting model ${i + 1}/${MODEL_PRIORITY.length}: ${modelId}${attemptText}`)
+        if (remainingModels.length > 0 && attempt === 1) {
+          console.log(`🔄 Remaining fallbacks: ${remainingModels.join(', ')}`)
         }
-      })
-      
-      console.log(`✅ Success with model: ${modelId}`)
-      return { result, modelUsed: modelId }
-      
-    } catch (error) {
-      const errorMsg = `❌ Model ${modelId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-      console.log(errorMsg)
-      errors.push(errorMsg)
-      
-      // If this is the last model, throw the accumulated errors
-      if (i === MODEL_PRIORITY.length - 1) {
-        throw new Error(`All models failed:\n${errors.join('\n')}`)
+        
+        const result = await streamText({
+          model: openrouter(modelId),
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...limitedMessages
+          ],
+          temperature,
+          headers: {
+            'X-OpenRouter-Fallback-Models': remainingModels.join(','),
+            'X-OpenRouter-Prefer': ROUTING_PREFERENCE
+          }
+        })
+        
+        console.log(`✅ Success with model: ${modelId}${attemptText}`)
+        return { result, modelUsed: modelId }
+        
+      } catch (error) {
+        const errorMsg = `❌ Model ${modelId} failed (attempt ${attempt}): ${error instanceof Error ? error.message : 'Unknown error'}`
+        console.log(errorMsg)
+        errors.push(errorMsg)
+        
+        // If this is the second attempt for this model, break to try next model
+        if (attempt === 2) {
+          console.log(`⏭️ Moving to next model after ${attempt} attempts...`)
+          break
+        }
+        
+        // If this is the first attempt, try the same model once more
+        console.log(`🔄 Retrying same model...`)
       }
-      
-      // Continue to next model
-      console.log(`⏭️ Trying next model...`)
+    }
+    
+    // If this is the last model and we've exhausted all attempts, throw the accumulated errors
+    if (i === MODEL_PRIORITY.length - 1) {
+      throw new Error(`All models failed:\n${errors.join('\n')}`)
     }
   }
   

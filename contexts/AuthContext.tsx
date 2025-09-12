@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { findGuestByName } from '../utils/nameNormalization'
 
 type Guest = {
   id: string
@@ -75,12 +76,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true)
         setGroup(data.group)
         
-        // Find the current user (the one who just logged in)
+        // Find the current user (the one who just logged in) using flexible matching
         if (data.group?.guests) {
-          const foundUser = data.group.guests.find((guest: Guest) => 
-            guest.first_name.toLowerCase() === firstName.trim().toLowerCase() &&
-            guest.last_name.toLowerCase() === lastName.trim().toLowerCase()
-          )
+          const foundUser = findGuestByName(data.group.guests as Guest[], firstName, lastName)
           setCurrentUser(foundUser || null)
         }
       }

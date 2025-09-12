@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { authenticateByName } from '../../../lib/auth'
 import { serialize } from 'cookie'
+import { findGuestByName } from '../../../utils/nameNormalization'
 
 type LoginRequest = {
   firstName: string
@@ -53,11 +54,10 @@ export default async function handler(
       })
     }
 
-    // Find the current user (the guest who logged in)
-    const currentUser = authResult.guests?.find(guest => 
-      guest.first_name.toLowerCase() === firstName.trim().toLowerCase() &&
-      guest.last_name.toLowerCase() === lastName.trim().toLowerCase()
-    )
+    // Find the current user (the guest who logged in) using flexible matching
+    const currentUser = authResult.guests ? 
+      findGuestByName(authResult.guests, firstName, lastName) : 
+      undefined
 
     // Create session cookie with current user information
     const sessionData = {

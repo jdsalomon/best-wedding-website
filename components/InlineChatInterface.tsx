@@ -51,6 +51,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
   const [faqPrompts, setFaqPrompts] = useState<FAQPrompt[]>([])
   const [isClient, setIsClient] = useState(false)
   const [isWideScreen, setIsWideScreen] = useState(false)
+  const [showTimeoutMessage, setShowTimeoutMessage] = useState(false)
 
   
   // Auto-scroll refs and state
@@ -101,10 +102,18 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setIsThinking(true)
+    setShowTimeoutMessage(false)
     
     // Always scroll when user sends a message
     setShouldAutoScroll(true)
     setTimeout(() => scrollToBottom(), 0)
+
+    // Show timeout message after 15 seconds
+    const timeoutTimer = setTimeout(() => {
+      if (isThinking) {
+        setShowTimeoutMessage(true)
+      }
+    }, 15000)
 
     try {
       // Call the real OpenAI API endpoint
@@ -152,6 +161,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           
           setMessages(prev => [...prev, assistantMessage])
           setIsThinking(false)
+          setShowTimeoutMessage(false)
+          clearTimeout(timeoutTimer)
           
           // Always scroll when new message is added
           setShouldAutoScroll(true)
@@ -171,6 +182,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           }
           setMessages(prev => [...prev, errorMessage])
           setIsThinking(false)
+          setShowTimeoutMessage(false)
+          clearTimeout(timeoutTimer)
           return
         }
       }
@@ -193,6 +206,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       // Add empty assistant message that we'll update as we stream
       setMessages(prev => [...prev, assistantMessage])
       setIsThinking(false)
+      setShowTimeoutMessage(false)
+      clearTimeout(timeoutTimer)
 
       // Read the stream
       while (true) {
@@ -237,6 +252,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       }
       setMessages(prev => [...prev, errorMessage])
       setIsThinking(false)
+      setShowTimeoutMessage(false)
+      clearTimeout(timeoutTimer)
     }
   }
 
@@ -703,7 +720,10 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           <div style={{
             display: 'flex',
             justifyContent: 'flex-start',
-            marginBottom: spacing.md
+            marginBottom: spacing.md,
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: modernSpacing.xs
           }}>
             <div style={{
               padding: spacing.sm,
@@ -741,6 +761,21 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 }
               `}</style>
             </div>
+            {showTimeoutMessage && (
+              <div style={{
+                padding: `${modernSpacing.xs} ${modernSpacing.base}`,
+                borderRadius: borderRadius.md,
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                border: `1px solid rgba(139, 149, 109, 0.3)`,
+                color: colors.deepOlive,
+                fontSize: '0.9rem',
+                fontFamily: typography.body,
+                fontStyle: 'italic',
+                maxWidth: '85%'
+              }}>
+                Taking a bit longer than usual, please wait...
+              </div>
+            )}
           </div>
         )}
         
