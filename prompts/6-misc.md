@@ -25,3 +25,8 @@ Some beaches can be hard to access so get a good car or a local taxi !
 The catering will be "Kosher-style", with no meat, but not official Bet-Din.
 We will have proper Kosher options for those who desire it.
 And if you want Hallal, then what is Kosher is also Hallal so, good news here.
+
+## Wedding gift
+
+We will setup a wedding list for our gifts very soon, so you can tell our guest that.
+Mention that we love money, moula, cash etc but stay classy.
