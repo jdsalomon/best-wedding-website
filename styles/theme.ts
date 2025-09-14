@@ -27,7 +27,7 @@ export const colors = {
 }
 
 // Easy-to-change font for testing interfaces and interactive elements
-const INTERFACE_FONT = "'Century Gothic', 'Futura', 'Avenir Next', 'Helvetica Neue', sans-serif"
+const INTERFACE_FONT = "'Inter', 'Lato', sans-serif"
 
 export const typography = {
   // Font families

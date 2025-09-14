@@ -76,7 +76,7 @@ const LoginPage = () => {
     const checkScreenProperties = () => {
       const width = window.innerWidth
       const height = window.innerHeight
-      setIsMobile(width < 768)
+      setIsMobile(width < 480)
       setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
     }
     checkScreenProperties()
@@ -123,7 +123,7 @@ const LoginPage = () => {
     <div style={{
       minHeight: '100vh',
       fontFamily: typography.interface,
-      background: isLandscape ? paperBackground.primaryLandscape : paperBackground.primary,
+      background: isMobile ? paperBackground.primary : paperBackground.primaryLandscape,
       backgroundSize: paperBackground.size,
       backgroundRepeat: paperBackground.repeat,
       backgroundPosition: paperBackground.position,
@@ -159,7 +159,7 @@ const LoginPage = () => {
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : 'clamp(1rem, 3vw, 1.3rem)',
+              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
               ...minimalTypography.title,
               color: colors.deepOlive,
               textShadow: '0 1px 2px rgba(255,255,255,0.5)',
@@ -167,10 +167,7 @@ const LoginPage = () => {
               overflow: 'hidden',
               textOverflow: 'ellipsis'
             }}>
-              {isMobile
-                ? t('home.weddingLineMobile')
-                : `${t('home.weddingLine')} • ${t('home.date')} • ${t('home.location')}`
-              }
+              {t('home.weddingLineMobile')}
             </h1>
           </div>
 
@@ -234,7 +231,7 @@ const LoginPage = () => {
             </h1>
             <p style={{
               fontFamily: typography.interface,
-              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
               color: colors.deepOlive,
               fontWeight: typography.light,
               margin: 0,

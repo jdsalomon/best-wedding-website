@@ -24,7 +24,7 @@ const Layout = ({ children }: LayoutProps) => {
     const checkScreenProperties = () => {
       const width = window.innerWidth
       const height = window.innerHeight
-      setIsMobile(width < 768)
+      setIsMobile(width < 480)
       setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
     }
     checkScreenProperties()
@@ -47,7 +47,7 @@ const Layout = ({ children }: LayoutProps) => {
       display: 'flex',
       flexDirection: 'column',
       fontFamily: typography.interface,
-      background: isLandscape ? paperBackground.primaryLandscape : paperBackground.primary,
+      background: isMobile ? paperBackground.primary : paperBackground.primaryLandscape,
       backgroundSize: paperBackground.size,
       backgroundRepeat: paperBackground.repeat,
       backgroundPosition: paperBackground.position,
@@ -81,7 +81,7 @@ const Layout = ({ children }: LayoutProps) => {
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : (isAuthenticated ? 'clamp(1rem, 3vw, 1.3rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)'),
+              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
               ...minimalTypography.title,
               color: colors.deepOlive,
               textShadow: '0 1px 2px rgba(255,255,255,0.5)',
@@ -89,10 +89,7 @@ const Layout = ({ children }: LayoutProps) => {
               overflow: 'hidden',
               textOverflow: 'ellipsis'
             }}>
-              {isMobile 
-                ? t('home.weddingLineMobile')
-                : `${t('home.weddingLine')} • ${t('home.date')} • ${t('home.location')}`
-              }
+              {t('home.weddingLineMobile')}
             </h1>
           </div>
 
