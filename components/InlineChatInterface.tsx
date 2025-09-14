@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 import { useTranslation } from '../hooks/useTranslation'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
-import { colors, typography, spacing, borderRadius, transitions, modernSpacing, gradients, shadows } from '../styles/theme'
+import { colors, typography, spacing, borderRadius, transitions, modernSpacing, gradients, shadows, paperBackground, minimalTypography } from '../styles/theme'
 import RSVPTable from './RSVPTable'
 import { getRandomFAQPrompts, FAQPrompt } from '../utils/faqPrompts'
 
@@ -370,7 +370,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
 
   return (
     <div style={{
-      background: gradients.subtleWarmth,
+      background: 'transparent',
       flex: 1,
       minHeight: 0,
       width: '100%',
@@ -389,7 +389,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: `${modernSpacing.base} clamp(1rem, 4vw, 1.5rem)`,
+          padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : 'clamp(1rem, 4vw, 1.5rem)'}`,
           background: 'transparent',
           minHeight: 0
         }}
@@ -412,103 +412,47 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 position: 'relative'
               }}>
                 <h3 style={{
-                  fontSize: 'clamp(1.3rem, 4vw, 1.6rem)',
+                  fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)',
                   marginBottom: modernSpacing.base,
                   color: colors.deepOlive,
-                  fontFamily: typography.heading,
-                  fontWeight: typography.bold,
+                  ...minimalTypography.title,
                   margin: `0 0 ${modernSpacing.base} 0`
                 }}>
-                  {currentUser ? `${t('chat.welcomePersonal')} ${currentUser.first_name}!` : t('chat.welcome')}
+                  {currentUser ? `${t('chat.welcomePersonal')} ${currentUser.first_name}` : t('chat.welcome')}
                 </h3>
                 <p style={{
                   color: colors.deepOlive,
                   fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-                  fontFamily: typography.body,
-                  fontWeight: typography.medium,
+                  fontFamily: typography.interface,
+                  fontWeight: typography.light,
                   margin: 0,
-                  opacity: 0.8,
-                  lineHeight: 1.6
+                  opacity: 0.9,
+                  letterSpacing: '0.01em'
                 }}>
-                  {t('chat.subtitle')}
+                  {t('chat.aiHelper')}
                 </p>
               </div>
               
-              {/* Responsive FAQ Buttons */}
+              {/* Couple Illustration */}
               <div style={{
                 display: 'flex',
-                flexDirection: isWideScreen ? 'row' : 'column',
                 justifyContent: 'center',
-                alignItems: isWideScreen ? 'center' : 'stretch',
-                gap: isWideScreen ? modernSpacing.comfortable : modernSpacing.base,
-                width: '100%',
-                maxWidth: isWideScreen ? '850px' : '500px',
-                margin: '0 auto',
-                padding: `0 ${modernSpacing.base}`,
-                boxSizing: 'border-box'
+                alignItems: 'center',
+                marginBottom: modernSpacing.comfortable,
+                marginTop: modernSpacing.base
               }}>
-              {faqPrompts.map((prompt, index) => (
-                <button
-                  key={prompt.id}
-                  onClick={() => handleFAQClick(prompt)}
+                <img 
+                  src="/images/estellejulien.png" 
+                  alt="Estelle and Julien"
                   style={{
-                    background: prompt.category === 'rsvp' 
-                      ? 'linear-gradient(135deg, #E8B86D 0%, #D4A747 100%)'
-                      : 'rgba(255, 255, 255, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    border: prompt.category === 'rsvp'
-                      ? `2px solid #C89935`
-                      : `1px solid rgba(139, 149, 109, 0.3)`,
-                    borderRadius: '16px',
-                    padding: `${modernSpacing.comfortable} ${modernSpacing.base}`,
-                    fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
-                    fontFamily: typography.body,
-                    fontWeight: typography.medium,
-                    color: prompt.category === 'rsvp' ? '#FFFFFF' : colors.deepOlive,
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    lineHeight: 1.5,
-                    transition: transitions.spring,
-                    boxShadow: shadows.soft,
-                    position: 'relative',
-                    opacity: 1,
-                    flex: isWideScreen ? '1' : 'none',
-                    width: isWideScreen ? 'auto' : '100%',
-                    minWidth: isWideScreen ? '220px' : 'auto',
-                    maxWidth: isWideScreen ? '260px' : 'none',
-                    height: isWideScreen ? 'auto' : 'auto'
+                    maxWidth: '280px',
+                    width: '100%',
+                    height: 'auto',
+                    opacity: 0.9
                   }}
-                  onMouseEnter={(e) => {
-                    if (prompt.category === 'rsvp') {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, #D4A747 0%, #C89935 100%)'
-                      e.currentTarget.style.color = '#FFFFFF'
-                      e.currentTarget.style.borderColor = '#B88A2E'
-                    } else {
-                      e.currentTarget.style.background = 'rgba(164, 180, 148, 0.8)'
-                      e.currentTarget.style.color = colors.cream
-                      e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.6)'
-                    }
-                    e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'
-                    e.currentTarget.style.boxShadow = shadows.floating
-                  }}
-                  onMouseLeave={(e) => {
-                    if (prompt.category === 'rsvp') {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, #E8B86D 0%, #D4A747 100%)'
-                      e.currentTarget.style.color = '#FFFFFF'
-                      e.currentTarget.style.borderColor = '#C89935'
-                    } else {
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
-                      e.currentTarget.style.color = colors.deepOlive
-                      e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.3)'
-                    }
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
-                    e.currentTarget.style.boxShadow = shadows.soft
-                  }}
-                >
-                  {t(prompt.titleKey)}
-                </button>
-              ))}
+                />
               </div>
+              
             </>
           )}
         </div>
@@ -527,21 +471,30 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           >
             <div
               style={{
-                maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : '85%',
-                padding: message.role === 'assistant' && message.rsvpData ? 0 : `${modernSpacing.base} ${modernSpacing.comfortable}`,
-                borderRadius: message.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                maxWidth: message.role === 'assistant' && message.rsvpData ? '100%' : message.role === 'assistant' ? '95%' : '85%',
+                padding: message.role === 'assistant' && message.rsvpData 
+                  ? 0 
+                  : message.role === 'assistant' 
+                    ? `${modernSpacing.base} 0`
+                    : `${modernSpacing.base} ${modernSpacing.comfortable}`,
+                borderRadius: message.role === 'user' ? '20px 20px 4px 20px' : '0px',
                 background: message.role === 'user' 
                   ? gradients.oliveSubtle
-                  : 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: message.role === 'user' ? 'none' : 'blur(10px)',
-                border: message.role === 'user' ? 'none' : `1px solid rgba(139, 149, 109, 0.2)`,
+                  : 'transparent',
+                backdropFilter: message.role === 'user' ? 'none' : 'none',
+                border: message.role === 'user' ? 'none' : 'none',
                 color: message.role === 'user' ? colors.cream : colors.charcoal,
                 fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
-                fontFamily: typography.body,
+                fontFamily: typography.interface,
+                fontWeight: typography.light,
                 lineHeight: 1.5,
                 textAlign: 'left',
                 overflow: 'hidden',
-                boxShadow: message.role === 'user' ? shadows.medium : shadows.soft,
+                boxShadow: message.role === 'user' ? shadows.medium : 'none',
+                wordBreak: 'normal',
+                overflowWrap: 'break-word',
+                lineBreak: 'strict',
+                hangingPunctuation: 'allow-end',
                 position: 'relative'
               }}
             >
@@ -554,7 +507,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4}}>{children}</span>,
+                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4, lineBreak: 'strict', hangingPunctuation: 'allow-end'}}>{children}</span>,
                   strong: ({children}) => <strong style={{color: message.role === 'user' ? colors.cream : colors.deepOlive}}>{children}</strong>,
                   em: ({children}) => <em style={{fontStyle: 'italic'}}>{children}</em>,
                   ul: ({children}) => <ul style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ul>,
@@ -579,17 +532,17 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       margin: '0.5rem 0',
                       borderRadius: borderRadius.sm,
                       border: `1px solid ${message.role === 'user' ? colors.cream : colors.oliveGreen}`,
-                      background: message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.05)',
+                      background: message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.02)',
                       scrollbarWidth: 'thin',
                       scrollbarColor: `${message.role === 'user' ? colors.cream : colors.oliveGreen} transparent`,
                       position: 'relative'
                     }}>
                       <table style={{
                         width: '100%',
-                        minWidth: 'max-content',
                         borderCollapse: 'collapse',
                         fontSize: '0.9em',
-                        border: 'none'
+                        border: 'none',
+                        tableLayout: 'auto'
                       }}>
                         {children}
                       </table>
@@ -623,10 +576,14 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       padding: '0.5rem',
                       textAlign: 'left',
                       fontWeight: typography.semibold,
-                      color: message.role === 'user' ? colors.cream : colors.charcoal,
+                      color: colors.cream,
                       borderBottom: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.2)' : 'rgba(139, 149, 109, 0.3)'}`,
                       borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.2)'}`,
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'normal',
+                      wordBreak: 'normal',
+                      overflowWrap: 'break-word',
+                      maxWidth: '200px',
+                      verticalAlign: 'top'
                     }}>
                       {children}
                     </th>
@@ -637,7 +594,11 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       borderBottom: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.2)'}`,
                       borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.05)' : 'rgba(139, 149, 109, 0.1)'}`,
                       color: message.role === 'user' ? colors.cream : colors.charcoal,
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'normal',
+                      wordBreak: 'normal',
+                      overflowWrap: 'break-word',
+                      maxWidth: '200px',
+                      verticalAlign: 'top'
                     }}>
                       {children}
                     </td>
@@ -660,7 +621,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                         lineHeight: 1.4,
                         color: message.role === 'user' ? colors.cream : colors.charcoal,
                         whiteSpace: 'pre',
-                        overflowWrap: 'normal'
+                        overflowWrap: 'anywhere'
                       }}>
                         {children}
                       </pre>
@@ -703,7 +664,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 return (
                   <div style={{ 
                     marginTop: message.content ? spacing.sm : 0, // Add spacing if there's text above
-                    padding: modernSpacing.base // Add padding around the RSVP table for breathing room
+                    padding: 0 // Remove padding since assistant messages no longer have bubble styling
                   }}>
                     <RSVPTable 
                       rsvpData={message.rsvpData}
@@ -726,12 +687,12 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
             gap: modernSpacing.xs
           }}>
             <div style={{
-              padding: spacing.sm,
-              borderRadius: borderRadius.md,
-              backgroundColor: colors.warmBeige,
+              padding: 0,
+              backgroundColor: 'transparent',
+              border: 'none',
               color: colors.charcoal,
               fontSize: '1.2rem',
-              fontFamily: typography.body,
+              fontFamily: typography.interface,
               textAlign: 'left'
             }}>
               <span style={{ display: 'flex', gap: '0.2rem', alignItems: 'center' }}>
@@ -783,9 +744,88 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         <div ref={messagesEndRef} />
       </div>
       
+      {/* Small FAQ Suggestions - Above Input */}
+      {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
+        <div style={{
+          padding: `${modernSpacing.base} ${modernSpacing.comfortable} ${modernSpacing.base} ${modernSpacing.comfortable}`,
+          background: 'transparent',
+          flexShrink: 0
+        }}>
+          {/* Suggestion title */}
+          <p style={{
+            fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+            color: colors.deepOlive,
+            fontFamily: typography.interface,
+            fontWeight: typography.light,
+            margin: `0 0 ${modernSpacing.xs} 0`,
+            opacity: 0.6,
+            textAlign: 'center'
+          }}>
+            {t('chat.suggestionTitle')}
+          </p>
+          
+          {/* Small horizontal FAQ buttons */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: modernSpacing.xs,
+            width: '100%'
+          }}>
+            {faqPrompts.map((prompt, index) => (
+              <button
+                key={prompt.id}
+                onClick={() => handleFAQClick(prompt)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.4)',
+                  border: `1px solid rgba(139, 149, 109, 0.2)`,
+                  borderRadius: '8px',
+                  padding: `${modernSpacing.tiny} ${modernSpacing.xs}`,
+                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
+                  fontFamily: typography.interface,
+                  fontWeight: typography.light,
+                  color: colors.deepOlive,
+                  opacity: 0.6,
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                  lineHeight: 1.3,
+                  transition: transitions.normal,
+                  whiteSpace: 'normal',
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                  lineBreak: 'strict',
+                  hangingPunctuation: 'allow-end',
+                  width: 'calc((100% - 2 * 0.25rem) / 3)',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textTransform: 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(139, 149, 109, 0.3)'
+                  e.currentTarget.style.color = colors.cream
+                  e.currentTarget.style.opacity = '1'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.4)'
+                  e.currentTarget.style.color = colors.deepOlive
+                  e.currentTarget.style.opacity = '0.8'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                {t(prompt.titleKey)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input Area - Fixed at bottom */}
       <div style={{
-        padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
+        padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : modernSpacing.comfortable}`,
         paddingBottom: `calc(${modernSpacing.base} + env(safe-area-inset-bottom, 0px))`,
         background: 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(20px)',
@@ -826,15 +866,20 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               flex: 1,
               border: 'none',
               background: 'transparent',
-              fontSize: 'clamp(1rem, 2.5vw, 1.1rem)',
-              fontFamily: typography.body,
+              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+              fontFamily: typography.interface,
+              fontWeight: typography.light,
               color: colors.charcoal,
               resize: 'none' as const,
               minHeight: '20px',
               maxHeight: '100px',
               outline: 'none',
               padding: `${modernSpacing.tiny} 0`,
-              lineHeight: 1.4
+              lineHeight: 1.4,
+              wordBreak: 'normal',
+              overflowWrap: 'break-word',
+              lineBreak: 'strict',
+              hangingPunctuation: 'allow-end'
             }}
             placeholder={t('chat.placeholder')}
             disabled={isThinking}
@@ -860,8 +905,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
               cursor: isThinking || !input.trim() ? 'not-allowed' : 'pointer',
               fontSize: '0.9rem',
-              fontFamily: typography.body,
-              fontWeight: typography.semibold,
+              fontFamily: typography.interface,
+              fontWeight: typography.regular,
               transition: transitions.spring,
               whiteSpace: 'nowrap' as const,
               flexShrink: 0,

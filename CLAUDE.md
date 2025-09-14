@@ -9,7 +9,7 @@
 - **Translation files**: `/translations/en.json` and `/translations/fr.json`
 - **Translation hook**: Use `useTranslation()` hook in all components
 - **Language context**: All pages wrapped with `LanguageProvider`
-- **Language switcher**: Available in navigation (🇺🇸 EN / 🇫🇷 FR)
+- **Language switcher**: Available in navigation (EN / FR)
 
 ### Rules for Adding New Text
 

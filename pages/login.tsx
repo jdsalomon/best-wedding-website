@@ -1,9 +1,9 @@
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { useAuth } from '../contexts/AuthContext'
-import { colors, typography, gradients, spacing, borderRadius, shadows } from '../styles/theme'
+import { colors, typography, modernSpacing, transitions, paperBackground, shadows, minimalTypography, borderRadius } from '../styles/theme'
 
 type LoginResponse = {
   success: boolean
@@ -33,6 +33,8 @@ const LoginPage = () => {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isMobile, setIsMobile] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -69,74 +71,140 @@ const LoginPage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en')
   }
 
+  // Check screen orientation and mobile status
+  useEffect(() => {
+    const checkScreenProperties = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      setIsMobile(width < 768)
+      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
+    }
+    checkScreenProperties()
+    window.addEventListener('resize', checkScreenProperties)
+    return () => window.removeEventListener('resize', checkScreenProperties)
+  }, [])
+
   const inputStyle = {
     width: '100%',
-    padding: spacing.md,
-    border: `1px solid ${colors.softGray}`,
-    borderRadius: borderRadius.md,
-    fontSize: '1rem',
-    fontFamily: typography.body,
-    backgroundColor: colors.white,
-    color: colors.charcoal,
+    padding: modernSpacing.comfortable,
+    border: `1px solid rgba(139, 149, 109, 0.2)`,
+    borderRadius: '12px',
+    fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+    fontFamily: typography.interface,
+    fontWeight: typography.light,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    color: colors.deepOlive,
     outline: 'none' as const,
-    transition: 'all 0.3s ease'
+    transition: transitions.normal,
+    backdropFilter: 'blur(10px)',
+    letterSpacing: '0.01em'
   }
+
+  const isFormValid = formData.firstName.trim() && formData.lastName.trim()
 
   const buttonStyle = {
     width: '100%',
-    padding: spacing.md,
-    backgroundColor: colors.oliveGreen,
-    color: colors.warmBeige,
-    border: 'none',
-    borderRadius: borderRadius.md,
-    fontSize: '1rem',
-    fontFamily: typography.body,
-    fontWeight: typography.semibold,
+    padding: modernSpacing.comfortable,
+    backgroundColor: isFormValid && !loading ? colors.oliveGreen : 'rgba(255, 255, 255, 0.4)',
+    color: isFormValid && !loading ? colors.cream : colors.deepOlive,
+    border: `1px solid ${isFormValid && !loading ? colors.oliveGreen : 'rgba(139, 149, 109, 0.2)'}`,
+    borderRadius: '16px',
+    fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+    fontFamily: typography.interface,
+    fontWeight: typography.light,
     cursor: loading ? 'not-allowed' : 'pointer',
-    opacity: loading ? 0.7 : 1,
-    transition: 'all 0.3s ease'
+    opacity: loading ? 0.5 : (isFormValid ? 1 : 0.8),
+    transition: transitions.normal,
+    textTransform: 'none' as const,
+    letterSpacing: '0.01em'
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      fontFamily: typography.body,
-      background: gradients.warmBackground,
+    <div style={{
+      minHeight: '100vh',
+      fontFamily: typography.interface,
+      background: isLandscape ? paperBackground.primaryLandscape : paperBackground.primary,
+      backgroundSize: paperBackground.size,
+      backgroundRepeat: paperBackground.repeat,
+      backgroundPosition: paperBackground.position,
+      backgroundAttachment: 'fixed',
       color: colors.charcoal,
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Language switcher header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'flex-end', 
-        padding: spacing.md 
+      {/* Wedding Header */}
+      <header style={{
+        flexShrink: 0,
+        zIndex: 1000,
+        background: 'transparent',
+        border: 'none'
       }}>
-        <button
-          onClick={toggleLanguage}
-          style={{
-            background: 'none',
-            border: `1px solid ${colors.oliveGreen}`,
-            borderRadius: borderRadius.md,
-            padding: `${spacing.xs} ${spacing.sm}`,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            color: colors.oliveGreen,
-            fontFamily: typography.body,
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = colors.oliveGreen
-            e.currentTarget.style.color = colors.warmBeige
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = colors.oliveGreen
-          }}
-        >
-          {language === 'en' ? 'FR' : 'EN'}
-        </button>
-      </div>
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.base} ${modernSpacing.base}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: isMobile ? modernSpacing.xs : modernSpacing.base,
+          minHeight: isMobile ? '40px' : '50px',
+          overflow: 'hidden'
+        }}>
+
+          {/* Wedding Info */}
+          <div style={{
+            flex: 1,
+            minWidth: 0,
+            overflow: 'hidden'
+          }}>
+            <h1 style={{
+              margin: 0,
+              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : 'clamp(1rem, 3vw, 1.3rem)',
+              ...minimalTypography.title,
+              color: colors.deepOlive,
+              textShadow: '0 1px 2px rgba(255,255,255,0.5)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {isMobile
+                ? t('home.weddingLineMobile')
+                : `${t('home.weddingLine')} • ${t('home.date')} • ${t('home.location')}`
+              }
+            </h1>
+          </div>
+
+          {/* Language switcher */}
+          <button
+            onClick={toggleLanguage}
+            style={{
+              background: 'rgba(255, 255, 255, 0.6)',
+              border: `1px solid rgba(60, 60, 60, 0.2)`,
+              borderRadius: borderRadius.sm,
+              padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
+              cursor: 'pointer',
+              fontSize: isMobile ? '0.75rem' : '0.85rem',
+              color: colors.charcoal,
+              fontFamily: typography.interface,
+              fontWeight: typography.light,
+              transition: transitions.normal,
+              whiteSpace: 'nowrap',
+              minWidth: isMobile ? '32px' : 'auto'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)'
+              e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+              e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
+            }}
+          >
+            {language === 'en' ? 'FR' : 'EN'}
+          </button>
+        </div>
+      </header>
+
 
       {/* Main login form */}
       <div style={{
@@ -144,31 +212,35 @@ const LoginPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: spacing.md
+        padding: modernSpacing.base
       }}>
         <div style={{
-          backgroundColor: colors.white,
-          borderRadius: borderRadius.lg,
-          boxShadow: shadows.soft,
-          padding: `${spacing.xl} ${spacing.lg}`,
           maxWidth: '400px',
           width: '100%'
         }}>
-          {/* Title */}
-          <div style={{ textAlign: 'center', marginBottom: spacing.xl }}>
+          {/* Login Title */}
+          <div style={{ textAlign: 'center', marginBottom: modernSpacing.generous, marginTop: modernSpacing.comfortable }}>
             <h1 style={{
-              fontFamily: typography.heading,
-              fontSize: '2rem',
-              color: colors.oliveGreen,
-              margin: `0 0 ${spacing.sm} 0`
+              fontFamily: typography.interface,
+              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
+              color: colors.deepOlive,
+              fontWeight: typography.light,
+              textTransform: 'none',
+              letterSpacing: '0.01em',
+              lineHeight: 1.2,
+              margin: `0 0 ${modernSpacing.tiny} 0`
             }}>
               {t('auth.welcomeTitle')}
             </h1>
             <p style={{
-              fontFamily: typography.body,
-              color: colors.charcoal,
+              fontFamily: typography.interface,
+              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+              color: colors.deepOlive,
+              fontWeight: typography.light,
               margin: 0,
-              opacity: 0.8
+              opacity: 0.8,
+              letterSpacing: '0.01em',
+              lineHeight: 1.4
             }}>
               {t('auth.loginSubtitle')}
             </p>
@@ -177,13 +249,17 @@ const LoginPage = () => {
           {/* Error message */}
           {error && (
             <div style={{
-              backgroundColor: '#fee',
-              color: '#c33',
-              padding: spacing.sm,
-              borderRadius: borderRadius.md,
-              marginBottom: spacing.md,
-              fontSize: '0.9rem',
-              textAlign: 'center'
+              backgroundColor: 'rgba(200, 100, 100, 0.1)',
+              color: colors.deepOlive,
+              padding: modernSpacing.comfortable,
+              borderRadius: '12px',
+              marginBottom: modernSpacing.comfortable,
+              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+              textAlign: 'center',
+              border: '1px solid rgba(200, 100, 100, 0.2)',
+              fontFamily: typography.interface,
+              fontWeight: typography.light,
+              opacity: 0.9
             }}>
               {error}
             </div>
@@ -191,15 +267,17 @@ const LoginPage = () => {
 
           {/* Login form */}
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: spacing.md }}>
+            <div style={{ marginBottom: modernSpacing.comfortable }}>
               <label style={{
                 display: 'block',
-                marginBottom: spacing.xs,
-                fontSize: '0.9rem',
-                color: colors.charcoal,
-                fontWeight: typography.medium
+                marginBottom: modernSpacing.tiny,
+                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+                color: colors.deepOlive,
+                fontFamily: typography.interface,
+                fontWeight: typography.light,
+                opacity: 0.8
               }}>
-                Prénom
+                {language === 'fr' ? 'Prénom' : 'First Name'}
               </label>
               <input
                 type="text"
@@ -209,24 +287,28 @@ const LoginPage = () => {
                 required
                 style={inputStyle}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = colors.oliveGreen
+                  e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.4)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'
                 }}
                 onBlur={(e) => {
-                  e.currentTarget.style.borderColor = colors.softGray
+                  e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.2)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'
                 }}
-                placeholder="Entrez votre prénom"
+                placeholder={language === 'fr' ? 'Votre prénom' : 'Your first name'}
               />
             </div>
 
-            <div style={{ marginBottom: spacing.lg }}>
+            <div style={{ marginBottom: modernSpacing.generous }}>
               <label style={{
                 display: 'block',
-                marginBottom: spacing.xs,
-                fontSize: '0.9rem',
-                color: colors.charcoal,
-                fontWeight: typography.medium
+                marginBottom: modernSpacing.tiny,
+                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+                color: colors.deepOlive,
+                fontFamily: typography.interface,
+                fontWeight: typography.light,
+                opacity: 0.8
               }}>
-                Nom
+                {language === 'fr' ? 'Nom de famille' : 'Last Name'}
               </label>
               <input
                 type="text"
@@ -236,12 +318,14 @@ const LoginPage = () => {
                 required
                 style={inputStyle}
                 onFocus={(e) => {
-                  e.currentTarget.style.borderColor = colors.oliveGreen
+                  e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.4)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'
                 }}
                 onBlur={(e) => {
-                  e.currentTarget.style.borderColor = colors.softGray
+                  e.currentTarget.style.borderColor = 'rgba(139, 149, 109, 0.2)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.4)'
                 }}
-                placeholder="Entrez votre nom"
+                placeholder={language === 'fr' ? 'Votre nom de famille' : 'Your last name'}
               />
             </div>
 
@@ -251,12 +335,24 @@ const LoginPage = () => {
               style={buttonStyle}
               onMouseEnter={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = colors.charcoal
+                  if (isFormValid) {
+                    e.currentTarget.style.background = colors.deepOlive
+                    e.currentTarget.style.borderColor = colors.deepOlive
+                  } else {
+                    e.currentTarget.style.background = 'rgba(139, 149, 109, 0.3)'
+                    e.currentTarget.style.color = colors.cream
+                  }
+                  e.currentTarget.style.opacity = '1'
+                  e.currentTarget.style.transform = 'translateY(-1px)'
                 }
               }}
               onMouseLeave={(e) => {
                 if (!loading) {
-                  e.currentTarget.style.backgroundColor = colors.oliveGreen
+                  e.currentTarget.style.background = isFormValid ? colors.oliveGreen : 'rgba(255, 255, 255, 0.4)'
+                  e.currentTarget.style.color = isFormValid ? colors.cream : colors.deepOlive
+                  e.currentTarget.style.borderColor = isFormValid ? colors.oliveGreen : 'rgba(139, 149, 109, 0.2)'
+                  e.currentTarget.style.opacity = isFormValid ? '1' : '0.8'
+                  e.currentTarget.style.transform = 'translateY(0)'
                 }
               }}
             >
@@ -267,10 +363,14 @@ const LoginPage = () => {
           {/* Help text */}
           <div style={{
             textAlign: 'center',
-            marginTop: spacing.md,
-            fontSize: '0.8rem',
-            color: colors.charcoal,
-            opacity: 0.6
+            marginTop: modernSpacing.comfortable,
+            fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
+            color: colors.deepOlive,
+            opacity: 0.7,
+            fontFamily: typography.interface,
+            fontWeight: typography.light,
+            letterSpacing: '0.01em',
+            lineHeight: 1.4
           }}>
             {t('auth.helpText')}
           </div>

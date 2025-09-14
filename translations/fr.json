@@ -84,10 +84,12 @@
     "title": "Assistant Mariage",
     "welcome": "Comment puis-je vous aider ?",
     "welcomePersonal": "Bienvenue",
-    "subtitle": "Posez-moi vos questions sur le mariage !",
+    "subtitle": "FAQ",
+    "aiHelper": "Notre IA de mariage répond à toutes vos questions",
+    "suggestionTitle": "suggestions de questions pour commencer...",
     "openChat": "Ouvrir l'assistant de mariage",
-    "placeholder": "Demandez-moi sur le transport, les hôtels, le programme...",
-    "barTitle": "Posez-moi vos questions sur le mariage !",
+    "placeholder": "Posez toutes vos questions sur notre mariage...",
+    "barTitle": "FAQ",
     "barSubtitle": "Obtenez de l'aide sur le transport, les hôtels, le programme et plus encore",
     "close": "Fermer le chat",
     "examples": [
@@ -112,55 +114,55 @@
   "faq": {
     "program": {
       "schedule": {
-        "title": "Programme du week-end",
+        "title": "programme du week-end",
         "message": "Je planifie mon voyage en Grèce - peux-tu me détailler ce qui se passe pendant le week-end de mariage pour que je sache à quoi m'attendre ?"
       },
       "events": {
-        "title": "Événements prévus",
+        "title": "événements prévus",
         "message": "Ça a l'air d'être une sacrée célébration ! Quels genres d'événements et d'activités tu as prévus pour nous les invités ?"
       },
       "welcome": {
-        "title": "Détails soirée d'accueil",
+        "title": "détails soirée d'accueil",
         "message": "Un mariage sur une île grecque, ça a l'air génial ! À quoi je peux m'attendre pour les événements d'accueil ? Je veux être prêt pour l'ambiance."
       },
       "ceremony": {
-        "title": "Détails de la cérémonie",
+        "title": "détails de la cérémonie",
         "message": "Parle-moi de la cérémonie ! Il y a quelque chose de spécial ou d'unique de prévu que je devrais savoir en tant qu'invité ?"
       }
     },
     "travel": {
       "gettingThere": {
-        "title": "Aller à l'île de Kea",
+        "title": "aller à l'île de Kea",
         "message": "La Grèce ça a l'air génial, mais franchement je ne sais pas comment arriver sur cette île. Tu peux me détailler le processus de voyage ?"
       },
       "carRental": {
-        "title": "Location de voiture",
+        "title": "location de voiture",
         "message": "Je me demande pour se déplacer sur l'île - est-ce que j'ai besoin de louer une voiture, ou je pourrai aller à tous les événements sans ?"
       },
       "helicopter": {
-        "title": "Transferts hélicoptère",
+        "title": "transferts hélicoptère",
         "message": "Je suis curieux sur les options de transport - il y a des moyens plus rapides ou directs pour aller sur l'île que les routes classiques ?"
       },
       "ferry": {
-        "title": "Horaires ferry",
+        "title": "horaires ferry",
         "message": "J'essaie de planifier mes vols et je me demande pour la connexion ferry vers l'île. Qu'est-ce que je dois savoir sur les horaires et les timings ?"
       }
     },
     "hotels": {
       "whereStay": {
-        "title": "Où loger",
+        "title": "où loger",
         "message": "J'ai besoin de conseils d'hébergement pour l'île - quelles sont les meilleures options pour les invités du mariage ? Tu as des recommandations de bons endroits ?"
       },
       "recommendations": {
-        "title": "Recommandations hôtels",
+        "title": "recommandations hôtels",
         "message": "Je cherche des suggestions d'hôtels spécifiques sur l'île de Kea. Qu'est-ce que tu recommandes pour les invités en termes d'emplacement et de qualité ?"
       },
       "shuttles": {
-        "title": "Services navettes",
+        "title": "services navettes",
         "message": "Je me demande pour le transport entre mon hôtel et les lieux du mariage. Il y a des services de navettes disponibles pour les invités ?"
       },
       "promoCodes": {
-        "title": "Codes promo hôtels",
+        "title": "codes promo hôtels",
         "message": "Est-ce qu'il y a des tarifs spéciaux ou des réductions de groupe disponibles pour les invités du mariage dans les hôtels recommandés ?"
       }
     },
@@ -176,19 +178,19 @@
     },
     "general": {
       "whatPack": {
-        "title": "Quoi emporter",
+        "title": "quoi emporter",
         "message": "Je planifie ce qu'apporter pour un week-end de mariage en Grèce - tu as des suggestions ou des recommandations sur quoi porter ?"
       },
       "weather": {
-        "title": "Météo en juin",
+        "title": "météo en juin",
         "message": "C'est comment le temps habituellement sur l'île de Kea en juin ? Je veux faire mes bagages correctement et savoir à quoi m'attendre."
       },
       "activities": {
-        "title": "Activités sur l'île",
+        "title": "activités sur l'île",
         "message": "J'ai hâte d'explorer l'île pendant mon temps libre ! Quelles sont les activités sympas ou les trucs intéressants à voir et faire sur Kea ?"
       },
       "dressCode": {
-        "title": "Code vestimentaire",
+        "title": "code vestimentaire",
         "message": "Qu'est-ce que je devrais porter aux différents événements du mariage ? Je veux m'assurer d'être habillé correctement pour chaque occasion."
       }
     }
@@ -196,10 +198,10 @@
   "auth": {
     "welcomeTitle": "Bienvenue",
     "homeTitle": "Salut !",
-    "homeMessage": "Pour t'aider au mieux avec les infos du mariage, j'ai besoin de savoir qui tu es. Connecte-toi avec ton nom pour continuer !",
+    "homeMessage": "Pour t'aider au mieux avec les infos du mariage, j'ai besoin de savoir qui tu es. Connecte-toi avec ton nom pour continuer",
     "loginSubtitle": "Entre ton prénom et nom pour accéder aux infos du mariage",
     "helpText": "Un problème ? Écris-nous si tu ne trouves pas ton nom dans la liste des invités",
-    "login": "Se Connecter",
+    "login": "Se connecter",
     "logout": "Se Déconnecter",
     "loggingIn": "Connexion en cours...",
     "loginError": "Échec de connexion. Veuillez vérifier vos informations.",

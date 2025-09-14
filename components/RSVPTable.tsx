@@ -243,7 +243,8 @@ const RSVPTable: React.FC<RSVPTableProps> = ({ rsvpData, onSubmit }) => {
                 borderTopLeftRadius: borderRadius.sm, // Round top-left corner
                 boxSizing: 'border-box',
                 whiteSpace: 'normal', // Allow text wrapping
-                wordBreak: 'break-word', // Break long words if needed
+                wordBreak: 'normal', // Standard word breaking
+                overflowWrap: 'break-word', // Only break words when necessary
                 hyphens: 'auto' // Add hyphens for better breaking
               }}>
                 Guest
@@ -260,7 +261,8 @@ const RSVPTable: React.FC<RSVPTableProps> = ({ rsvpData, onSubmit }) => {
                   fontSize: 'min(13px, 3.5vw)', // Responsive font size
                   borderTopRightRadius: index === rsvpData.events.length - 1 ? borderRadius.sm : 0, // Round top-right corner for last column
                   whiteSpace: 'normal', // Allow text wrapping
-                  wordBreak: 'break-word', // Break long words if needed
+                  wordBreak: 'normal', // Standard word breaking
+                overflowWrap: 'break-word', // Only break words when necessary
                   hyphens: 'auto', // Add hyphens for better breaking
                   boxSizing: 'border-box'
                 }}>
@@ -304,7 +306,8 @@ const RSVPTable: React.FC<RSVPTableProps> = ({ rsvpData, onSubmit }) => {
                   width: 'min(90px, 25vw)', // Responsive width same as headers
                   minWidth: '60px', // Minimum usable width
                   whiteSpace: 'normal', // Allow text wrapping
-                  wordBreak: 'break-word', // Break long words if needed
+                  wordBreak: 'normal', // Standard word breaking
+                overflowWrap: 'break-word', // Only break words when necessary
                   hyphens: 'auto', // Add hyphens for better breaking
                   boxSizing: 'border-box',
                   lineHeight: 1.2

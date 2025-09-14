@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { useAuth } from '../contexts/AuthContext'
-import { colors, typography, gradients, spacing, borderRadius, shadows, transitions, glassMorphism, modernSpacing } from '../styles/theme'
+import { colors, typography, gradients, spacing, borderRadius, shadows, transitions, glassMorphism, modernSpacing, paperBackground, minimalTypography } from '../styles/theme'
 
 interface LayoutProps {
   children: ReactNode
@@ -16,16 +16,20 @@ const Layout = ({ children }: LayoutProps) => {
   const { language, setLanguage } = useLanguageContext()
   const { isAuthenticated, group, logout } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   const router = useRouter()
 
-  // Check if mobile screen
+  // Check screen orientation and mobile status
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkScreenProperties = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      setIsMobile(width < 768)
+      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkScreenProperties()
+    window.addEventListener('resize', checkScreenProperties)
+    return () => window.removeEventListener('resize', checkScreenProperties)
   }, [])
 
   const toggleLanguage = () => {
@@ -38,24 +42,24 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div style={{ 
+    <div style={{
       height: '100dvh',
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: typography.body,
-      background: gradients.subtleWarmth,
+      fontFamily: typography.interface,
+      background: isLandscape ? paperBackground.primaryLandscape : paperBackground.primary,
+      backgroundSize: paperBackground.size,
+      backgroundRepeat: paperBackground.repeat,
+      backgroundPosition: paperBackground.position,
+      backgroundAttachment: 'fixed',
       color: colors.charcoal
     }}>
       {/* Clean Single-Line Wedding Header */}
       <header style={{
         flexShrink: 0,
         zIndex: 1000,
-        background: 'rgba(139, 149, 109, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: `1px solid rgba(255, 255, 255, 0.1)`,
-        borderTop: 'none',
-        borderLeft: 'none',
-        borderRight: 'none'
+        background: 'transparent',
+        border: 'none'
       }}>
         <div style={{ 
           maxWidth: '1400px', 
@@ -77,11 +81,10 @@ const Layout = ({ children }: LayoutProps) => {
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: isMobile ? 'clamp(0.85rem, 4vw, 1.1rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)',
-              fontFamily: typography.heading,
-              fontWeight: typography.bold,
-              color: colors.cream,
-              letterSpacing: '-0.02em',
+              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : (isAuthenticated ? 'clamp(1rem, 3vw, 1.3rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)'),
+              ...minimalTypography.title,
+              color: colors.deepOlive,
+              textShadow: '0 1px 2px rgba(255,255,255,0.5)',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis'
@@ -105,25 +108,25 @@ const Layout = ({ children }: LayoutProps) => {
               <button
                 onClick={handleLogout}
                 style={{
-                  background: 'none',
-                  border: `1px solid rgba(255, 255, 255, 0.4)`,
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  border: `1px solid rgba(60, 60, 60, 0.2)`,
                   borderRadius: borderRadius.sm,
                   padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
                   cursor: 'pointer',
                   fontSize: isMobile ? '0.75rem' : '0.85rem',
-                  color: colors.cream,
-                  fontFamily: typography.body,
-                  fontWeight: typography.medium,
+                  color: colors.charcoal,
+                  fontFamily: typography.chat,
+                  fontWeight: typography.light,
                   transition: transitions.normal,
                   whiteSpace: 'nowrap'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
+                  e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'
+                  e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
                 }}
               >
                 {isMobile ? 'Exit' : t('auth.logout')}
@@ -132,25 +135,25 @@ const Layout = ({ children }: LayoutProps) => {
               <Link href="/login" style={{ textDecoration: 'none' }}>
                 <button
                   style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: `1px solid rgba(255, 255, 255, 0.4)`,
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    border: `1px solid rgba(60, 60, 60, 0.2)`,
                     borderRadius: borderRadius.sm,
                     padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
                     cursor: 'pointer',
                     fontSize: isMobile ? '0.75rem' : '0.85rem',
-                    color: colors.cream,
-                    fontFamily: typography.body,
-                    fontWeight: typography.medium,
+                    color: colors.charcoal,
+                    fontFamily: typography.interface,
+                    fontWeight: typography.light,
                     transition: transitions.normal,
                     whiteSpace: 'nowrap'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
+                    e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'
+                    e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
                   }}
                 >
                   {isMobile ? 'Login' : t('auth.login')}
@@ -162,26 +165,26 @@ const Layout = ({ children }: LayoutProps) => {
             <button
               onClick={toggleLanguage}
               style={{
-                background: 'rgba(255, 255, 255, 0.15)',
-                border: `1px solid rgba(255, 255, 255, 0.4)`,
+                background: 'rgba(255, 255, 255, 0.6)',
+                border: `1px solid rgba(60, 60, 60, 0.2)`,
                 borderRadius: borderRadius.sm,
                 padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
                 cursor: 'pointer',
                 fontSize: isMobile ? '0.75rem' : '0.85rem',
-                color: colors.cream,
-                fontFamily: typography.body,
-                fontWeight: typography.medium,
+                color: colors.charcoal,
+                fontFamily: typography.chat,
+                fontWeight: typography.light,
                 transition: transitions.normal,
                 whiteSpace: 'nowrap',
                 minWidth: isMobile ? '32px' : 'auto'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.6)'
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)'
+                e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)'
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+                e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
               }}
             >
               {language === 'en' ? 'FR' : 'EN'}

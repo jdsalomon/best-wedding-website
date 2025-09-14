@@ -84,10 +84,12 @@
     "title": "Wedding Assistant",
     "welcome": "How can I help you?",
     "welcomePersonal": "Welcome",
-    "subtitle": "Ask me anything about the wedding!",
+    "subtitle": "FAQ",
+    "aiHelper": "Our wedding AI answers all of your questions",
+    "suggestionTitle": "suggestions to get you started...",
     "openChat": "Open wedding chat assistant",
-    "placeholder": "Ask about transportation, hotels, program...",
-    "barTitle": "Ask me anything about the wedding!",
+    "placeholder": "Ask anything about our wedding...",
+    "barTitle": "FAQ",
     "barSubtitle": "Get help with transportation, hotels, program details, and more",
     "close": "Close chat",
     "examples": [
@@ -112,55 +114,55 @@
   "faq": {
     "program": {
       "schedule": {
-        "title": "Wedding weekend schedule",
+        "title": "wedding weekend schedule",
         "message": "I'm planning my trip to Greece - can you walk me through what's happening over the wedding weekend so I know what to expect and can plan accordingly?"
       },
       "events": {
-        "title": "Planned events",
+        "title": "planned events",
         "message": "This sounds like it's going to be quite the celebration! What kind of events and activities do you have planned for us guests?"
       },
       "welcome": {
-        "title": "Welcome party details",
+        "title": "welcome party details",
         "message": "A Greek island wedding sounds amazing! What can I expect from the welcome events? I want to make sure I'm prepared for the vibe."
       },
       "ceremony": {
-        "title": "Ceremony details",
+        "title": "ceremony details",
         "message": "Tell me about the ceremony! Is there anything special or unique planned that I should know about as a guest?"
       }
     },
     "travel": {
       "gettingThere": {
-        "title": "Getting to Kea Island",
+        "title": "getting to Kea Island",
         "message": "Greece sounds amazing, but I'm honestly not sure how to get to this island. Can you break down the travel process for me?"
       },
       "carRental": {
-        "title": "Car rental needed?",
+        "title": "car rental needed?",
         "message": "I'm wondering about getting around the island - do I need to rent a car, or will I be able to get to all the events without one?"
       },
       "helicopter": {
-        "title": "Helicopter transfers",
+        "title": "helicopter transfers",
         "message": "I'm curious about travel options - are there any faster or more direct ways to get to the island besides the typical routes?"
       },
       "ferry": {
-        "title": "Ferry schedules",
+        "title": "ferry schedules",
         "message": "I'm trying to plan my flights and wondering about the ferry connection to the island. What should I know about ferry schedules and timing?"
       }
     },
     "hotels": {
       "whereStay": {
-        "title": "Where to stay",
+        "title": "where to stay",
         "message": "I need accommodation advice for the island - what are the best options for wedding guests? Any recommendations for good places to stay?"
       },
       "recommendations": {
-        "title": "Hotel recommendations",
+        "title": "hotel recommendations",
         "message": "I'm looking for specific hotel suggestions on Kea Island. What would you recommend for wedding guests in terms of location and quality?"
       },
       "shuttles": {
-        "title": "Shuttle services",
+        "title": "shuttle services",
         "message": "I'm wondering about transportation between my hotel and the wedding venues. Are there shuttle services available for guests?"
       },
       "promoCodes": {
-        "title": "Hotel promo codes",
+        "title": "hotel promo codes",
         "message": "Are there any special rates or group discounts available for wedding guests at the recommended hotels?"
       }
     },
@@ -176,7 +178,7 @@
     },
     "general": {
       "whatPack": {
-        "title": "What to pack",
+        "title": "what to pack",
         "message": "I'm planning what to bring for a wedding weekend in Greece - any packing suggestions or recommendations for what to wear?"
       },
       "weather": {
@@ -184,11 +186,11 @@
         "message": "What's the weather typically like on Kea Island in June? I want to pack appropriately and know what to expect."
       },
       "activities": {
-        "title": "Island activities",
+        "title": "island activities",
         "message": "I'm excited to explore the island during my free time! What are some fun activities or interesting things to see and do on Kea?"
       },
       "dressCode": {
-        "title": "Dress code",
+        "title": "dress code",
         "message": "What should I wear to the different wedding events? I want to make sure I'm dressed appropriately for each occasion."
       }
     }
@@ -196,7 +198,7 @@
   "auth": {
     "welcomeTitle": "Welcome",
     "homeTitle": "Hey there!",
-    "homeMessage": "To help you best with wedding info, I need to know who you are. Sign in with your name to continue!",
+    "homeMessage": "To help you best with wedding info, I need to know who you are. Sign in with your name to continue",
     "loginSubtitle": "Enter your first and last name to access wedding info",
     "helpText": "Having trouble? Drop us a line if you can't find your name on the guest list",
     "login": "Login",

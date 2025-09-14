@@ -26,12 +26,24 @@ export const colors = {
   danger: '#C85450' // Red for 'No' responses
 }
 
+// Easy-to-change font for testing interfaces and interactive elements
+const INTERFACE_FONT = "'Century Gothic', 'Futura', 'Avenir Next', 'Helvetica Neue', sans-serif"
+
 export const typography = {
   // Font families
   heading: "'Merriweather', serif",
   body: "'Lato', sans-serif",
   
+  // Minimal design fonts
+  title: "'Futura', 'Avenir Next', 'Century Gothic', 'Helvetica Neue', sans-serif",
+  chat: "'Helvetica Neue', 'Gill Sans', 'Avenir', sans-serif",
+  
+  // Testing font for easy experimentation
+  interface: INTERFACE_FONT,
+  
   // Font weights
+  thin: 100,
+  extraLight: 200,
   light: 300,
   regular: 400,
   medium: 500,
@@ -121,4 +133,53 @@ export const modernSpacing = {
   comfortable: '1.5rem',
   spacious: '2.5rem',
   generous: '4rem'
+}
+
+// Paper texture background with orientation-specific images
+export const paperBackground = {
+  // Portrait/square screens - vertical image
+  primary: `url('/images/background_1.png')`,
+
+  // Landscape screens - use basic background
+  primaryLandscape: `
+    radial-gradient(circle, transparent 2px, rgba(0,0,0,0.01) 2px),
+    #f8f6f0
+  `,
+
+  // Subtle variant (keeping original for fallback)
+  subtle: `
+    radial-gradient(circle, transparent 2px, rgba(0,0,0,0.01) 2px),
+    #f8f6f0
+  `,
+
+  // Background properties
+  size: 'cover',
+  repeat: 'no-repeat',
+  position: 'center center',
+
+  // Fallback
+  fallback: '#f8f6f0'
+}
+
+// Minimal typography styles
+export const minimalTypography = {
+  title: {
+    fontFamily: typography.title,
+    fontWeight: typography.light,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.15em',
+    lineHeight: 1.2
+  },
+  chat: {
+    fontFamily: typography.chat,
+    fontWeight: typography.regular,
+    letterSpacing: '0.01em',
+    lineHeight: 1.5
+  },
+  interface: {
+    fontFamily: typography.interface,
+    fontWeight: typography.thin,
+    letterSpacing: '0.01em',
+    lineHeight: 1.5
+  }
 }

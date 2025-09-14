@@ -703,27 +703,31 @@ function showToast(message, type = 'info') {
 // Load dashboard data
 async function loadDashboardData() {
     try {
-        const [guestsResult, groupsResult, coverageResult] = await Promise.all([
+        const [guestsResult, groupsResult, coverageResult, eventsResult] = await Promise.all([
             apiRequest('/api/guests'),
             apiRequest('/api/groups'),
-            apiRequest('/api/contact-coverage')
+            apiRequest('/api/contact-coverage'),
+            apiRequest('/api/events')
         ])
-        
+
         // Update stats
         document.getElementById('total-guests').textContent = guestsResult.data.length
         document.getElementById('total-groups').textContent = groupsResult.data.length
-        
+
         const ungrouped = guestsResult.data.filter(g => !g.group_id)
         document.getElementById('ungrouped-guests').textContent = ungrouped.length
-        
+
         // Safely handle coverage data
         const coverageData = coverageResult?.data || []
         const groupsWithContact = Array.isArray(coverageData) ? coverageData.filter(g => g.hasContact) : []
         document.getElementById('groups-with-contact').textContent = groupsWithContact.length
-        
+
         // Update contact coverage
         displayContactCoverage(coverageData)
-        
+
+        // Load event dashboard data
+        await loadEventsDashboard(eventsResult.data)
+
     } catch (error) {
         console.error('Error loading dashboard data:', error)
         showToast('❌ Error loading dashboard data', 'error')
@@ -751,6 +755,238 @@ async function loadGroups() {
     } catch (error) {
         console.error('Error loading groups:', error)
         showToast('❌ Error loading groups', 'error')
+    }
+}
+
+// Load events dashboard data
+async function loadEventsDashboard(events) {
+    const container = document.getElementById('events-dashboard-container')
+    if (!container) return
+
+    if (events.length === 0) {
+        container.innerHTML = `
+            <div class="no-events-message">
+                <p>📅 No events configured yet</p>
+                <button class="btn btn-primary" onclick="switchToEventsTab()">Create Your First Event</button>
+            </div>
+        `
+        return
+    }
+
+    try {
+        // Fetch attendee data for all events
+        const eventStatsPromises = events.map(async (event) => {
+            try {
+                const result = await apiRequest(`/api/events/${event.id}/attendees`)
+                return {
+                    ...event,
+                    stats: result.data.summary,
+                    totalInvited: result.data.summary.total
+                }
+            } catch (error) {
+                console.error(`Error loading stats for event ${event.id}:`, error)
+                return {
+                    ...event,
+                    stats: { yes: 0, no: 0, no_answer: 0, total: 0 },
+                    totalInvited: 0
+                }
+            }
+        })
+
+        const eventsWithStats = await Promise.all(eventStatsPromises)
+
+        // Sort events by date
+        eventsWithStats.sort((a, b) => new Date(a.date) - new Date(b.date))
+
+        container.innerHTML = eventsWithStats.map(event => {
+            const stats = event.stats
+            const responseRate = stats.total > 0 ? Math.round(((stats.yes + stats.no) / stats.total) * 100) : 0
+            const attendanceRate = stats.total > 0 ? Math.round((stats.yes / stats.total) * 100) : 0
+
+            return `
+                <div class="event-dashboard-card">
+                    <div class="event-header">
+                        <h3>${event.name}</h3>
+                        <p class="event-date">${formatEventDate(event.date)}</p>
+                        ${event.location ? `<p class="event-location">📍 ${event.location}</p>` : ''}
+                    </div>
+
+                    <div class="event-stats-grid">
+                        <div class="event-stat clickable" onclick="showEventGuestList('${event.id}', '${event.name}', 'total')">
+                            <div class="stat-number large">${stats.total}</div>
+                            <div class="stat-label">Total Invited</div>
+                        </div>
+                        <div class="event-stat success clickable" onclick="showEventGuestList('${event.id}', '${event.name}', 'yes')">
+                            <div class="stat-number large">${stats.yes}</div>
+                            <div class="stat-label">Coming</div>
+                        </div>
+                        <div class="event-stat danger clickable" onclick="showEventGuestList('${event.id}', '${event.name}', 'no')">
+                            <div class="stat-number large">${stats.no}</div>
+                            <div class="stat-label">Not Coming</div>
+                        </div>
+                        <div class="event-stat warning clickable" onclick="showEventGuestList('${event.id}', '${event.name}', 'no_answer')">
+                            <div class="stat-number large">${stats.no_answer}</div>
+                            <div class="stat-label">No Response</div>
+                        </div>
+                    </div>
+
+                    <div class="event-progress-bars">
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Response Rate</span>
+                                <span class="progress-percentage">${responseRate}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${responseRate}%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Attendance Rate</span>
+                                <span class="progress-percentage">${attendanceRate}%</span>
+                            </div>
+                            <div class="progress-bar attendance">
+                                <div class="progress-fill" style="width: ${attendanceRate}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-actions">
+                        <button class="btn btn-sm btn-secondary" onclick="viewEventAttendees('${event.id}', '${event.name}')">
+                            📊 View Details
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="switchToEventsTab()">
+                            ⚙️ Manage Event
+                        </button>
+                    </div>
+                </div>
+            `
+        }).join('')
+
+    } catch (error) {
+        console.error('Error loading events dashboard:', error)
+        container.innerHTML = `
+            <div class="error-message">
+                <p>❌ Error loading event data</p>
+                <button class="btn btn-secondary" onclick="loadDashboardData()">🔄 Retry</button>
+            </div>
+        `
+    }
+}
+
+// Helper function to format event date
+function formatEventDate(dateString) {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
+}
+
+// Helper function to switch to events tab
+function switchToEventsTab() {
+    document.querySelector('.tab-btn[data-tab="events"]').click()
+}
+
+// Show filtered guest list for specific event response type
+async function showEventGuestList(eventId, eventName, filterType) {
+    try {
+        showToast('🔄 Loading guest list...')
+
+        // Get event attendees data and all guests
+        const [attendeesResult, allGuestsResult] = await Promise.all([
+            apiRequest(`/api/events/${eventId}/attendees`),
+            apiRequest('/api/guests')
+        ])
+
+        const attendeesData = attendeesResult.data
+        const allGuests = allGuestsResult.data
+
+        // Filter guests based on response type
+        let filteredGuests = []
+        let title = ''
+        let subtitle = ''
+
+        if (filterType === 'total') {
+            filteredGuests = allGuests
+            title = `📊 All Invited Guests`
+            subtitle = `Total: ${allGuests.length} guests`
+        } else if (filterType === 'yes') {
+            filteredGuests = attendeesData.attendees
+                .filter(a => a.response === 'yes')
+                .map(a => ({ ...a.guests, response: a.response, notes: a.notes }))
+            title = `✅ Guests Coming`
+            subtitle = `${filteredGuests.length} guests confirmed attendance`
+        } else if (filterType === 'no') {
+            filteredGuests = attendeesData.attendees
+                .filter(a => a.response === 'no')
+                .map(a => ({ ...a.guests, response: a.response, notes: a.notes }))
+            title = `❌ Guests Not Coming`
+            subtitle = `${filteredGuests.length} guests declined attendance`
+        } else if (filterType === 'no_answer') {
+            const respondedGuestIds = new Set(attendeesData.attendees.map(a => a.guest_id))
+            filteredGuests = allGuests.filter(guest => !respondedGuestIds.has(guest.id))
+            title = `❓ No Response Yet`
+            subtitle = `${filteredGuests.length} guests haven't responded`
+        }
+
+        // Build modal content
+        const modalContent = document.getElementById('rsvp-modal-content')
+        modalContent.innerHTML = `
+            <h2>${title} - ${eventName}</h2>
+            <p class="event-filter-subtitle">${subtitle}</p>
+
+            ${filteredGuests.length > 0 ? `
+                <div class="filtered-guest-list">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th>
+                                <th>Group</th>
+                                ${filterType !== 'total' && filterType !== 'no_answer' ? '<th>Notes</th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredGuests.map(guest => `
+                                <tr>
+                                    <td>
+                                        <strong>${guest.first_name} ${guest.last_name}</strong>
+                                        ${guest.plus_one_of ? '<span class="plus-one-badge">+1</span>' : ''}
+                                    </td>
+                                    <td>
+                                        ${guest.groups?.name || guest.group?.name || '<em>No group</em>'}
+                                    </td>
+                                    ${filterType !== 'total' && filterType !== 'no_answer' ? `
+                                        <td>${guest.notes || '<em>No notes</em>'}</td>
+                                    ` : ''}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : `
+                <div class="no-guests-message">
+                    <p>No guests in this category.</p>
+                </div>
+            `}
+
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRSVPModal()">Close</button>
+                ${filterType !== 'total' ? `
+                    <button class="btn btn-primary" onclick="viewEventAttendees('${eventId}', '${eventName}')">
+                        📊 View All Details
+                    </button>
+                ` : ''}
+            </div>
+        `
+
+        document.getElementById('rsvp-modal').style.display = 'block'
+
+    } catch (error) {
+        showToast(`❌ Error loading guest list: ${error.message}`, 'error')
+        console.error('Error showing event guest list:', error)
     }
 }
 
