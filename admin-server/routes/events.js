@@ -142,17 +142,27 @@ router.get('/:id/attendees', async (req, res) => {
   try {
     const { id } = req.params
     const attendees = await database.getEventAttendees(id)
-    
-    // Calculate summary statistics
+
+    // Get total number of guests to calculate correct no-response count
+    const allGuests = await database.getAllGuests()
+    const totalGuests = allGuests.length
+
+    // Calculate actual response counts
+    const yesCount = attendees.filter(a => a.response === 'yes').length
+    const noCount = attendees.filter(a => a.response === 'no').length
+
+    // Calculate no response as: total guests - (yes + no responses)
+    const noResponseCount = totalGuests - (yesCount + noCount)
+
     const summary = {
-      total: attendees.length,
-      yes: attendees.filter(a => a.response === 'yes').length,
-      no: attendees.filter(a => a.response === 'no').length,
-      no_answer: attendees.filter(a => a.response === 'no_answer').length
+      total: totalGuests,
+      yes: yesCount,
+      no: noCount,
+      no_answer: noResponseCount
     }
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       data: {
         attendees: attendees,
         summary: summary

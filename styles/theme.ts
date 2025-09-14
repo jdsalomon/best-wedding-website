@@ -26,12 +26,24 @@ export const colors = {
   danger: '#C85450' // Red for 'No' responses
 }
 
+// Easy-to-change font for testing interfaces and interactive elements
+const INTERFACE_FONT = "'Century Gothic', 'Futura', 'Avenir Next', 'Helvetica Neue', sans-serif"
+
 export const typography = {
   // Font families
   heading: "'Merriweather', serif",
   body: "'Lato', sans-serif",
   
+  // Minimal design fonts
+  title: "'Futura', 'Avenir Next', 'Century Gothic', 'Helvetica Neue', sans-serif",
+  chat: "'Helvetica Neue', 'Gill Sans', 'Avenir', sans-serif",
+  
+  // Testing font for easy experimentation
+  interface: INTERFACE_FONT,
+  
   // Font weights
+  thin: 100,
+  extraLight: 200,
   light: 300,
   regular: 400,
   medium: 500,
@@ -121,4 +133,53 @@ export const modernSpacing = {
   comfortable: '1.5rem',
   spacious: '2.5rem',
   generous: '4rem'
+}
+
+// Paper texture background
+export const paperBackground = {
+  // Realistic paper background inspired by reference image
+  primary: `
+    linear-gradient(0deg, #f8f6f0, #f8f6f0),
+    linear-gradient(23deg, transparent 48%, rgba(0,0,0,0.006) 49%, rgba(0,0,0,0.006) 50%, transparent 51%),
+    linear-gradient(67deg, transparent 48%, rgba(0,0,0,0.005) 49%, rgba(0,0,0,0.005) 50%, transparent 51%),
+    linear-gradient(115deg, transparent 48%, rgba(0,0,0,0.004) 49%, rgba(0,0,0,0.004) 50%, transparent 51%),
+    linear-gradient(-12deg, transparent 48%, rgba(0,0,0,0.005) 49%, rgba(0,0,0,0.005) 50%, transparent 51%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.04'/></svg>"),
+    radial-gradient(ellipse 800px 600px at 25% 20%, rgba(0,0,0,0.008), transparent 60%),
+    radial-gradient(ellipse 600px 900px at 75% 80%, rgba(0,0,0,0.006), transparent 60%)
+  `,
+  // Subtle variant (keeping original for fallback)
+  subtle: `
+    radial-gradient(circle, transparent 2px, rgba(0,0,0,0.01) 2px),
+    #f8f6f0
+  `,
+  // Updated sizing for fiber patterns and textures
+  size: 'auto, 300px 100px, 200px 120px, 180px 90px, 220px 110px, 300px 300px, auto, auto',
+  // Updated repeat pattern for fiber lines and textures
+  repeat: 'no-repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat',
+  // Fallback
+  fallback: '#f8f6f0'
+}
+
+// Minimal typography styles
+export const minimalTypography = {
+  title: {
+    fontFamily: typography.title,
+    fontWeight: typography.light,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.15em',
+    lineHeight: 1.2
+  },
+  chat: {
+    fontFamily: typography.chat,
+    fontWeight: typography.regular,
+    letterSpacing: '0.01em',
+    lineHeight: 1.5
+  },
+  interface: {
+    fontFamily: typography.interface,
+    fontWeight: typography.thin,
+    letterSpacing: '0.01em',
+    lineHeight: 1.5
+  }
 }

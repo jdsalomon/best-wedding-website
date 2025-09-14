@@ -12,7 +12,7 @@
 ## Day 2 - June 6th, 2026
 **Relaxation & Welcome Party**
 - Relaxation time to enjoy the island: recommend things to do during the day if people ask.
-- Welcome gathering for all guests
+- "Greek Party" - gathering for all guests
     - Aigis Hotel (https://share.google/W5KOoZNXxy9a1P28R)
     - Dress code: casual, just a pre wedding party
     - Drinks at 7pm before sunset
@@ -20,14 +20,15 @@
 ## Day 3 - June 7th, 2026
 **Wedding Ceremony & Reception** 
 - Houppa ceremony followed by the celebration - Mystery location...
-    - Dresscode: dress to impress! Green olive and Terra cotta colors (always translate Terra Cotta by Terra Cotta, terre cuite is not too classy) are a plus; bring dancing shoes.
+    - Dresscode: Summer chic, elegant. bring dancing shoes.
     - Be ready at 5pm. Ceremony, then dinner & party.
 
 ## Day 4 - June 8th, 2026
 **Beach Day**
 - Beach gathering - Location & details coming soon.
     - Your best bathing suit and sunglasses.
-    - Get ready to relax hard 
+    - Picnic on the beach, and watersports and boat activites.
+    - Get ready to relax hard. And maybe party a bit more. But mainly relax.
 
 ## Important Guidelines for Program Questions:
 - Focus on **practical information** guests need: timing, dress code, meeting points, what to bring

@@ -9,7 +9,7 @@ import InlineChatInterface from '../components/InlineChatInterface'
 import { useTranslation } from '../hooks/useTranslation'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguageContext } from '../contexts/LanguageContext'
-import { colors, typography, cardStyle, spacing, borderRadius, shadows, transitions, modernSpacing, gradients } from '../styles/theme'
+import { colors, typography, cardStyle, spacing, borderRadius, shadows, transitions, modernSpacing, gradients, paperBackground, minimalTypography } from '../styles/theme'
 
 const Home: NextPage = () => {
   const { t } = useTranslation()
@@ -51,7 +51,7 @@ const Home: NextPage = () => {
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              background: gradients.romanticOverlay,
+              background: 'transparent',
               flexDirection: 'column',
               gap: modernSpacing.base
             }}>
@@ -88,7 +88,7 @@ const Home: NextPage = () => {
               height: '100%',
               padding: modernSpacing.spacious,
               textAlign: 'center',
-              background: gradients.subtleWarmth
+              background: 'transparent'
             }}>
               <div style={{
                 background: 'rgba(255, 255, 255, 0.4)',
