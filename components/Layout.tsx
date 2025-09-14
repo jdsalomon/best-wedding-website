@@ -16,16 +16,20 @@ const Layout = ({ children }: LayoutProps) => {
   const { language, setLanguage } = useLanguageContext()
   const { isAuthenticated, group, logout } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   const router = useRouter()
 
-  // Check if mobile screen
+  // Check screen orientation and mobile status
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkScreenProperties = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      setIsMobile(width < 768)
+      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkScreenProperties()
+    window.addEventListener('resize', checkScreenProperties)
+    return () => window.removeEventListener('resize', checkScreenProperties)
   }, [])
 
   const toggleLanguage = () => {
@@ -38,14 +42,16 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div style={{ 
+    <div style={{
       height: '100dvh',
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: typography.body,
-      background: paperBackground.primary,
+      fontFamily: typography.interface,
+      background: isLandscape ? paperBackground.primaryLandscape : paperBackground.primary,
       backgroundSize: paperBackground.size,
       backgroundRepeat: paperBackground.repeat,
+      backgroundPosition: paperBackground.position,
+      backgroundAttachment: 'fixed',
       color: colors.charcoal
     }}>
       {/* Clean Single-Line Wedding Header */}
@@ -75,7 +81,7 @@ const Layout = ({ children }: LayoutProps) => {
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)',
+              fontSize: isMobile ? 'clamp(0.7rem, 3.5vw, 0.95rem)' : (isAuthenticated ? 'clamp(1rem, 3vw, 1.3rem)' : 'clamp(1.2rem, 3.5vw, 1.6rem)'),
               ...minimalTypography.title,
               color: colors.deepOlive,
               textShadow: '0 1px 2px rgba(255,255,255,0.5)',
@@ -136,7 +142,7 @@ const Layout = ({ children }: LayoutProps) => {
                     cursor: 'pointer',
                     fontSize: isMobile ? '0.75rem' : '0.85rem',
                     color: colors.charcoal,
-                    fontFamily: typography.chat,
+                    fontFamily: typography.interface,
                     fontWeight: typography.light,
                     transition: transitions.normal,
                     whiteSpace: 'nowrap'

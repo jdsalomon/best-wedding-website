@@ -1,5 +1,5 @@
 import { NextPage } from 'next'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import MapWidget from '../components/MapWidget'
@@ -23,7 +23,14 @@ const Home: NextPage = () => {
     setFirstMessage(message)
     setIsInlineChatOpen(true)
   }
-  
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [loading, isAuthenticated, router])
+
   return (
     <Layout>
       {/* Modern Full-Screen Chat Layout */}
@@ -79,82 +86,24 @@ const Home: NextPage = () => {
               firstMessage=""
             />
           ) : (
-            // Clean login prompt
+            // Redirect to login - no welcome page needed
             <div style={{
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              padding: modernSpacing.spacious,
-              textAlign: 'center',
-              background: 'transparent'
+              background: 'transparent',
+              flexDirection: 'column',
+              gap: modernSpacing.base
             }}>
               <div style={{
-                background: 'rgba(255, 255, 255, 0.4)',
-                backdropFilter: 'blur(20px)',
-                padding: `${modernSpacing.generous} ${modernSpacing.spacious}`,
-                borderRadius: '24px',
-                border: `1px solid rgba(139, 149, 109, 0.2)`,
-                boxShadow: shadows.floating,
-                maxWidth: '480px',
-                width: '100%',
-                position: 'relative'
+                color: colors.deepOlive,
+                fontSize: '1.1rem',
+                fontFamily: typography.interface,
+                fontWeight: typography.light
               }}>
-                <h2 style={{
-                  fontSize: 'clamp(1.5rem, 5vw, 2.2rem)',
-                  color: colors.deepOlive,
-                  marginBottom: modernSpacing.comfortable,
-                  fontFamily: typography.heading,
-                  fontWeight: typography.bold,
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.2
-                }}>
-                  {t('auth.homeTitle')}
-                </h2>
-                <p style={{
-                  fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-                  color: colors.charcoal,
-                  marginBottom: modernSpacing.generous,
-                  fontFamily: typography.body,
-                  lineHeight: 1.6,
-                  opacity: 0.9
-                }}>
-                  {t('auth.homeMessage')}
-                </p>
-                <button
-                  onClick={() => router.push('/login')}
-                  style={{
-                    background: gradients.oliveSubtle,
-                    color: colors.cream,
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: `${modernSpacing.comfortable} ${modernSpacing.spacious}`,
-                    fontSize: 'clamp(1rem, 3vw, 1.1rem)',
-                    fontFamily: typography.body,
-                    fontWeight: typography.semibold,
-                    cursor: 'pointer',
-                    transition: transitions.spring,
-                    width: '100%',
-                    boxShadow: shadows.medium,
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)'
-                    e.currentTarget.style.boxShadow = shadows.elevated
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0) scale(1)'
-                    e.currentTarget.style.boxShadow = shadows.medium
-                  }}
-                >
-                  <span style={{ position: 'relative', zIndex: 1 }}>
-                    {language === 'fr' ? 'Se Connecter' : 'Sign In'}
-                  </span>
-                </button>
+                {language === 'fr' ? 'Redirection...' : 'Redirecting...'}
               </div>
-
             </div>
           )}
         </div>

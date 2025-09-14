@@ -198,10 +198,10 @@
   "auth": {
     "welcomeTitle": "Bienvenue",
     "homeTitle": "Salut !",
-    "homeMessage": "Pour t'aider au mieux avec les infos du mariage, j'ai besoin de savoir qui tu es. Connecte-toi avec ton nom pour continuer !",
+    "homeMessage": "Pour t'aider au mieux avec les infos du mariage, j'ai besoin de savoir qui tu es. Connecte-toi avec ton nom pour continuer",
     "loginSubtitle": "Entre ton prénom et nom pour accéder aux infos du mariage",
     "helpText": "Un problème ? Écris-nous si tu ne trouves pas ton nom dans la liste des invités",
-    "login": "Se Connecter",
+    "login": "Se connecter",
     "logout": "Se Déconnecter",
     "loggingIn": "Connexion en cours...",
     "loginError": "Échec de connexion. Veuillez vérifier vos informations.",

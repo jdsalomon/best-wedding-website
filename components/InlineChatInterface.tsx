@@ -389,7 +389,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           flex: 1,
           overflowY: 'auto',
           overflowX: 'hidden',
-          padding: `${modernSpacing.base} clamp(1rem, 4vw, 1.5rem)`,
+          padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : 'clamp(1rem, 4vw, 1.5rem)'}`,
           background: 'transparent',
           minHeight: 0
         }}
@@ -484,13 +484,17 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                 backdropFilter: message.role === 'user' ? 'none' : 'none',
                 border: message.role === 'user' ? 'none' : 'none',
                 color: message.role === 'user' ? colors.cream : colors.charcoal,
-                fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
                 fontFamily: typography.interface,
-                fontWeight: typography.regular,
+                fontWeight: typography.light,
                 lineHeight: 1.5,
                 textAlign: 'left',
                 overflow: 'hidden',
                 boxShadow: message.role === 'user' ? shadows.medium : 'none',
+                wordBreak: 'normal',
+                overflowWrap: 'break-word',
+                lineBreak: 'strict',
+                hangingPunctuation: 'allow-end',
                 position: 'relative'
               }}
             >
@@ -503,7 +507,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4}}>{children}</span>,
+                  p: ({children}) => <span style={{margin: 0, lineHeight: 1.4, lineBreak: 'strict', hangingPunctuation: 'allow-end'}}>{children}</span>,
                   strong: ({children}) => <strong style={{color: message.role === 'user' ? colors.cream : colors.deepOlive}}>{children}</strong>,
                   em: ({children}) => <em style={{fontStyle: 'italic'}}>{children}</em>,
                   ul: ({children}) => <ul style={{margin: '0.5rem 0', paddingLeft: '1rem'}}>{children}</ul>,
@@ -576,7 +580,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       borderBottom: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.2)' : 'rgba(139, 149, 109, 0.3)'}`,
                       borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.1)' : 'rgba(139, 149, 109, 0.2)'}`,
                       whiteSpace: 'normal',
-                      wordBreak: 'break-word',
+                      wordBreak: 'normal',
+                      overflowWrap: 'break-word',
                       maxWidth: '200px',
                       verticalAlign: 'top'
                     }}>
@@ -590,7 +595,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                       borderRight: `1px solid ${message.role === 'user' ? 'rgba(255,255,255,0.05)' : 'rgba(139, 149, 109, 0.1)'}`,
                       color: message.role === 'user' ? colors.cream : colors.charcoal,
                       whiteSpace: 'normal',
-                      wordBreak: 'break-word',
+                      wordBreak: 'normal',
+                      overflowWrap: 'break-word',
                       maxWidth: '200px',
                       verticalAlign: 'top'
                     }}>
@@ -615,7 +621,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                         lineHeight: 1.4,
                         color: message.role === 'user' ? colors.cream : colors.charcoal,
                         whiteSpace: 'pre',
-                        overflowWrap: 'normal'
+                        overflowWrap: 'anywhere'
                       }}>
                         {children}
                       </pre>
@@ -776,7 +782,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   border: `1px solid rgba(139, 149, 109, 0.2)`,
                   borderRadius: '8px',
                   padding: `${modernSpacing.tiny} ${modernSpacing.xs}`,
-                  fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+                  fontSize: 'clamp(0.85rem, 2.5vw, 1rem)',
                   fontFamily: typography.interface,
                   fontWeight: typography.light,
                   color: colors.deepOlive,
@@ -785,8 +791,16 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   textAlign: 'center',
                   lineHeight: 1.3,
                   transition: transitions.normal,
-                  whiteSpace: 'nowrap',
-                  flex: '1',
+                  whiteSpace: 'normal',
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                  lineBreak: 'strict',
+                  hangingPunctuation: 'allow-end',
+                  width: 'calc((100% - 2 * 0.25rem) / 3)',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   textTransform: 'none'
                 }}
                 onMouseEnter={(e) => {
@@ -811,7 +825,7 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
 
       {/* Input Area - Fixed at bottom */}
       <div style={{
-        padding: `${modernSpacing.base} ${modernSpacing.comfortable}`,
+        padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : modernSpacing.comfortable}`,
         paddingBottom: `calc(${modernSpacing.base} + env(safe-area-inset-bottom, 0px))`,
         background: 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(20px)',
@@ -852,15 +866,20 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               flex: 1,
               border: 'none',
               background: 'transparent',
-              fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
               fontFamily: typography.interface,
+              fontWeight: typography.light,
               color: colors.charcoal,
               resize: 'none' as const,
               minHeight: '20px',
               maxHeight: '100px',
               outline: 'none',
               padding: `${modernSpacing.tiny} 0`,
-              lineHeight: 1.4
+              lineHeight: 1.4,
+              wordBreak: 'normal',
+              overflowWrap: 'break-word',
+              lineBreak: 'strict',
+              hangingPunctuation: 'allow-end'
             }}
             placeholder={t('chat.placeholder')}
             disabled={isThinking}

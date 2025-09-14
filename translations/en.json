@@ -198,7 +198,7 @@
   "auth": {
     "welcomeTitle": "Welcome",
     "homeTitle": "Hey there!",
-    "homeMessage": "To help you best with wedding info, I need to know who you are. Sign in with your name to continue!",
+    "homeMessage": "To help you best with wedding info, I need to know who you are. Sign in with your name to continue",
     "loginSubtitle": "Enter your first and last name to access wedding info",
     "helpText": "Having trouble? Drop us a line if you can't find your name on the guest list",
     "login": "Login",
