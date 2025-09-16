@@ -123,11 +123,7 @@ const LoginPage = () => {
     <div style={{
       minHeight: '100vh',
       fontFamily: typography.interface,
-      background: isMobile ? paperBackground.primary : paperBackground.primaryLandscape,
-      backgroundSize: paperBackground.size,
-      backgroundRepeat: paperBackground.repeat,
-      backgroundPosition: paperBackground.position,
-      backgroundAttachment: 'fixed',
+      background: paperBackground.primary,
       color: colors.charcoal,
       display: 'flex',
       flexDirection: 'column'
@@ -155,17 +151,23 @@ const LoginPage = () => {
           <div style={{
             flex: 1,
             minWidth: 0,
+            maxWidth: 'calc(100% - 100px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             overflow: 'hidden'
           }}>
             <h1 style={{
               margin: 0,
-              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
+              fontSize: 'clamp(3px, 3.5vw, 15px)',
               ...minimalTypography.title,
               color: colors.deepOlive,
               textShadow: '0 1px 2px rgba(255,255,255,0.5)',
               whiteSpace: 'nowrap',
+              textAlign: 'center',
+              maxWidth: '100%',
               overflow: 'hidden',
-              textOverflow: 'ellipsis'
+              textOverflow: 'clip'
             }}>
               {t('home.weddingLineMobile')}
             </h1>

@@ -381,81 +381,82 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
       borderRadius: 0
     }}>
 
-      {/* Messages Area - Only this scrolls */}
-      <div 
+      {/* Content Area - grows to fill remaining space */}
+      <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
         style={{
           flex: 1,
-          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          overflowY: messages.length > 0 ? 'auto' : 'hidden',
           overflowX: 'hidden',
           padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : 'clamp(1rem, 4vw, 1.5rem)'}`,
           background: 'transparent',
           minHeight: 0
         }}
       >
-        {/* Centered FAQ Section */}
-        <div style={{
-          display: messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 ? 'flex' : 'none',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100%',
-          height: '100%'
-        }}>
-          {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
-            <>
-              {/* Welcome Message */}
-              <div style={{
-                textAlign: 'center',
-                marginBottom: isWideScreen ? modernSpacing.spacious : modernSpacing.comfortable,
-                position: 'relative'
+        {/* Welcome page layout when no messages */}
+        {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            minHeight: 0
+          }}>
+            {/* Welcome Message - fixed height */}
+            <div style={{
+              textAlign: 'center',
+              flexShrink: 0,
+              paddingBottom: modernSpacing.base
+            }}>
+              <h3 style={{
+                fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)',
+                marginBottom: modernSpacing.base,
+                color: colors.deepOlive,
+                ...minimalTypography.title,
+                margin: `0 0 ${modernSpacing.base} 0`
               }}>
-                <h3 style={{
-                  fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)',
-                  marginBottom: modernSpacing.base,
-                  color: colors.deepOlive,
-                  ...minimalTypography.title,
-                  margin: `0 0 ${modernSpacing.base} 0`
-                }}>
-                  {currentUser ? `${t('chat.welcomePersonal')} ${currentUser.first_name}` : t('chat.welcome')}
-                </h3>
-                <p style={{
-                  color: colors.deepOlive,
-                  fontSize: 'clamp(1rem, 3vw, 1.2rem)',
-                  fontFamily: typography.interface,
-                  fontWeight: typography.regular,
-                  margin: 0,
-                  opacity: 0.9,
-                  letterSpacing: '0.01em'
-                }}>
-                  {t('chat.aiHelper')}
-                </p>
-              </div>
-              
-              {/* Couple Illustration */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: modernSpacing.comfortable,
-                marginTop: modernSpacing.base
+                {currentUser ? `${t('chat.welcomePersonal')} ${currentUser.first_name}` : t('chat.welcome')}
+              </h3>
+              <p style={{
+                color: colors.deepOlive,
+                fontSize: 'clamp(1rem, 3vw, 1.2rem)',
+                fontFamily: typography.interface,
+                fontWeight: typography.regular,
+                margin: 0,
+                opacity: 0.9,
+                letterSpacing: '0.01em'
               }}>
-                <img 
-                  src="/images/estellejulien.png" 
-                  alt="Estelle and Julien"
-                  style={{
-                    maxWidth: '280px',
-                    width: '100%',
-                    height: 'auto',
-                    opacity: 0.9
-                  }}
-                />
-              </div>
-              
-            </>
-          )}
-        </div>
+                {t('chat.aiHelper')}
+              </p>
+            </div>
+
+            {/* Image - grows to fill remaining space */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 0
+            }}>
+              <img
+                src="/images/estellejulien.png"
+                alt="Estelle and Julien"
+                style={{
+                  maxHeight: '100%',
+                  maxWidth: 'min(320px, 80vw)',
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  opacity: 0.9
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         
         {messages.map((message, index) => (
@@ -745,12 +746,16 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
         <div ref={messagesEndRef} />
       </div>
       
-      {/* Small FAQ Suggestions - Above Input */}
+      {/* FAQ Buttons - Fixed proportion of viewport */}
       {messages.length === 0 && showFAQButtons && isClient && faqPrompts.length > 0 && (
         <div style={{
-          padding: `${modernSpacing.base} ${modernSpacing.comfortable} ${modernSpacing.base} ${modernSpacing.comfortable}`,
-          background: 'transparent',
-          flexShrink: 0
+          flexBasis: '15vh',
+          flexShrink: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: `${modernSpacing.tiny} ${modernSpacing.comfortable}`,
+          background: 'transparent'
         }}>
           {/* Suggestion title */}
           <p style={{
