@@ -114,7 +114,7 @@
   "faq": {
     "program": {
       "schedule": {
-        "title": "wedding weekend schedule",
+        "title": "weekend schedule",
         "message": "I'm planning my trip to Greece - can you walk me through what's happening over the wedding weekend so I know what to expect and can plan accordingly?"
       },
       "events": {
@@ -122,7 +122,7 @@
         "message": "This sounds like it's going to be quite the celebration! What kind of events and activities do you have planned for us guests?"
       },
       "welcome": {
-        "title": "welcome party details",
+        "title": "welcome party",
         "message": "A Greek island wedding sounds amazing! What can I expect from the welcome events? I want to make sure I'm prepared for the vibe."
       },
       "ceremony": {
@@ -132,15 +132,15 @@
     },
     "travel": {
       "gettingThere": {
-        "title": "getting to Kea Island",
+        "title": "getting there",
         "message": "Greece sounds amazing, but I'm honestly not sure how to get to this island. Can you break down the travel process for me?"
       },
       "carRental": {
-        "title": "car rental needed?",
+        "title": "car rental",
         "message": "I'm wondering about getting around the island - do I need to rent a car, or will I be able to get to all the events without one?"
       },
       "helicopter": {
-        "title": "helicopter transfers",
+        "title": "helicopter",
         "message": "I'm curious about travel options - are there any faster or more direct ways to get to the island besides the typical routes?"
       },
       "ferry": {
@@ -154,7 +154,7 @@
         "message": "I need accommodation advice for the island - what are the best options for wedding guests? Any recommendations for good places to stay?"
       },
       "recommendations": {
-        "title": "hotel recommendations",
+        "title": "hotel options",
         "message": "I'm looking for specific hotel suggestions on Kea Island. What would you recommend for wedding guests in terms of location and quality?"
       },
       "shuttles": {
@@ -162,7 +162,7 @@
         "message": "I'm wondering about transportation between my hotel and the wedding venues. Are there shuttle services available for guests?"
       },
       "promoCodes": {
-        "title": "hotel promo codes",
+        "title": "promo codes",
         "message": "Are there any special rates or group discounts available for wedding guests at the recommended hotels?"
       }
     },
@@ -186,7 +186,7 @@
         "message": "What's the weather typically like on Kea Island in June? I want to pack appropriately and know what to expect."
       },
       "activities": {
-        "title": "island activities",
+        "title": "activities",
         "message": "I'm excited to explore the island during my free time! What are some fun activities or interesting things to see and do on Kea?"
       },
       "dressCode": {

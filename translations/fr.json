@@ -114,7 +114,7 @@
   "faq": {
     "program": {
       "schedule": {
-        "title": "programme du week-end",
+        "title": "programme",
         "message": "Je planifie mon voyage en Grèce - peux-tu me détailler ce qui se passe pendant le week-end de mariage pour que je sache à quoi m'attendre ?"
       },
       "events": {
@@ -122,25 +122,25 @@
         "message": "Ça a l'air d'être une sacrée célébration ! Quels genres d'événements et d'activités tu as prévus pour nous les invités ?"
       },
       "welcome": {
-        "title": "détails soirée d'accueil",
+        "title": "soirée d'accueil",
         "message": "Un mariage sur une île grecque, ça a l'air génial ! À quoi je peux m'attendre pour les événements d'accueil ? Je veux être prêt pour l'ambiance."
       },
       "ceremony": {
-        "title": "détails de la cérémonie",
+        "title": "la cérémonie",
         "message": "Parle-moi de la cérémonie ! Il y a quelque chose de spécial ou d'unique de prévu que je devrais savoir en tant qu'invité ?"
       }
     },
     "travel": {
       "gettingThere": {
-        "title": "aller à l'île de Kea",
+        "title": "aller à Kea",
         "message": "La Grèce ça a l'air génial, mais franchement je ne sais pas comment arriver sur cette île. Tu peux me détailler le processus de voyage ?"
       },
       "carRental": {
-        "title": "location de voiture",
+        "title": "location auto",
         "message": "Je me demande pour se déplacer sur l'île - est-ce que j'ai besoin de louer une voiture, ou je pourrai aller à tous les événements sans ?"
       },
       "helicopter": {
-        "title": "transferts hélicoptère",
+        "title": "hélicoptère",
         "message": "Je suis curieux sur les options de transport - il y a des moyens plus rapides ou directs pour aller sur l'île que les routes classiques ?"
       },
       "ferry": {
@@ -154,7 +154,7 @@
         "message": "J'ai besoin de conseils d'hébergement pour l'île - quelles sont les meilleures options pour les invités du mariage ? Tu as des recommandations de bons endroits ?"
       },
       "recommendations": {
-        "title": "recommandations hôtels",
+        "title": "hôtels",
         "message": "Je cherche des suggestions d'hôtels spécifiques sur l'île de Kea. Qu'est-ce que tu recommandes pour les invités en termes d'emplacement et de qualité ?"
       },
       "shuttles": {
@@ -162,7 +162,7 @@
         "message": "Je me demande pour le transport entre mon hôtel et les lieux du mariage. Il y a des services de navettes disponibles pour les invités ?"
       },
       "promoCodes": {
-        "title": "codes promo hôtels",
+        "title": "codes promo",
         "message": "Est-ce qu'il y a des tarifs spéciaux ou des réductions de groupe disponibles pour les invités du mariage dans les hôtels recommandés ?"
       }
     },
@@ -186,7 +186,7 @@
         "message": "C'est comment le temps habituellement sur l'île de Kea en juin ? Je veux faire mes bagages correctement et savoir à quoi m'attendre."
       },
       "activities": {
-        "title": "activités sur l'île",
+        "title": "activités",
         "message": "J'ai hâte d'explorer l'île pendant mon temps libre ! Quelles sont les activités sympas ou les trucs intéressants à voir et faire sur Kea ?"
       },
       "dressCode": {

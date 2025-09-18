@@ -772,10 +772,8 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
           
           {/* Small horizontal FAQ buttons */}
           <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(max-content, 1fr))',
             gap: modernSpacing.xs,
             width: '100%'
           }}>
@@ -802,7 +800,6 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
                   overflowWrap: 'break-word',
                   lineBreak: 'strict',
                   hangingPunctuation: 'allow-end',
-                  width: 'calc((100% - 2 * 0.25rem) / 3)',
                   minHeight: '44px',
                   display: 'flex',
                   alignItems: 'center',
