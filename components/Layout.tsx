@@ -45,7 +45,7 @@ const Layout = ({ children }: LayoutProps) => {
   // CSS-first responsive button styling (prevents hydration mismatch)
   const baseButtonStyle = {
     // Mobile-first defaults (SSR safe)
-    padding: '0.3rem 0.5rem',
+    padding: '0.25rem 0.5rem',
     fontSize: '0.75rem',
     background: 'rgba(255, 255, 255, 0.6)',
     border: `1px solid rgba(60, 60, 60, 0.2)`,
@@ -55,20 +55,23 @@ const Layout = ({ children }: LayoutProps) => {
     fontWeight: typography.light,
     transition: transitions.normal,
     whiteSpace: 'nowrap' as const,
-    minHeight: '44px', // Touch-friendly minimum
+    minHeight: '36px', // Reduced from 44px for less visual weight on mobile
 
     // CSS-in-JS media queries for responsive scaling
     '@media (max-width: 380px)': {
-      padding: '0.25rem 0.4rem',
-      fontSize: '0.7rem'
+      padding: '0.2rem 0.4rem',
+      fontSize: '0.7rem',
+      minHeight: '32px'
     },
     '@media (min-width: 481px)': {
-      padding: '0.4rem 0.6rem',
-      fontSize: '0.8rem'
+      padding: '0.3rem 0.6rem',
+      fontSize: '0.8rem',
+      minHeight: '38px'
     },
     '@media (min-width: 769px)': {
-      padding: '0.5rem 0.75rem',
-      fontSize: '0.85rem'
+      padding: '0.4rem 0.75rem',
+      fontSize: '0.85rem',
+      minHeight: '42px'
     }
   }
 
