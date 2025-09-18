@@ -135,16 +135,13 @@ export const modernSpacing = {
   generous: '4rem'
 }
 
-// Paper texture background with orientation-specific images
+// Paper texture background - uniform cream color
 export const paperBackground = {
-  // Portrait/square screens - vertical image
-  primary: `url('/images/background_1.png')`,
+  // All screens - solid cream color
+  primary: '#f8f6f0',
 
-  // Landscape screens - use basic background
-  primaryLandscape: `
-    radial-gradient(circle, transparent 2px, rgba(0,0,0,0.01) 2px),
-    #f8f6f0
-  `,
+  // All screens - same solid cream color
+  primaryLandscape: '#f8f6f0',
 
   // Subtle variant (keeping original for fallback)
   subtle: `
