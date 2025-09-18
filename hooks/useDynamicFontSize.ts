@@ -68,12 +68,8 @@ export const useDynamicFontSize = ({
         const reservedSpace = buttonWidth + gapWidth + 20 // Extra safety margin
         const availableWidth = containerWidth - reservedSpace
 
-        // Debug logging
-        console.log(`Container: ${containerWidth}px, Buttons: ${buttonWidth}px, Available: ${availableWidth}px`)
-
         if (availableWidth > 0) {
           const newSize = calculateFontSize(availableWidth)
-          console.log(`Font size calculated: ${newSize}px`)
           setFontSize(newSize)
         }
       }

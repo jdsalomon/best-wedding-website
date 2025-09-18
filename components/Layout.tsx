@@ -18,6 +18,7 @@ const Layout = ({ children }: LayoutProps) => {
   const { isAuthenticated, group, logout } = useAuth()
   const [isMobile, setIsMobile] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
+  const [screenWidth, setScreenWidth] = useState(0)
   const router = useRouter()
 
   // Get wedding header text
@@ -26,6 +27,63 @@ const Layout = ({ children }: LayoutProps) => {
   // Track button width dynamically
   const [buttonWidth, setButtonWidth] = useState(110) // Initial estimate
   const buttonRef = useRef<HTMLDivElement>(null)
+
+  // Check screen orientation and mobile status
+  React.useEffect(() => {
+    const checkScreenProperties = () => {
+      const width = window.innerWidth
+      const height = window.innerHeight
+      setIsMobile(width < 480)
+      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
+      setScreenWidth(width) // Track width for responsive button styling
+    }
+    checkScreenProperties()
+    window.addEventListener('resize', checkScreenProperties)
+    return () => window.removeEventListener('resize', checkScreenProperties)
+  }, [])
+
+  // CSS-first responsive button styling (prevents hydration mismatch)
+  const baseButtonStyle = {
+    // Mobile-first defaults (SSR safe)
+    padding: '0.3rem 0.5rem',
+    fontSize: '0.75rem',
+    background: 'rgba(255, 255, 255, 0.6)',
+    border: `1px solid rgba(60, 60, 60, 0.2)`,
+    borderRadius: borderRadius.sm,
+    cursor: 'pointer' as const,
+    color: colors.charcoal,
+    fontWeight: typography.light,
+    transition: transitions.normal,
+    whiteSpace: 'nowrap' as const,
+    minHeight: '44px', // Touch-friendly minimum
+
+    // CSS-in-JS media queries for responsive scaling
+    '@media (max-width: 380px)': {
+      padding: '0.25rem 0.4rem',
+      fontSize: '0.7rem'
+    },
+    '@media (min-width: 481px)': {
+      padding: '0.4rem 0.6rem',
+      fontSize: '0.8rem'
+    },
+    '@media (min-width: 769px)': {
+      padding: '0.5rem 0.75rem',
+      fontSize: '0.85rem'
+    }
+  }
+
+  // Responsive gaps for container and navigation
+  const getResponsiveGap = () => {
+    if (typeof window === 'undefined') return '0.5rem' // SSR default
+    const width = screenWidth || window.innerWidth
+
+    if (width <= 380) return '0.4rem'  // Covers 350px screens
+    if (width <= 480) return '0.5rem'
+    if (width <= 768) return '0.6rem'
+    return '0.75rem'
+  }
+
+  const responsiveGap = getResponsiveGap()
 
   // ResizeObserver for button width
   useEffect(() => {
@@ -41,30 +99,17 @@ const Layout = ({ children }: LayoutProps) => {
     return () => resizeObserver.disconnect()
   }, [])
 
-  // Dynamic font sizing with measured button width
+  // Dynamic font sizing with measured button width and responsive gap
   const { fontSize, containerRef } = useDynamicFontSize({
     text: headerText,
     fontFamily: "'Futura', 'Avenir Next', 'Century Gothic', 'Helvetica Neue', sans-serif",
     fontWeight: 300,
     letterSpacing: '0.15em',
-    minSize: 8,
+    minSize: 10, // Increased minimum for better readability
     maxSize: 20,
     buttonWidth: buttonWidth,
-    gapWidth: 16 // 1rem
+    gapWidth: parseFloat(responsiveGap) * 16 // Convert rem to px (1rem = 16px)
   })
-
-  // Check screen orientation and mobile status
-  React.useEffect(() => {
-    const checkScreenProperties = () => {
-      const width = window.innerWidth
-      const height = window.innerHeight
-      setIsMobile(width < 480)
-      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
-    }
-    checkScreenProperties()
-    window.addEventListener('resize', checkScreenProperties)
-    return () => window.removeEventListener('resize', checkScreenProperties)
-  }, [])
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en')
@@ -100,7 +145,7 @@ const Layout = ({ children }: LayoutProps) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            gap: '1rem',
+            gap: responsiveGap,
             minHeight: isMobile ? '40px' : '50px'
           }}>
 
@@ -125,7 +170,7 @@ const Layout = ({ children }: LayoutProps) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '0.5rem' : '0.75rem',
+              gap: responsiveGap,
               flexShrink: 0
             }}>
             {/* Auth Status */}
@@ -133,18 +178,8 @@ const Layout = ({ children }: LayoutProps) => {
               <button
                 onClick={handleLogout}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  border: `1px solid rgba(60, 60, 60, 0.2)`,
-                  borderRadius: borderRadius.sm,
-                  padding: 'clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 0.75rem)',
-                  cursor: 'pointer',
-                  fontSize: 'clamp(0.75rem, 1.8vw, 0.85rem)',
-                  color: colors.charcoal,
-                  fontFamily: typography.chat,
-                  fontWeight: typography.light,
-                  transition: transitions.normal,
-                  whiteSpace: 'nowrap',
-                  minHeight: '44px' // Touch-friendly minimum
+                  ...baseButtonStyle,
+                  fontFamily: typography.chat
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
@@ -161,18 +196,8 @@ const Layout = ({ children }: LayoutProps) => {
               <Link href="/login" style={{ textDecoration: 'none' }}>
                 <button
                   style={{
-                    background: 'rgba(255, 255, 255, 0.6)',
-                    border: `1px solid rgba(60, 60, 60, 0.2)`,
-                    borderRadius: borderRadius.sm,
-                    padding: 'clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 0.75rem)',
-                    cursor: 'pointer',
-                    fontSize: 'clamp(0.75rem, 1.8vw, 0.85rem)',
-                    color: colors.charcoal,
-                    fontFamily: typography.interface,
-                    fontWeight: typography.light,
-                    transition: transitions.normal,
-                    whiteSpace: 'nowrap',
-                    minHeight: '44px' // Touch-friendly minimum
+                    ...baseButtonStyle,
+                    fontFamily: typography.interface
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.8)'
@@ -192,19 +217,9 @@ const Layout = ({ children }: LayoutProps) => {
             <button
               onClick={toggleLanguage}
               style={{
-                background: 'rgba(255, 255, 255, 0.6)',
-                border: `1px solid rgba(60, 60, 60, 0.2)`,
-                borderRadius: borderRadius.sm,
-                padding: 'clamp(0.25rem, 1vw, 0.5rem) clamp(0.5rem, 2vw, 0.75rem)',
-                cursor: 'pointer',
-                fontSize: 'clamp(0.75rem, 1.8vw, 0.85rem)',
-                color: colors.charcoal,
+                ...baseButtonStyle,
                 fontFamily: typography.chat,
-                fontWeight: typography.light,
-                transition: transitions.normal,
-                whiteSpace: 'nowrap',
-                minWidth: 'clamp(32px, 5vw, 44px)',
-                minHeight: '44px' // Touch-friendly minimum
+                minWidth: '44px' // Fixed minimum for touch target (overrides base)
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)'
