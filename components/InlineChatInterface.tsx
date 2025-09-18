@@ -503,7 +503,9 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
               {/* AI Text Response */}
               {message.content && (
                 <div style={{
-                  padding: message.role === 'assistant' && message.rsvpData ? spacing.sm : 0,
+                  paddingTop: message.role === 'assistant' && message.rsvpData ? spacing.sm : 0,
+                  paddingLeft: message.role === 'assistant' && message.rsvpData ? spacing.sm : 0,
+                  paddingRight: message.role === 'assistant' && message.rsvpData ? spacing.sm : 0,
                   paddingBottom: message.role === 'assistant' && message.rsvpData ? spacing.xs : 0
                 }}>
                   <ReactMarkdown
@@ -828,7 +830,9 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
 
       {/* Input Area - Fixed at bottom */}
       <div style={{
-        padding: `${modernSpacing.base} ${isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : modernSpacing.comfortable}`,
+        paddingTop: modernSpacing.base,
+        paddingLeft: isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : modernSpacing.comfortable,
+        paddingRight: isWideScreen ? 'clamp(3rem, 12vw, 8rem)' : modernSpacing.comfortable,
         paddingBottom: `calc(${modernSpacing.base} + env(safe-area-inset-bottom, 0px))`,
         background: 'rgba(255, 255, 255, 0.3)',
         backdropFilter: 'blur(20px)',

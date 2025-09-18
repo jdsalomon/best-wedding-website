@@ -42,38 +42,50 @@ const Layout = ({ children }: LayoutProps) => {
     return () => window.removeEventListener('resize', checkScreenProperties)
   }, [])
 
-  // CSS-first responsive button styling (prevents hydration mismatch)
-  const baseButtonStyle = {
-    // Mobile-first defaults (SSR safe)
-    padding: '0.25rem 0.5rem',
-    fontSize: '0.75rem',
-    background: 'rgba(255, 255, 255, 0.6)',
-    border: `1px solid rgba(60, 60, 60, 0.2)`,
-    borderRadius: borderRadius.sm,
-    cursor: 'pointer' as const,
-    color: colors.charcoal,
-    fontWeight: typography.light,
-    transition: transitions.normal,
-    whiteSpace: 'nowrap' as const,
-    minHeight: '36px', // Reduced from 44px for less visual weight on mobile
+  // Responsive button styling with JavaScript breakpoints
+  const getResponsiveButtonStyle = () => {
+    const width = screenWidth || (typeof window !== 'undefined' ? window.innerWidth : 481)
 
-    // CSS-in-JS media queries for responsive scaling
-    '@media (max-width: 380px)': {
-      padding: '0.2rem 0.4rem',
-      fontSize: '0.7rem',
-      minHeight: '32px'
-    },
-    '@media (min-width: 481px)': {
-      padding: '0.3rem 0.6rem',
-      fontSize: '0.8rem',
-      minHeight: '38px'
-    },
-    '@media (min-width: 769px)': {
-      padding: '0.4rem 0.75rem',
-      fontSize: '0.85rem',
-      minHeight: '42px'
+    let responsiveStyles = {
+      padding: '0.25rem 0.5rem',
+      fontSize: '0.75rem',
+      minHeight: '36px'
+    }
+
+    if (width <= 380) {
+      responsiveStyles = {
+        padding: '0.2rem 0.4rem',
+        fontSize: '0.7rem',
+        minHeight: '32px'
+      }
+    } else if (width >= 769) {
+      responsiveStyles = {
+        padding: '0.4rem 0.75rem',
+        fontSize: '0.85rem',
+        minHeight: '42px'
+      }
+    } else if (width >= 481) {
+      responsiveStyles = {
+        padding: '0.3rem 0.6rem',
+        fontSize: '0.8rem',
+        minHeight: '38px'
+      }
+    }
+
+    return {
+      ...responsiveStyles,
+      background: 'rgba(255, 255, 255, 0.6)',
+      border: `1px solid rgba(60, 60, 60, 0.2)`,
+      borderRadius: borderRadius.sm,
+      cursor: 'pointer' as const,
+      color: colors.charcoal,
+      fontWeight: typography.light,
+      transition: transitions.normal,
+      whiteSpace: 'nowrap' as const,
     }
   }
+
+  const baseButtonStyle = getResponsiveButtonStyle()
 
   // Responsive gaps for container and navigation
   const getResponsiveGap = () => {
