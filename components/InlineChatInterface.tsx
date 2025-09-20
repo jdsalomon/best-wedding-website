@@ -264,6 +264,83 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
     }
   }
 
+  // Helper function to format RSVP responses into readable summary
+  const formatRSVPSummary = (responses: Array<{ guestId: string; eventId: string; response: string }>, rsvpData: any) => {
+    if (!rsvpData?.events) return 'RSVP responses updated'
+
+    const eventResponses = responses.map(r => {
+      const event = rsvpData.events.find((e: any) => e.id === r.eventId)
+      const eventName = event?.name || 'Unknown Event'
+      return `${r.response === 'yes' ? 'Yes' : 'No'} to ${eventName}`
+    })
+
+    return eventResponses.join(', ')
+  }
+
+  // Helper function to generate AI-powered RSVP success message
+  const generateAIRSVPMessage = async (responses: Array<{ guestId: string; eventId: string; response: string }>, rsvpData: any) => {
+    try {
+      const rsvpSummary = formatRSVPSummary(responses, rsvpData)
+
+      // Create a message for the AI to generate a contextual confirmation
+      const aiPrompt = {
+        role: 'user' as const,
+        content: `I just submitted my event selections: ${rsvpSummary}. Please give me a brief, warm confirmation message (max 2 sentences).`
+      }
+
+      // Get recent conversation context (last 3 messages to keep it concise)
+      const recentMessages = messages.slice(-3)
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...recentMessages, aiPrompt]
+        })
+      })
+
+      if (response.ok) {
+        // Now this will be streaming since we avoided RSVP keywords
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let fullContent = ''
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            const lines = chunk.split('\n')
+
+            for (const line of lines) {
+              if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+                try {
+                  const data = JSON.parse(line.slice(6))
+                  if (data.choices?.[0]?.delta?.content) {
+                    fullContent += data.choices[0].delta.content
+                  }
+                } catch (e) {
+                  // Skip invalid JSON lines
+                }
+              }
+            }
+          }
+        }
+
+        return fullContent.trim() || null
+      }
+
+      // Fallback if AI generation fails
+      return null
+    } catch (error) {
+      console.error('Error generating AI RSVP message:', error)
+      return null
+    }
+  }
+
   const handleRSVPSubmission = async (responses: Array<{ guestId: string; eventId: string; response: string }>) => {
     try {
       console.log('📝 RSVP submission started:', responses)
@@ -280,16 +357,29 @@ const InlineChatInterface = ({ isOpen, onClose, firstMessage }: InlineChatInterf
 
       if (response.ok && result.success) {
         console.log('✅ RSVP responses submitted successfully')
-        
-        // Add success message to chat
+
+        // Try to extract RSVP data from recent assistant messages (if available)
+        let rsvpData = null
+        const recentAssistantMessages = messages.slice(-5).filter(m => m.role === 'assistant')
+        for (const msg of recentAssistantMessages) {
+          if (msg.rsvpData) {
+            rsvpData = msg.rsvpData
+            break
+          }
+        }
+
+        // Generate AI-powered contextual success message
+        const aiMessage = await generateAIRSVPMessage(responses, rsvpData)
+
+        // Create success message with AI-generated content or fallback
         const successMessage: Message = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: '✅ Thank you! Your RSVP responses have been successfully registered. We look forward to celebrating with you! 🎉',
+          content: aiMessage || '✅ Thank you! Your RSVP responses have been successfully registered. We look forward to celebrating with you! 🎉',
           timestamp: new Date()
         }
         setMessages(prev => [...prev, successMessage])
-        
+
         // Always scroll when new message is added
         setShouldAutoScroll(true)
         setTimeout(() => scrollToBottom(), 0)

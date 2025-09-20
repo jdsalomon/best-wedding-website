@@ -105,7 +105,7 @@ function generateRSVPStatusContext(rsvpData: any): string {
   }
 
   const statusLines: string[] = []
-  statusLines.push('## Current RSVP Status Context')
+  statusLines.push('Under your message, the user will have displayed a clickable table allowing it to respond to the events. Build a contextual response to introduce that table. \n ## Current RSVP Status Context')
   
   // Overall statistics
   const totalResponses = rsvpData.events.length * rsvpData.guests.length
