@@ -7,12 +7,12 @@ import { getGroupContext, processHyperpersonalizationTemplate } from '../../util
 import { getClientId, checkRateLimit } from '../../lib/rateLimit'
 import { createClient } from '@supabase/supabase-js'
 
-// Model Priority Configuration (hardcoded for easier management)
-const MODEL_PRIORITY = [
+// Model Fallback Configuration (max 3 models due to OpenRouter constraint)
+// OpenRouter will automatically try each model in order if previous ones fail
+const FALLBACK_MODELS = [
   'google/gemini-2.5-flash',
-  'openai/gpt-4o',  
-  'anthropic/claude-3.5-sonnet',
-  'openai/gpt-4o-mini'
+  'openai/gpt-4o-mini',
+  'anthropic/claude-3.5-sonnet'
 ]
 
 // Routing preference for OpenRouter
@@ -29,68 +29,36 @@ interface Message {
 }
 
 /**
- * Attempt to get AI response with model fallback
- * Tries models in priority order with single retry per model
+ * Get AI response using OpenRouter's native fallback system
+ * OpenRouter automatically tries models in order if previous ones fail
  */
 async function getAIResponseWithFallback(
   systemPrompt: string,
   limitedMessages: Message[],
   temperature: number = 0.7
 ) {
-  const errors: string[] = []
-  
-  for (let i = 0; i < MODEL_PRIORITY.length; i++) {
-    const modelId = MODEL_PRIORITY[i]
-    const remainingModels = MODEL_PRIORITY.slice(i + 1)
-    
-    // Try each model up to 2 times (initial attempt + 1 retry)
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      try {
-        const attemptText = attempt === 1 ? '' : ' (retry)'
-        console.log(`🤖 Attempting model ${i + 1}/${MODEL_PRIORITY.length}: ${modelId}${attemptText}`)
-        if (remainingModels.length > 0 && attempt === 1) {
-          console.log(`🔄 Remaining fallbacks: ${remainingModels.join(', ')}`)
-        }
-        
-        const result = await streamText({
-          model: openrouter(modelId),
-          messages: [
-            { role: 'system', content: systemPrompt },
-            ...limitedMessages
-          ],
-          temperature,
-          headers: {
-            'X-OpenRouter-Fallback-Models': remainingModels.join(','),
-            'X-OpenRouter-Prefer': ROUTING_PREFERENCE
-          }
-        })
-        
-        console.log(`✅ Success with model: ${modelId}${attemptText}`)
-        return { result, modelUsed: modelId }
-        
-      } catch (error) {
-        const errorMsg = `❌ Model ${modelId} failed (attempt ${attempt}): ${error instanceof Error ? error.message : 'Unknown error'}`
-        console.log(errorMsg)
-        errors.push(errorMsg)
-        
-        // If this is the second attempt for this model, break to try next model
-        if (attempt === 2) {
-          console.log(`⏭️ Moving to next model after ${attempt} attempts...`)
-          break
-        }
-        
-        // If this is the first attempt, try the same model once more
-        console.log(`🔄 Retrying same model...`)
+  console.log(`🤖 Using OpenRouter native fallback: ${FALLBACK_MODELS.join(' → ')}`)
+
+  // Use OpenRouter's native fallback system via providerOptions
+  const result = await streamText({
+    model: openrouter(FALLBACK_MODELS[0]), // Primary model
+    messages: [
+      { role: 'system', content: systemPrompt },
+      ...limitedMessages
+    ],
+    temperature,
+    providerOptions: {
+      openrouter: {
+        models: FALLBACK_MODELS, // OpenRouter handles automatic fallback
       }
+    },
+    headers: {
+      'X-OpenRouter-Prefer': ROUTING_PREFERENCE
     }
-    
-    // If this is the last model and we've exhausted all attempts, throw the accumulated errors
-    if (i === MODEL_PRIORITY.length - 1) {
-      throw new Error(`All models failed:\n${errors.join('\n')}`)
-    }
-  }
-  
-  throw new Error('Unexpected error: no models to try')
+  })
+
+  console.log(`✅ OpenRouter streaming with native fallback initialized`)
+  return result
 }
 
 /**
@@ -103,18 +71,14 @@ function limitConversationMemory(messages: Message[], maxExchanges: number = 5):
   // Work backwards through messages to preserve most recent exchanges
   const recentMessages: Message[] = []
   let exchangeCount = 0
-  let expectingRole: 'assistant' | 'user' = 'assistant' // Work backwards, so we expect assistant first
   
   for (let i = messages.length - 1; i >= 0 && exchangeCount < maxExchanges; i--) {
     const message = messages[i]
     recentMessages.unshift(message) // Add to beginning since we're working backwards
     
-    // Count exchanges: when we see a user message after an assistant message (or standalone)
+    // Count exchanges: when we see a user message (start of an exchange when working backwards)
     if (message.role === 'user') {
       exchangeCount++
-      expectingRole = 'assistant'
-    } else if (message.role === 'assistant') {
-      expectingRole = 'user'
     }
   }
   
@@ -179,7 +143,6 @@ function generateRSVPStatusContext(rsvpData: any): string {
     const guestResponses = rsvpData.events.map((event: any) => 
       rsvpData.responses[event.id]?.[guest.id] || 'no_answer'
     )
-    const completed = guestResponses.filter((r: string) => r !== 'no_answer').length
     const going = guestResponses.filter((r: string) => r === 'yes').length
     const notGoing = guestResponses.filter((r: string) => r === 'no').length
     const pending = guestResponses.filter((r: string) => r === 'no_answer').length
@@ -394,17 +357,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`🔑 OpenRouter API Key: ${process.env.OPENROUTER_API_KEY ? 'Present' : 'Missing'}`)
     console.log(`📝 System prompt length: ${systemPrompt.length} chars`)
     console.log(`💬 Messages: ${limitedMessages.length} messages`)
-    console.log(`🎯 Model Priority: ${MODEL_PRIORITY.join(' → ')}`)
+    console.log(`🎯 Fallback Models: ${FALLBACK_MODELS.join(' → ')}`)
     console.log(`⚙️ Routing Preference: ${ROUTING_PREFERENCE}`)
 
-    // Get AI response with automatic model fallback
-    const { result, modelUsed } = await getAIResponseWithFallback(
+    // Get AI response with OpenRouter native fallback
+    const result = await getAIResponseWithFallback(
       systemPrompt,
       limitedMessages,
       0.7
     )
-    
-    console.log(`✅ Using model: ${modelUsed}`)
 
     // Handle RSVP messages with simple JSON response
     if (isRSVPMessage) {
