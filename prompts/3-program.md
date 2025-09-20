@@ -3,18 +3,18 @@
 ## Day 1 - Friday June 5th, 2026
 **Civil Ceremony & Shabbat Dinner**
 - Official civil ceremony at the town hall of Loulis, kea's main village https://maps.app.goo.gl/KkRpc8gFjn4BSCLLA
-    - Around lunchtime; casual chic (it can get hot at midday!)
+    - Around 5pm; casual chic, but nothing too heavery as it can get hot even at 5pm. But bring a sweater as we're going to Shabbat directly after.
 
 - Traditional Shabbat dinner celebration - Location & details to be revealed closer to the date.
     - Starts at sunset.
-    - Dresscode: white. For shoes, it might be on the sand so heels are not recommended.
+    - Dresscode: same as civil wedding (right after). For shoes, it might be on the sand so heels are not recommended.
 
 ## Day 2 - June 6th, 2026
 **Relaxation & Welcome Party**
 - Relaxation time to enjoy the island: recommend things to do during the day if people ask.
 - Greek Party - gathering for all guests
     - Aigis Hotel (https://share.google/W5KOoZNXxy9a1P28R)
-    - Dress code: casual, just a pre wedding party
+    - Dress code: all white, to fit with the Greek theme.
     - Drinks at 7pm before sunset
 
 ## Day 3 - June 7th, 2026

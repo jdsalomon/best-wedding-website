@@ -1,6 +1,7 @@
-import { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useTranslation } from '../hooks/useTranslation'
+import { useDynamicFontSize } from '../hooks/useDynamicFontSize'
 import { useLanguageContext } from '../contexts/LanguageContext'
 import { useAuth } from '../contexts/AuthContext'
 import { colors, typography, modernSpacing, transitions, paperBackground, shadows, minimalTypography, borderRadius } from '../styles/theme'
@@ -35,6 +36,11 @@ const LoginPage = () => {
   const [error, setError] = useState('')
   const [isMobile, setIsMobile] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
+  const [screenWidth, setScreenWidth] = useState(481) // Default to avoid hydration mismatch
+
+  // Header refs for responsive design
+  const buttonRef = useRef<HTMLDivElement>(null)
+  const [buttonWidth, setButtonWidth] = useState(110)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -71,17 +77,104 @@ const LoginPage = () => {
     setLanguage(language === 'en' ? 'fr' : 'en')
   }
 
+  // Get wedding header text
+  const headerText = t('home.weddingLineMobile')
+
+  // Responsive button styling
+  const getResponsiveButtonStyle = () => {
+    const width = screenWidth || (typeof window !== 'undefined' ? window.innerWidth : 481)
+
+    let responsiveStyles = {
+      padding: '0.25rem 0.5rem',
+      fontSize: '0.75rem',
+      minHeight: '36px'
+    }
+
+    if (width <= 380) {
+      responsiveStyles = {
+        padding: '0.2rem 0.4rem',
+        fontSize: '0.7rem',
+        minHeight: '32px'
+      }
+    } else if (width >= 769) {
+      responsiveStyles = {
+        padding: '0.4rem 0.75rem',
+        fontSize: '0.85rem',
+        minHeight: '42px'
+      }
+    } else if (width >= 481) {
+      responsiveStyles = {
+        padding: '0.3rem 0.6rem',
+        fontSize: '0.8rem',
+        minHeight: '38px'
+      }
+    }
+
+    return {
+      ...responsiveStyles,
+      background: 'rgba(255, 255, 255, 0.6)',
+      border: `1px solid rgba(60, 60, 60, 0.2)`,
+      borderRadius: borderRadius.sm,
+      cursor: 'pointer' as const,
+      color: colors.charcoal,
+      fontFamily: typography.interface,
+      fontWeight: typography.light,
+      transition: transitions.normal,
+      whiteSpace: 'nowrap' as const,
+    }
+  }
+
+  // Responsive gaps
+  const getResponsiveGap = () => {
+    const width = screenWidth || (typeof window !== 'undefined' ? window.innerWidth : 481)
+
+    if (width <= 380) return '0.4rem'
+    if (width <= 480) return '0.5rem'
+    if (width <= 768) return '0.6rem'
+    return '0.75rem'
+  }
+
+  const baseButtonStyle = getResponsiveButtonStyle()
+  const responsiveGap = getResponsiveGap()
+
+  // Dynamic font sizing
+  const { fontSize, containerRef } = useDynamicFontSize({
+    text: headerText,
+    fontFamily: "'Futura', 'Avenir Next', 'Century Gothic', 'Helvetica Neue', sans-serif",
+    fontWeight: 300,
+    letterSpacing: '0.15em',
+    minSize: 10,
+    maxSize: 20,
+    buttonWidth: buttonWidth,
+    gapWidth: parseFloat(responsiveGap) * 16
+  })
+
   // Check screen orientation and mobile status
   useEffect(() => {
     const checkScreenProperties = () => {
       const width = window.innerWidth
       const height = window.innerHeight
       setIsMobile(width < 480)
-      setIsLandscape(width > height && width >= 1024) // Landscape and reasonably wide
+      setIsLandscape(width > height && width >= 1024)
+      setScreenWidth(width)
     }
     checkScreenProperties()
     window.addEventListener('resize', checkScreenProperties)
     return () => window.removeEventListener('resize', checkScreenProperties)
+  }, [])
+
+  // ResizeObserver for button width
+  useEffect(() => {
+    if (!buttonRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setButtonWidth(entry.contentRect.width)
+      }
+    })
+
+    resizeObserver.observe(buttonRef.current)
+    return () => resizeObserver.disconnect()
   }, [])
 
   const inputStyle = {
@@ -121,139 +214,154 @@ const LoginPage = () => {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      height: '100dvh',
+      display: 'flex',
+      flexDirection: 'column',
       fontFamily: typography.interface,
       background: paperBackground.primary,
-      color: colors.charcoal,
-      display: 'flex',
-      flexDirection: 'column'
+      color: colors.charcoal
     }}>
-      {/* Wedding Header */}
+      {/* Modern Responsive Header - matching Layout component */}
       <header style={{
         flexShrink: 0,
         zIndex: 1000,
         background: 'transparent',
         border: 'none'
       }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.base} ${modernSpacing.base}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: isMobile ? modernSpacing.xs : modernSpacing.base,
-          minHeight: isMobile ? '40px' : '50px',
-          overflow: 'hidden'
-        }}>
-
-          {/* Wedding Info */}
-          <div style={{
-            flex: 1,
-            minWidth: 0,
-            maxWidth: 'calc(100% - 100px)',
+        <div
+          ref={containerRef}
+          style={{
+            maxWidth: '1400px',
+            margin: '0 auto',
+            padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.base} ${modernSpacing.base}`,
             display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden'
+            gap: responsiveGap,
+            minHeight: isMobile ? '40px' : '50px'
           }}>
-            <h1 style={{
-              margin: 0,
-              fontSize: 'clamp(3px, 3.5vw, 15px)',
-              ...minimalTypography.title,
-              color: colors.deepOlive,
-              textShadow: '0 1px 2px rgba(255,255,255,0.5)',
-              whiteSpace: 'nowrap',
-              textAlign: 'center',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'clip'
-            }}>
-              {t('home.weddingLineMobile')}
-            </h1>
-          </div>
 
-          {/* Language switcher */}
-          <button
-            onClick={toggleLanguage}
+          {/* Wedding Title - Dynamic Font Sizing */}
+          <h1 style={{
+            margin: 0,
+            fontSize: fontSize,
+            ...minimalTypography.title,
+            color: colors.deepOlive,
+            textShadow: '0 1px 2px rgba(255,255,255,0.5)',
+            whiteSpace: 'nowrap',
+            lineHeight: 1.2,
+            flex: 1,
+            minWidth: 0
+          }}>
+            {headerText}
+          </h1>
+
+          {/* Navigation Buttons - Right Aligned */}
+          <nav
+            ref={buttonRef}
             style={{
-              background: 'rgba(255, 255, 255, 0.6)',
-              border: `1px solid rgba(60, 60, 60, 0.2)`,
-              borderRadius: borderRadius.sm,
-              padding: isMobile ? `${modernSpacing.tiny} ${modernSpacing.xs}` : `${modernSpacing.xs} ${modernSpacing.base}`,
-              cursor: 'pointer',
-              fontSize: isMobile ? '0.75rem' : '0.85rem',
-              color: colors.charcoal,
-              fontFamily: typography.interface,
-              fontWeight: typography.light,
-              transition: transitions.normal,
-              whiteSpace: 'nowrap',
-              minWidth: isMobile ? '32px' : 'auto'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)'
-              e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
-              e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
-            }}
-          >
-            {language === 'en' ? 'FR' : 'EN'}
-          </button>
+              display: 'flex',
+              alignItems: 'center',
+              gap: responsiveGap,
+              flexShrink: 0
+            }}>
+
+            {/* Language switcher */}
+            <button
+              onClick={toggleLanguage}
+              style={{
+                ...baseButtonStyle,
+                fontFamily: typography.interface,
+                minWidth: '44px' // Fixed minimum for touch target
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.8)'
+                e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)'
+                e.currentTarget.style.borderColor = 'rgba(60, 60, 60, 0.2)'
+              }}
+            >
+              {language === 'en' ? 'FR' : 'EN'}
+            </button>
+          </nav>
         </div>
       </header>
 
 
-      {/* Main login form */}
-      <div style={{
+      {/* Main content - optimized for viewport height */}
+      <main style={{
         flex: 1,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: modernSpacing.base
+        flexDirection: 'column',
+        minHeight: 0,
+        overflow: 'hidden'
       }}>
         <div style={{
-          maxWidth: '400px',
-          width: '100%'
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: `${modernSpacing.xs} ${modernSpacing.base}`,
+          minHeight: 0
         }}>
-          {/* Login Title */}
-          <div style={{ textAlign: 'center', marginBottom: modernSpacing.generous, marginTop: modernSpacing.comfortable }}>
-            <h1 style={{
-              fontFamily: typography.interface,
-              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
+
+          {/* Welcome Title Section - Compact */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: modernSpacing.xs,
+            flexShrink: 0
+          }}>
+            <h3 style={{
+              fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)',
               color: colors.deepOlive,
-              fontWeight: typography.light,
-              textTransform: 'none',
-              letterSpacing: '0.01em',
-              lineHeight: 1.2,
-              margin: `0 0 ${modernSpacing.tiny} 0`
+              ...minimalTypography.title,
+              margin: 0
             }}>
               {t('auth.welcomeTitle')}
-            </h1>
-            <p style={{
-              fontFamily: typography.interface,
-              fontSize: 'clamp(1rem, 3vw, 1.3rem)',
-              color: colors.deepOlive,
-              fontWeight: typography.light,
-              margin: 0,
-              opacity: 0.8,
-              letterSpacing: '0.01em',
-              lineHeight: 1.4
-            }}>
-              {t('auth.loginSubtitle')}
-            </p>
+            </h3>
           </div>
+
+          {/* Kea Image Section - Takes available space */}
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 0,
+            marginBottom: '4px'
+          }}>
+            <img
+              src="/images/kea.png"
+              alt="Kea Island illustration"
+              style={{
+                maxHeight: 'calc(100% - 2rem)',
+                maxWidth: 'min(320px, 80vw)',
+                width: 'auto',
+                height: 'auto',
+                objectFit: 'contain',
+                opacity: 0.9
+              }}
+            />
+          </div>
+
+          {/* Form Section - Compact and fixed */}
+          <div style={{
+            maxWidth: '400px',
+            width: '100%',
+            margin: '0 auto',
+            flexShrink: 0
+          }}>
 
           {/* Error message */}
           {error && (
             <div style={{
               backgroundColor: 'rgba(200, 100, 100, 0.1)',
               color: colors.deepOlive,
-              padding: modernSpacing.comfortable,
-              borderRadius: '12px',
-              marginBottom: modernSpacing.comfortable,
-              fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+              padding: modernSpacing.xs,
+              borderRadius: '8px',
+              marginBottom: modernSpacing.xs,
+              fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
               textAlign: 'center',
               border: '1px solid rgba(200, 100, 100, 0.2)',
               fontFamily: typography.interface,
@@ -264,13 +372,13 @@ const LoginPage = () => {
             </div>
           )}
 
-          {/* Login form */}
+          {/* Login form - Compact */}
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: modernSpacing.comfortable }}>
+            <div style={{ marginBottom: modernSpacing.xs }}>
               <label style={{
                 display: 'block',
-                marginBottom: modernSpacing.tiny,
-                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+                marginBottom: '4px',
+                fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
                 color: colors.deepOlive,
                 fontFamily: typography.interface,
                 fontWeight: typography.light,
@@ -297,11 +405,11 @@ const LoginPage = () => {
               />
             </div>
 
-            <div style={{ marginBottom: modernSpacing.generous }}>
+            <div style={{ marginBottom: modernSpacing.base }}>
               <label style={{
                 display: 'block',
-                marginBottom: modernSpacing.tiny,
-                fontSize: 'clamp(0.9rem, 2.5vw, 1rem)',
+                marginBottom: '4px',
+                fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
                 color: colors.deepOlive,
                 fontFamily: typography.interface,
                 fontWeight: typography.light,
@@ -359,22 +467,23 @@ const LoginPage = () => {
             </button>
           </form>
 
-          {/* Help text */}
+          {/* Help text - Compact */}
           <div style={{
             textAlign: 'center',
-            marginTop: modernSpacing.comfortable,
-            fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
+            marginTop: modernSpacing.xs,
+            fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)',
             color: colors.deepOlive,
             opacity: 0.7,
             fontFamily: typography.interface,
             fontWeight: typography.light,
             letterSpacing: '0.01em',
-            lineHeight: 1.4
+            lineHeight: 1.3
           }}>
             {t('auth.helpText')}
           </div>
-        </div>
-      </div>
+          </div> {/* End Form Section */}
+        </div> {/* End Content Container */}
+      </main> {/* End Main content */}
     </div>
   )
 }
